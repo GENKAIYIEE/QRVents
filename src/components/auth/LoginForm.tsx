@@ -112,7 +112,7 @@ export default function LoginForm() {
               textDecoration: "none",
             }}
           >
-            Forget Password?
+            Forgot Password?
           </a>
         </div>
         <input
