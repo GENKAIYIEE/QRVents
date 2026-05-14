@@ -1,0 +1,261 @@
+@import "tailwindcss";
+@source "../../src";
+
+/* ============================================================
+   TAILWIND V4 THEME — All config lives here, NOT tailwind.config.ts
+   ============================================================ */
+@theme {
+  /* Brand Colors */
+  --color-brand-primary:   #00205B;
+  --color-brand-hover:     #00184D;
+  --color-brand-secondary: #003087;
+  --color-brand-light:     #F0F4FF;
+
+  /* Sidebar */
+  --color-sidebar-bg:   #00205B;
+  --color-sidebar-text: #E0E7FF;
+
+  /* Page / Surface */
+  --color-page: #F5F7FB;
+
+  /* Semantic Status Colors */
+  --color-success:       #0F6E56;
+  --color-success-light: #E1F5EE;
+  --color-success-text:  #065F46;
+  --color-warning:       #D97706;
+  --color-warning-light: #FEF3C7;
+  --color-warning-text:  #92400E;
+  --color-danger:        #DC2626;
+  --color-danger-light:  #FEE2E2;
+  --color-danger-text:   #991B1B;
+  --color-purple:        #7C3AED;
+  --color-purple-light:  #EDE9FE;
+  --color-purple-text:   #5B21B6;
+
+  /* QRVents Material Design Tokens */
+  --color-primary:                   #00236f;
+  --color-on-primary:                #ffffff;
+  --color-primary-container:         #1a3a8f;
+  --color-primary-fixed:             #dce1ff;
+  --color-primary-fixed-dim:         #b5c4ff;
+  --color-on-primary-container:      #91a9ff;
+  --color-secondary:                 #305cae;
+  --color-on-secondary:              #ffffff;
+  --color-secondary-container:       #80a7fe;
+  --color-on-secondary-fixed:        #001944;
+  --color-on-secondary-container:    #003a86;
+  --color-surface-tint:              #3d59af;
+  --color-tertiary-container:        #722a00;
+  --color-on-tertiary:               #ffffff;
+  --color-error:                     #ba1a1a;
+  --color-on-error:                  #ffffff;
+  --color-error-container:           #ffdad6;
+  --color-on-error-container:        #93000a;
+  --color-on-surface:                #0b1c30;
+  --color-on-surface-variant:        #444652;
+  --color-on-background:             #0b1c30;
+  --color-outline:                   #757683;
+  --color-outline-variant:           #c4c5d3;
+  --color-inverse-surface:           #213145;
+  --color-inverse-on-surface:        #eaf1ff;
+  --color-inverse-primary:           #b5c4ff;
+  --color-surface-bright:            #f8f9ff;
+  --color-surface-dim:               #cbdbf5;
+  --color-surface-container-lowest:  #ffffff;
+  --color-surface-container-low:     #eff4ff;
+  --color-surface-container:         #e5eeff;
+  --color-surface-container-high:    #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-surface-variant:           #d3e4fe;
+  --color-surface:                   #f8f9ff;
+  --color-background:                #f8f9ff;
+
+  /* Typography */
+  --font-sans:    "Inter", "Plus Jakarta Sans", sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-mono:    "JetBrains Mono", "Fira Code", monospace;
+
+  /* Border Radius */
+  --radius-card:  12px;
+  --radius-modal: 16px;
+  --radius-btn:   8px;
+  --radius-pill:  999px;
+
+  /* Shadows */
+  --shadow-card:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-modal:  0 20px 60px rgba(0,0,0,0.15);
+  --shadow-drawer: -8px 0 32px rgba(0,0,0,0.12);
+  --shadow-glow:   0 0 40px rgba(26,58,143,0.3);
+
+  /* Animations */
+  --animate-shimmer:     shimmer 1.5s infinite;
+  --animate-pulse-ring:  pulse-ring 1.5s infinite;
+  --animate-scan-line:   scan-line 2s linear infinite;
+  --animate-slide-right: slide-in-right 0.3s ease;
+  --animate-slide-top:   slide-in-top 0.2s ease;
+  --animate-fade-flash:  fade-flash 1.5s ease;
+
+  /* Spacing */
+  --spacing-sidebar: 260px;
+  --spacing-sidebar-width: 260px;
+  --spacing-container-padding: 32px;
+  --spacing-card-gap: 20px;
+  --spacing-gutter: 24px;
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0;   }
+}
+@keyframes scan-line {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slide-in-top {
+  from { transform: translateY(-10px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes fade-flash {
+  0%   { background-color: #E1F5EE; }
+  100% { background-color: transparent; }
+}
+
+/* ============================================================
+   MATERIAL SYMBOLS ICON FONT
+   ============================================================ */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.icon-fill {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ============================================================
+   BASE RESETS
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F1F5F9; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.shimmer {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.card {
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin: 2px 8px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  color: #94A3B8;
+}
+
+.sidebar-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: #E2E8F0;
+}
+
+.sidebar-item.active {
+  background: rgba(255,255,255,0.08);
+  color: #FFFFFF;
+  border-left: 3px solid #3B82F6;
+  border-radius: 0 8px 8px 0;
+}
+
+/* ============================================================
+   GLOBAL LAYOUT CLASSES
+   ============================================================ */
+.admin-main-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  transition: margin-left 300ms ease;
+}
+
+@media (min-width: 768px) {
+  .admin-main-wrapper {
+    margin-left: 260px !important;
+  }
+}
+
+.admin-page-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 24px;
+}

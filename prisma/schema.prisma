@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  DEPT_ADMIN
+  STUDENT
+}
+
+enum EventType {
+  SCHOOL_WIDE
+  DEPARTMENT
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  ON_HOLD
+  REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  GUEST
+  CHECKED_OUT
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  color     String   @default("#1A3A8F")
+  lightBg   String   @default("#EEF2FF")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  events    Event[]
+  proposals EventProposal[]
+
+  @@map("departments")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  fullName     String
+  email        String      @unique
+  passwordHash String
+  role         Role        @default(STUDENT)
+  studentId    String?
+  yearLevel    String?
+  qrCode       String?     @unique
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  attendanceLogs AttendanceLog[]
+  proposals      EventProposal[]
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+model Event {
+  id                String      @id @default(uuid())
+  title             String
+  description       String?
+  date              DateTime
+  startTime         String
+  endTime           String
+  venue             String
+  eventType         EventType   @default(SCHOOL_WIDE)
+  status            EventStatus @default(UPCOMING)
+  expectedAttendees Int?
+  createdById       String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  departmentId      String?
+  department        Department? @relation(fields: [departmentId], references: [id])
+
+  attendanceLogs AttendanceLog[]
+  proposal       EventProposal?
+
+  @@map("events")
+}
+
+model EventProposal {
+  id              String         @id @default(uuid())
+  title           String
+  description     String?
+  date            DateTime
+  startTime       String
+  endTime         String
+  venue           String
+  status          ProposalStatus @default(PENDING)
+  rejectionReason String?
+  isPublished     Boolean        @default(false)
+  submittedAt     DateTime       @default(now())
+  reviewedAt      DateTime?
+  updatedAt       DateTime       @updatedAt
+  submittedById   String
+  submittedBy     User           @relation(fields: [submittedById], references: [id])
+  departmentId    String
+  department      Department     @relation(fields: [departmentId], references: [id])
+  eventId         String?        @unique
+  event           Event?         @relation(fields: [eventId], references: [id])
+
+  @@map("event_proposals")
+}
+
+model AttendanceLog {
+  id        String           @id @default(uuid())
+  checkIn   DateTime         @default(now())
+  checkOut  DateTime?
+  status    AttendanceStatus @default(PRESENT)
+  createdAt DateTime         @default(now())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  eventId   String
+  event     Event            @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+  @@map("attendance_logs")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model ScannerPin {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  pinHash   String
+  updatedAt DateTime @updatedAt
+
+  @@map("scanner_pins")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  userName  String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
