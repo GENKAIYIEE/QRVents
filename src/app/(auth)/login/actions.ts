@@ -1,6 +1,5 @@
 "use server"
 
-import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { SignJWT } from "jose"
 import prisma from "@/lib/prisma"
@@ -9,6 +8,7 @@ import { COOKIE_NAME } from "@/lib/constants"
 
 type LoginActionResult = {
   error?: string
+  redirectTo?: string
 }
 
 const ROLE_REDIRECT: Record<string, string> = {
@@ -71,7 +71,7 @@ export async function loginAction(
     path: "/",
   })
 
-  // Step 7 — Redirect by role
+  // Step 7 — Return redirect destination (client handles navigation)
   const destination = ROLE_REDIRECT[user.role] ?? "/login"
-  redirect(destination)
+  return { redirectTo: destination }
 }

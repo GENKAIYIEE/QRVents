@@ -64,6 +64,9 @@ export default function LoginForm() {
     const result = await loginAction(values.email, values.password)
     if (result?.error) {
       setServerError(result.error)
+    } else if (result?.redirectTo) {
+      // Hard navigate so middleware picks up the new session cookie
+      window.location.href = result.redirectTo
     }
   }
 
