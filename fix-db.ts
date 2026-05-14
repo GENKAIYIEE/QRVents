@@ -110,7 +110,7 @@ async function fixDb() {
       try {
         await prisma.department.delete({ where: { id: d.id } })
         console.log(`Deleted stray department: ${d.code}`)
-      } catch (err) {
+      } catch (err: any) {
         console.log(`Could not delete stray dept ${d.code}:`, err.message)
       }
     }

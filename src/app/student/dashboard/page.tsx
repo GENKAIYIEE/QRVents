@@ -116,7 +116,7 @@ export default async function StudentDashboardPage() {
           </SectionCard>
         }>
           <SectionCard title="Recently Attended Events" subtitle="Your last 5 events" icon={History}>
-            <RecentAttendance logs={data.recentAttendance} studentDepartmentId={data.department?.id} />
+            <RecentAttendance logs={data.recentAttendance} studentDepartmentId={data.department?.id || ""} />
           </SectionCard>
         </Suspense>
       </div>
