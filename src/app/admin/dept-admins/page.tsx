@@ -1,9 +1,14 @@
+import { Suspense } from "react"
 import { getDepartments } from "../events/actions" // Reuse getDepartments
 import { DeptAdminsClient } from "./dept-admins-client"
 
 export default async function DeptAdminsPage() {
   const departments = await getDepartments()
-  return <DeptAdminsClient departments={departments} />
+  return (
+    <Suspense fallback={<div className="flex justify-center py-12"><span className="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span></div>}>
+      <DeptAdminsClient departments={departments} />
+    </Suspense>
+  )
 }
 
 function ComingSoon({ icon, title, desc, color, bg }: { icon: string; title: string; desc: string; color: string; bg: string }) {
