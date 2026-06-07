@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@source "../../src";
+@source "../app";
+@source "../components";
 
 /* ============================================================
    TAILWIND V4 THEME — All config lives here, NOT tailwind.config.ts

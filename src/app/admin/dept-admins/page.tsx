@@ -1,5 +1,9 @@
-export default function DeptAdminsPage() {
-  return <ComingSoon icon="manage_accounts" title="Dept Admins" desc="Register department deans and assign them access to their respective department portals. Example: assign Ma'am Richelle as the BSIT dean so she can manage BSIT events and attendance." color="#EC4899" bg="#FDF2F8" />
+import { getDepartments } from "../events/actions" // Reuse getDepartments
+import { DeptAdminsClient } from "./dept-admins-client"
+
+export default async function DeptAdminsPage() {
+  const departments = await getDepartments()
+  return <DeptAdminsClient departments={departments} />
 }
 
 function ComingSoon({ icon, title, desc, color, bg }: { icon: string; title: string; desc: string; color: string; bg: string }) {
