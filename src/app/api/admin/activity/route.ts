@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getReportsData } from "@/app/admin/reports/actions"
+import { getActivityLogs } from "@/app/admin/activity/actions"
 import { getSession } from "@/lib/auth"
 
 export async function GET(request: Request) {
@@ -10,10 +10,10 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
-    const startDate = searchParams.get("startDate") || undefined
-    const endDate = searchParams.get("endDate") || undefined
+    const page = parseInt(searchParams.get("page") || "1")
+    const search = searchParams.get("search") || ""
 
-    const data = await getReportsData(startDate, endDate)
+    const data = await getActivityLogs(page, 20, search)
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })

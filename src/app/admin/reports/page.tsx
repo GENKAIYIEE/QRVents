@@ -1,5 +1,7 @@
+import { ReportsClient } from "@/components/admin/reports-client"
+
 export default function ReportsPage() {
-  return <ComingSoon icon="bar_chart" title="Reports" desc="Generate detailed attendance reports per department and event. Export to PDF or Excel. Example: BSIT — 12 students attended, Tourism — 15 students attended." color="#0891B2" bg="#F0FDFE" />
+  return <ReportsClient />
 }
 
 function ComingSoon({ icon, title, desc, color, bg }: { icon: string; title: string; desc: string; color: string; bg: string }) {
