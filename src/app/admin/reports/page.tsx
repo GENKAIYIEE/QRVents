@@ -1,7 +1,12 @@
+import { Suspense } from "react"
 import { ReportsClient } from "@/components/admin/reports-client"
 
 export default function ReportsPage() {
-  return <ReportsClient />
+  return (
+    <Suspense fallback={null}>
+      <ReportsClient />
+    </Suspense>
+  )
 }
 
 function ComingSoon({ icon, title, desc, color, bg }: { icon: string; title: string; desc: string; color: string; bg: string }) {
@@ -16,7 +21,7 @@ function ComingSoon({ icon, title, desc, color, bg }: { icon: string; title: str
         </div>
         <h1 style={{ fontSize: "26px", fontWeight: 800, color: "#0F172A", letterSpacing: "-0.5px" }}>{title}</h1>
       </div>
-      <div style={{ background: "white", borderRadius: "20px", border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 40px", textAlign: "center", minHeight: "500px" }}>
+      <div style={{ background: "white", borderRadius: "20px", border: "1px solid #F1F5F9", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", alignItems: "center", justifyItems: "center", padding: "80px 40px", textAlign: "center", minHeight: "500px" }}>
         <div style={{ width: "88px", height: "88px", background: bg, borderRadius: "24px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", boxShadow: `0 8px 32px ${color}25` }}>
           <span className="material-symbols-outlined" style={{ color, fontSize: "44px", fontVariationSettings: "'FILL' 1" }}>{icon}</span>
         </div>

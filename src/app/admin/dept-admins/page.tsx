@@ -4,5 +4,9 @@ import { DeptAdminsClient } from "./dept-admins-client"
 
 export default async function DeptAdminsPage() {
   const departments = await getDepartments()
-  return <DeptAdminsClient departments={departments} />
+  return (
+    <Suspense fallback={null}>
+      <DeptAdminsClient departments={departments} />
+    </Suspense>
+  )
 }

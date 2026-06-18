@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { getDepartments } from "../events/actions"
 import { getEventsForAttendance } from "./actions"
 import { AttendanceViewer } from "@/components/admin/attendance-viewer"
@@ -19,7 +20,9 @@ export default async function AttendancePage() {
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-none">Live Attendance</h1>
       </div>
 
-      <AttendanceViewer departments={departments} events={events} />
+      <Suspense fallback={null}>
+        <AttendanceViewer departments={departments} events={events} />
+      </Suspense>
     </div>
   )
 }
