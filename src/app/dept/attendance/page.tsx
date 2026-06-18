@@ -1,4 +1,9 @@
 "use client"
 export default function DeptAttendancePage() {
-  return <h1>Dept Attendance</h1>
+  return (
+        <div>
+          <h1>Page</h1>
+          <p>This page will be redesigned.</p>
+        </div>
+      );
 }

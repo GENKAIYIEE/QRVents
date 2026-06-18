@@ -1,8 +1,7 @@
 import { Suspense } from "react"
-import { Toaster } from "sonner"
 import { getDashboardData } from "@/lib/dept-admin/dashboard-data"
 import Link from "next/link"
-import { format } from "date-fns"
+import { format, formatDistanceToNow } from "date-fns"
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function StatCard({
@@ -22,80 +21,33 @@ function StatCard({
   bg: string
   trend?: { dir: "up" | "down" | "neutral"; text: string }
 }) {
-  const trendColor =
-    trend?.dir === "up" ? "#22C55E" : trend?.dir === "down" ? "#EF4444" : "#94A3B8"
-  const trendIcon =
-    trend?.dir === "up" ? "trending_up" : trend?.dir === "down" ? "trending_down" : "remove"
+  const trendColor = trend?.dir === "up" ? "text-emerald-500 bg-emerald-500/10" : trend?.dir === "down" ? "text-red-500 bg-red-500/10" : "text-slate-400 bg-slate-100"
+  const trendIcon = trend?.dir === "up" ? "trending_up" : trend?.dir === "down" ? "trending_down" : "remove"
 
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "16px",
-        padding: "22px 24px",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.04)",
-        border: "1px solid #F1F5F9",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        position: "relative",
-        overflow: "hidden",
-        transition: "transform 200ms ease, box-shadow 200ms ease",
-      }}
-    >
+    <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 flex flex-col gap-4 relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 group">
       {/* Subtle gradient blob */}
       <div
-        style={{
-          position: "absolute",
-          top: "-30px",
-          right: "-30px",
-          width: "120px",
-          height: "120px",
-          background: bg,
-          borderRadius: "50%",
-          opacity: 0.3,
-        }}
+        className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-30 transition-transform group-hover:scale-110"
+        style={{ background: bg }}
       />
 
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+      <div className="flex items-start justify-between relative z-10">
         <div
-          style={{
-            width: "46px",
-            height: "46px",
-            background: bg,
-            borderRadius: "12px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
+          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+          style={{ background: bg }}
         >
           <span
-            className="material-symbols-outlined"
-            style={{ color, fontSize: "22px", fontVariationSettings: "'FILL' 1" }}
+            className="material-symbols-outlined text-[24px] [font-variation-settings:'FILL'_1]"
+            style={{ color }}
           >
             {icon}
           </span>
         </div>
 
         {trend && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              color: trendColor,
-              fontSize: "11px",
-              fontWeight: 600,
-              background: `${trendColor}15`,
-              padding: "4px 8px",
-              borderRadius: "20px",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}
-            >
+          <div className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${trendColor}`}>
+            <span className="material-symbols-outlined text-[14px] [font-variation-settings:'FILL'_1]">
               {trendIcon}
             </span>
             {trend.text}
@@ -103,23 +55,15 @@ function StatCard({
         )}
       </div>
 
-      <div>
-        <div
-          style={{
-            fontSize: "32px",
-            fontWeight: 800,
-            color: "#0F172A",
-            lineHeight: 1,
-            letterSpacing: "-1px",
-          }}
-        >
+      <div className="relative z-10">
+        <div className="text-3xl font-extrabold text-slate-900 leading-none tracking-tight">
           {value}
         </div>
-        <div style={{ color: "#64748B", fontSize: "13px", fontWeight: 500, marginTop: "6px" }}>
+        <div className="text-[13px] text-slate-500 font-bold mt-1.5 uppercase tracking-wider">
           {label}
         </div>
         {sub && (
-          <div style={{ color: "#94A3B8", fontSize: "11px", marginTop: "3px" }}>{sub}</div>
+          <div className="text-[11px] text-slate-400 font-semibold mt-1">{sub}</div>
         )}
       </div>
     </div>
@@ -140,53 +84,24 @@ function SectionCard({
   action?: React.ReactNode
 }) {
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "16px",
-        border: "1px solid #F1F5F9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.05), 0 4px 20px rgba(0,0,0,0.03)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          padding: "20px 24px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #F8FAFC",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              background: "#EFF6FF",
-              borderRadius: "9px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ color: "#3B82F6", fontSize: "18px", fontVariationSettings: "'FILL' 1" }}
-            >
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+      <div className="p-5 flex items-center justify-between border-b border-slate-50/50 bg-slate-50/30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-blue-500 text-[20px] [font-variation-settings:'FILL'_1]">
               {icon}
             </span>
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>{title}</div>
+            <div className="font-extrabold text-slate-900 text-sm tracking-tight">{title}</div>
             {subtitle && (
-              <div style={{ color: "#94A3B8", fontSize: "11px", marginTop: "1px" }}>{subtitle}</div>
+              <div className="text-slate-400 text-[11px] font-medium mt-0.5">{subtitle}</div>
             )}
           </div>
         </div>
         {action}
       </div>
-      <div style={{ padding: "20px 24px" }}>{children}</div>
+      <div className="p-5 flex-1">{children}</div>
     </div>
   )
 }
@@ -195,179 +110,196 @@ export default async function DeptAdminDashboardPage() {
   const data = await getDashboardData()
 
   return (
-    <div>
-      <Toaster position="bottom-right" richColors />
-      
-      {/* ── Stat Cards Row ───────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-          marginBottom: "24px",
-        }}
-      >
+    <div className="flex flex-col gap-6 w-full max-w-full pb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon="groups"
+          icon="group"
           label="Total Students"
-          value={data.studentCount.toLocaleString()}
-          sub="Registered in dept"
-          color={data.department.color || "#3B82F6"}
-          bg={(data.department.color || "#3B82F6") + "15"}
-          trend={{ dir: "up", text: "Active" }}
+          value={data.studentCount}
+          sub="Registered in department"
+          color="#3B82F6"
+          bg="#EFF6FF"
+          trend={{ dir: "up", text: "+12%" }}
         />
         <StatCard
-          icon="calendar_month"
-          label="Upcoming Events"
-          value={data.upcomingEvents.length}
-          sub="School & dept events"
-          color="#8B5CF6"
-          bg="#F5F3FF"
-          trend={data.upcomingEvents.length > 0 ? { dir: "up", text: "Scheduled" } : { dir: "neutral", text: "None" }}
-        />
-        <StatCard
-          icon="schedule"
+          icon="pending_actions"
           label="Pending Proposals"
           value={data.pendingCount}
-          sub="Awaiting approval"
-          color="#F59E0B"
-          bg="#FFFBEB"
-          trend={data.pendingCount > 0 ? { dir: "down", text: "Action Needed" } : { dir: "neutral", text: "Cleared" }}
+          sub="Requires your action"
+          color="#EAB308"
+          bg="#FEFCE8"
         />
         <StatCard
-          icon="verified"
+          icon="task_alt"
           label="Approved Proposals"
           value={data.approvedCount}
-          sub="Ready for launch"
-          color="#10B981"
-          bg="#ECFDF5"
-          trend={data.approvedCount > 0 ? { dir: "up", text: "Recent" } : { dir: "neutral", text: "No approvals" }}
+          sub="Ready for execution"
+          color="#22C55E"
+          bg="#F0FDF4"
+        />
+        <StatCard
+          icon="event"
+          label="Upcoming Events"
+          value={data.upcomingEvents.length}
+          sub="Next 30 days"
+          color="#8B5CF6"
+          bg="#F5F3FF"
         />
       </div>
 
-      {/* ── Charts Row ──────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: "24px",
-          alignItems: "start",
-        }}
-        className="dashboard-main-grid"
-      >
-        {/* ── Left Column ─────────────────────────── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px", minWidth: 0 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <SectionCard
             title="Upcoming Events"
-            subtitle="Events relevant to your department"
-            icon="event"
+            subtitle="Department and School-wide events"
+            icon="calendar_month"
             action={
-              <Link href="/dept/events" style={{ color: "#3B82F6", fontSize: "12px", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
-                View all <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chevron_right</span>
+              <Link href="#" className="text-blue-600 text-xs font-bold hover:text-blue-700 hover:underline">
+                View Calendar
               </Link>
             }
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {data.upcomingEvents.length > 0 ? (
-                data.upcomingEvents.map((event: any) => (
-                  <div key={event.id} style={{ padding: "14px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #F1F5F9", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <div style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A" }}>{event.title}</div>
-                      <div style={{ fontSize: "10px", fontWeight: 700, background: event.eventType === "SCHOOL_WIDE" ? "#DBEAFE" : (data.department.color + "20"), color: event.eventType === "SCHOOL_WIDE" ? "#1E40AF" : data.department.color, padding: "2px 8px", borderRadius: "10px", textTransform: "uppercase" }}>{event.eventType === "SCHOOL_WIDE" ? "School Wide" : "Department"}</div>
+            {data.upcomingEvents.length === 0 ? (
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <span className="material-symbols-outlined text-4xl text-slate-300 mb-3">event_busy</span>
+                <p className="text-sm font-bold text-slate-500">No upcoming events scheduled.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {data.upcomingEvents.map((event) => (
+                  <div key={event.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors group cursor-pointer">
+                    <div className="w-14 h-14 rounded-xl bg-blue-50 flex flex-col items-center justify-center shrink-0 border border-blue-100/50">
+                      <div className="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest">{format(new Date(event.date), "MMM")}</div>
+                      <div className="text-xl font-black text-blue-700 leading-none">{format(new Date(event.date), "dd")}</div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>location_on</span>
-                      <span style={{ fontSize: "12px" }}>{event.venue}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-extrabold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{event.title}</div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
+                        <span className="material-symbols-outlined text-[14px]">location_on</span>
+                        <span className="truncate">{event.venue}</span>
+                      </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>calendar_month</span>
-                      <span style={{ fontSize: "12px" }}>{format(new Date(event.date), "MMM d, yyyy")}</span>
+                    <div className="shrink-0">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                        event.eventType === 'SCHOOL_WIDE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {event.eventType.replace('_', ' ')}
+                      </span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div style={{ height: "120px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#CBD5E1", gap: "8px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>event_busy</span>
-                  <span style={{ fontSize: "13px" }}>No upcoming events</span>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </SectionCard>
 
           <SectionCard
-            title="Recent Students"
-            subtitle={`Newly registered in ${data.department.name}`}
-            icon="group"
+            title="Recent Student Registrations"
+            subtitle="Latest additions to your department"
+            icon="group_add"
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {data.recentStudents.length > 0 ? (
-                data.recentStudents.map((student: any, i: number) => (
-                  <div key={i} style={{ padding: "12px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #F1F5F9", display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: data.department.color + "20", color: data.department.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: "bold" }}>
-                      {student.fullName.charAt(0)}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#0F172A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{student.fullName}</div>
-                      <div style={{ fontSize: "11px", color: "#64748B", marginTop: "2px" }}>{student.yearLevel}</div>
-                    </div>
-                    <div style={{ fontSize: "11px", color: "#94A3B8" }}>
-                      {format(new Date(student.createdAt), "MMM d")}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ height: "120px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#CBD5E1", gap: "8px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>group_off</span>
-                  <span style={{ fontSize: "13px" }}>No students registered yet</span>
-                </div>
-              )}
-            </div>
+            {data.recentStudents.length === 0 ? (
+               <div className="py-8 flex flex-col items-center justify-center text-center">
+                 <p className="text-sm font-bold text-slate-500">No students registered yet.</p>
+               </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-500 font-bold uppercase tracking-wider bg-slate-50/50">
+                    <tr>
+                      <th className="px-4 py-3 rounded-l-lg">Student</th>
+                      <th className="px-4 py-3">Year Level</th>
+                      <th className="px-4 py-3 rounded-r-lg text-right">Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {data.recentStudents.map((s, i) => (
+                      <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="font-bold text-slate-900">{s.fullName}</div>
+                          <div className="text-xs text-slate-500 font-medium">{s.email}</div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase">
+                            {s.yearLevel || "N/A"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right text-slate-500 font-medium text-xs">
+                          {formatDistanceToNow(new Date(s.createdAt), { addSuffix: true })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </SectionCard>
         </div>
 
-        {/* ── Right Column ───────────────────────────── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <SectionCard title="Quick Actions" subtitle="Common tasks" icon="bolt">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              {[
-                { label: "Propose Event", icon: "send", color: "#3B82F6", href: "/dept/proposals" },
-                { label: "Scanner", icon: "qr_code_scanner", color: "#8B5CF6", href: "/dept/scanner" },
-                { label: "Attendance", icon: "wifi_tethering", color: "#10B981", href: "/dept/attendance" },
-                { label: "Reports", icon: "bar_chart", color: "#F59E0B", href: "/dept/reports" },
-              ].map((action) => (
-                <a key={action.label} href={action.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px", background: "#F8FAFC", border: "1px solid #F1F5F9", borderRadius: "12px", cursor: "pointer", transition: "all 200ms ease", textDecoration: "none" }}>
-                  <span className="material-symbols-outlined" style={{ color: action.color, fontSize: "24px" }}>{action.icon}</span>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textAlign: "center" }}>{action.label}</span>
-                </a>
-              ))}
-            </div>
+        <div className="flex flex-col gap-6">
+          <SectionCard
+            title="Recent Proposals"
+            icon="draft"
+            action={
+              <Link href="#" className="text-blue-600 text-xs font-bold hover:text-blue-700 hover:underline">
+                View All
+              </Link>
+            }
+          >
+             {data.recentProposals.length === 0 ? (
+               <div className="py-8 flex flex-col items-center justify-center text-center">
+                 <p className="text-sm font-bold text-slate-500">No proposals submitted.</p>
+               </div>
+             ) : (
+               <div className="flex flex-col gap-3">
+                 {data.recentProposals.map(prop => (
+                   <div key={prop.id} className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                     <div className="flex items-start justify-between gap-2 mb-2">
+                       <div className="font-bold text-slate-900 text-sm line-clamp-1">{prop.title}</div>
+                       <span className={`shrink-0 px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider ${
+                         prop.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                         prop.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' :
+                         prop.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                         'bg-slate-100 text-slate-700'
+                       }`}>
+                         {prop.status}
+                       </span>
+                     </div>
+                     <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                       <span className="material-symbols-outlined text-[14px]">event</span>
+                       {format(new Date(prop.date), "MMM d, yyyy")}
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
           </SectionCard>
 
           <SectionCard
-            title="Recent Proposals"
-            subtitle="Status of submitted proposals"
-            icon="assignment"
+             title="Activity Log"
+             icon="history"
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {data.recentProposals.length > 0 ? (
-                data.recentProposals.map((proposal: any) => (
-                  <div key={proposal.id} style={{ padding: "12px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #F1F5F9", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#0F172A" }}>{proposal.title}</div>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
-                      <div style={{ fontSize: "10px", color: "#94A3B8" }}>{format(new Date(proposal.submittedAt), "MMM d, yyyy")}</div>
-                      <div style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "6px", background: proposal.status === "PENDING" ? "#FEF3C7" : proposal.status === "APPROVED" ? "#D1FAE5" : "#FEE2E2", color: proposal.status === "PENDING" ? "#92400E" : proposal.status === "APPROVED" ? "#065F46" : "#991B1B", textTransform: "uppercase" }}>{proposal.status}</div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ height: "100px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#CBD5E1", gap: "8px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>assignment_turned_in</span>
-                  <span style={{ fontSize: "12px" }}>No recent proposals</span>
+             {data.recentActivity.length === 0 ? (
+                <div className="py-8 flex flex-col items-center justify-center text-center">
+                  <p className="text-sm font-bold text-slate-500">No recent activity.</p>
                 </div>
-              )}
-            </div>
+             ) : (
+                <div className="relative pl-3">
+                  <div className="absolute left-[11px] top-2 bottom-2 w-px bg-slate-100" />
+                  <div className="flex flex-col gap-4">
+                    {data.recentActivity.map((log) => (
+                      <div key={log.id} className="relative pl-5">
+                        <div className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 ring-4 ring-white" />
+                        <div className="text-xs text-slate-600 font-medium leading-relaxed">
+                           {log.action}
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">
+                           {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+             )}
           </SectionCard>
         </div>
       </div>

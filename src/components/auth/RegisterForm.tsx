@@ -5,6 +5,21 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerAction } from "@/app/(auth)/register/actions"
 import { registerSchema, type RegisterFormValues } from "@/lib/validations/register"
+import {
+  Mail,
+  Lock,
+  User,
+  Building2,
+  GraduationCap,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  AlertCircle,
+  QrCode,
+  ScanLine,
+  BarChart2,
+  Shield,
+} from "lucide-react"
 
 type Department = {
   id: string
@@ -16,59 +31,15 @@ type RegisterFormProps = {
   departments: Department[]
 }
 
-const getPasswordStrength = (pwd: string): { score: number; label: string } => {
-  let score = 0
-  if (pwd.length >= 8) score++
-  if (/[A-Z]/.test(pwd)) score++
-  if (/[0-9]/.test(pwd)) score++
-  if (/[^A-Za-z0-9]/.test(pwd)) score++
-  const labels = ["", "Weak", "Fair", "Good", "Strong"]
-  return { score, label: labels[score] || "" }
-}
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: "12px",
-  lineHeight: 1,
-  letterSpacing: "0.05em",
-  fontWeight: 600,
-  color: "#444652",
-  marginBottom: "8px",
-  fontFamily: "'Inter', sans-serif",
-}
-
-const errorTextStyle: React.CSSProperties = {
-  marginTop: "8px",
-  fontSize: "12px",
-  lineHeight: 1.5,
-  color: "#ba1a1a",
-  margin: "8px 0 0 0",
-  fontFamily: "'Inter', sans-serif",
-}
-
-const baseInputStyle: React.CSSProperties = {
-  width: "100%",
-  backgroundColor: "#ffffff",
-  border: "1px solid #c4c5d3",
-  borderRadius: "6px",
-  padding: "12px 16px",
-  color: "#0b1c30",
-  fontSize: "14px",
-  outline: "none",
-  boxSizing: "border-box",
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
-  transition: "border-color 0.2s, box-shadow 0.2s",
-}
-
 export default function RegisterForm({ departments }: RegisterFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
-  const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors, touchedFields, isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -82,11 +53,6 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
     mode: "onChange",
   })
 
-  const passwordValue = watch("password") || ""
-  const confirmPasswordValue = watch("confirmPassword") || ""
-
-  const strength = getPasswordStrength(passwordValue)
-
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null)
     const result = await registerAction(values)
@@ -95,243 +61,300 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
     }
   }
 
-  const getInputStyle = (fieldName: string, hasError: boolean, isValid: boolean) => {
-    const isFocused = focusedField === fieldName
-    let borderColor = "#c4c5d3"
-    let boxShadow = "none"
-
-    if (hasError) {
-      borderColor = "#ba1a1a"
-      if (isFocused) boxShadow = "0 0 0 1px #ba1a1a"
-    } else if (isValid) {
-      borderColor = "#059669"
-      if (isFocused) boxShadow = "0 0 0 1px #059669"
-    } else if (isFocused) {
-      borderColor = "#00236f"
-      boxShadow = "0 0 0 1px #00236f"
-    }
-
-    return { ...baseInputStyle, borderColor, boxShadow }
-  }
-
-  const emailHasError = touchedFields.email && !!errors.email
-  const confirmHasError = touchedFields.confirmPassword && !!errors.confirmPassword
-  const confirmIsValid =
-    !confirmHasError &&
-    touchedFields.confirmPassword &&
-    confirmPasswordValue.length > 0 &&
-    confirmPasswordValue === passwordValue &&
-    !errors.confirmPassword
-
   return (
-    <div style={{ padding: "32px" }}>
-      {serverError && (
-        <div
-          style={{
-            marginBottom: "24px",
-            padding: "16px",
-            backgroundColor: "rgba(186, 26, 26, 0.1)",
-            border: "1px solid rgba(186, 26, 26, 0.2)",
-            borderRadius: "6px",
-            color: "#ba1a1a",
-            fontSize: "14px",
-            textAlign: "center",
-            fontWeight: 500,
-          }}
-        >
-          {serverError}
-        </div>
-      )}
+    <div className="h-screen w-screen overflow-hidden flex bg-white">
+      {/* Main Container */}
+      <div className="w-full h-full flex flex-col md:flex-row">
+        
+        {/* ── LEFT PANEL ── */}
+        <div className="hidden md:flex w-full md:w-5/12 bg-[#0F1E45] flex-col justify-between p-10 lg:p-14 relative overflow-hidden shrink-0">
+          {/* Decorative circles */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-600/10" />
+          <div className="absolute -bottom-20 -left-10 w-80 h-80 rounded-full bg-blue-400/5" />
+          <div className="absolute top-1/2 right-10 w-20 h-20 rounded-full bg-blue-500/10" />
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        {/* Full Name */}
-        <div>
-          <label htmlFor="fullName" style={labelStyle}>
-            Full Name
-          </label>
-          <input
-            id="fullName"
-            type="text"
-            placeholder="Juan Dela Cruz"
-            style={getInputStyle("fullName", !!errors.fullName, false)}
-            {...register("fullName")}
-            onFocus={(e) => { register("fullName").onBlur(e); setFocusedField("fullName") }}
-            onBlur={(e) => { register("fullName").onBlur(e); setFocusedField(null) }}
-          />
-          {errors.fullName && <p style={errorTextStyle}>{errors.fullName.message}</p>}
-        </div>
-
-        {/* Email Address */}
-        <div>
-          <label htmlFor="email" style={labelStyle}>
-            Email Address
-          </label>
-          <div style={{ position: "relative" }}>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email address"
-              style={getInputStyle("email", emailHasError ?? false, false)}
-              {...register("email")}
-              onFocus={(e) => { register("email").onBlur(e); setFocusedField("email") }}
-              onBlur={(e) => { register("email").onBlur(e); setFocusedField(null) }}
-            />
-            {emailHasError && (
-              <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, display: "flex", alignItems: "center", paddingRight: "12px", pointerEvents: "none" }}>
-                <span className="material-symbols-outlined" style={{ color: "#ba1a1a", fontSize: "20px" }}>error</span>
+          {/* Branding */}
+          <div className="relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                <span className="text-white font-bold text-lg">QR</span>
               </div>
-            )}
-          </div>
-          {errors.email && <p style={errorTextStyle}>{errors.email.message}</p>}
-        </div>
-
-        {/* Department & Year Level */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-          <div>
-            <label htmlFor="departmentId" style={labelStyle}>
-              Department
-            </label>
-            <div style={{ position: "relative" }}>
-              <select
-                id="departmentId"
-                style={{ ...getInputStyle("departmentId", !!errors.departmentId, false), appearance: "none", cursor: "pointer", paddingRight: "40px" }}
-                {...register("departmentId")}
-                onFocus={(e) => { register("departmentId").onBlur(e); setFocusedField("departmentId") }}
-                onBlur={(e) => { register("departmentId").onBlur(e); setFocusedField(null) }}
-              >
-                <option value="" disabled>Select</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>{d.code}</option>
-                ))}
-              </select>
-              <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, display: "flex", alignItems: "center", paddingRight: "12px", pointerEvents: "none" }}>
-                <span className="material-symbols-outlined" style={{ color: "#757683", fontSize: "20px" }}>expand_more</span>
+              <div>
+                <p className="text-white font-bold text-xl leading-none tracking-tight">QRVents</p>
+                <p className="text-blue-300/70 text-xs font-medium tracking-widest uppercase mt-1">
+                  Polytechnic College of La Union
+                </p>
               </div>
             </div>
-            {errors.departmentId && <p style={errorTextStyle}>{errors.departmentId.message}</p>}
           </div>
 
-          <div>
-            <label htmlFor="yearLevel" style={labelStyle}>
-              Year Level
-            </label>
-            <div style={{ position: "relative" }}>
-              <select
-                id="yearLevel"
-                style={{ ...getInputStyle("yearLevel", !!errors.yearLevel, false), appearance: "none", cursor: "pointer", paddingRight: "40px" }}
-                {...register("yearLevel")}
-                onFocus={(e) => { register("yearLevel").onBlur(e); setFocusedField("yearLevel") }}
-                onBlur={(e) => { register("yearLevel").onBlur(e); setFocusedField(null) }}
-              >
-                <option value="" disabled>Select</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-              </select>
-              <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, display: "flex", alignItems: "center", paddingRight: "12px", pointerEvents: "none" }}>
-                <span className="material-symbols-outlined" style={{ color: "#757683", fontSize: "20px" }}>expand_more</span>
-              </div>
+          {/* Hero Text */}
+          <div className="relative z-10 flex-1 flex flex-col justify-center py-10">
+            <h1 className="text-white text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+              Create your<br />
+              <span className="text-blue-400">Student Account.</span>
+            </h1>
+            <p className="text-blue-200/60 text-base leading-relaxed max-w-xs mt-5">
+              Register once to get your permanent QR code for all campus events.
+            </p>
+            <div className="w-12 h-0.5 bg-blue-500/40 mt-8" />
+
+            {/* Feature List */}
+            <div className="mt-6 flex flex-col gap-3">
+              {[
+                { icon: <QrCode className="text-blue-400" size={14} />, text: "Permanent QR per student" },
+                { icon: <ScanLine className="text-blue-400" size={14} />, text: "Instant QR check-in & out" },
+                { icon: <BarChart2 className="text-blue-400" size={14} />, text: "Track your attendance history" },
+                { icon: <Shield className="text-blue-400" size={14} />, text: "Secure role-based access" },
+              ].map((feature, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    {feature.icon}
+                  </div>
+                  <span className="text-blue-100/70 text-sm">{feature.text}</span>
+                </div>
+              ))}
             </div>
-            {errors.yearLevel && <p style={errorTextStyle}>{errors.yearLevel.message}</p>}
+          </div>
+
+          {/* Stats */}
+          <div className="relative z-10">
+            <div className="w-full h-px bg-white/5 mb-6" />
+            <div className="flex gap-8">
+              {[
+                { number: "7", label: "Departments" },
+                { number: "3", label: "Portals" },
+                { number: "∞", label: "Events" },
+              ].map((stat, i) => (
+                <div key={i}>
+                  <p className="text-white font-bold text-2xl leading-none">{stat.number}</p>
+                  <p className="text-blue-300/50 text-xs mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Password */}
-        <div>
-          <label htmlFor="password" style={labelStyle}>
-            Password
-          </label>
-          <div style={{ position: "relative" }}>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              style={getInputStyle("password", !!errors.password, false)}
-              {...register("password")}
-              onFocus={(e) => { register("password").onBlur(e); setFocusedField("password") }}
-              onBlur={(e) => { register("password").onBlur(e); setFocusedField(null) }}
-            />
-          </div>
-          {errors.password && <p style={errorTextStyle}>{errors.password.message}</p>}
+        {/* ── RIGHT PANEL ── */}
+        <div className="w-full md:w-7/12 bg-white flex flex-col justify-center p-6 sm:p-10 lg:p-14 overflow-y-auto overflow-x-hidden">
+          <div className="w-full max-w-xl mx-auto my-auto py-8">
+            {/* Mobile logo */}
+            <div className="flex md:hidden items-center gap-2 mb-6">
+              <div className="w-9 h-9 bg-[#1A3A8F] rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">QR</span>
+              </div>
+              <span className="font-bold text-[#0F172A] text-lg">QRVents</span>
+            </div>
 
-          <div style={{ marginTop: "8px", display: "flex", gap: "4px", height: "6px", width: "100%", borderRadius: "9999px", overflow: "hidden", backgroundColor: "#d3e4fe" }}>
-            <div style={{ height: "100%", width: "25%", transition: "background-color 0.2s", backgroundColor: strength.score >= 1 ? "#ba1a1a" : "transparent" }} />
-            <div style={{ height: "100%", width: "25%", transition: "background-color 0.2s", backgroundColor: strength.score >= 2 ? "#f59e0b" : "transparent" }} />
-            <div style={{ height: "100%", width: "25%", transition: "background-color 0.2s", backgroundColor: strength.score >= 3 ? "#10b981" : "transparent" }} />
-            <div style={{ height: "100%", width: "25%", transition: "background-color 0.2s", backgroundColor: strength.score >= 4 ? "#059669" : "transparent" }} />
-          </div>
-          <p style={{ marginTop: "6px", fontSize: "12px", lineHeight: 1.5, color: "#444652", textAlign: "right", margin: "6px 0 0 0", fontFamily: "'Inter', sans-serif" }}>
-            {strength.label}
-          </p>
-        </div>
+            {/* Form Header */}
+            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 mb-6">
+              <div className="w-2 h-2 rounded-full bg-blue-600" />
+              <span className="text-blue-700 text-xs font-semibold tracking-wide uppercase">
+                Student Portal Access
+              </span>
+            </div>
 
-        {/* Confirm Password */}
-        <div>
-          <label htmlFor="confirmPassword" style={labelStyle}>
-            Confirm Password
-          </label>
-          <div style={{ position: "relative" }}>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              style={getInputStyle("confirmPassword", confirmHasError ?? false, confirmIsValid ?? false)}
-              {...register("confirmPassword")}
-              onFocus={(e) => { register("confirmPassword").onBlur(e); setFocusedField("confirmPassword") }}
-              onBlur={(e) => { register("confirmPassword").onBlur(e); setFocusedField(null) }}
-            />
-            {confirmHasError && (
-              <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, display: "flex", alignItems: "center", paddingRight: "12px", pointerEvents: "none" }}>
-                <span className="material-symbols-outlined" style={{ color: "#ba1a1a", fontSize: "20px" }}>error</span>
+            <h2 className="text-[#0F172A] text-3xl font-bold tracking-tight">Create your account</h2>
+            <p className="text-[#475569] text-sm leading-relaxed mt-2">
+              Fill in your details to register. Your permanent QR code will be generated instantly.
+            </p>
+
+            {/* Error Banner */}
+            {serverError && (
+              <div className="mt-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+                <AlertCircle className="text-red-500 w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p className="text-red-700 text-sm leading-snug">{serverError}</p>
               </div>
             )}
-            {confirmIsValid && (
-              <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, display: "flex", alignItems: "center", paddingRight: "12px", pointerEvents: "none" }}>
-                <span className="material-symbols-outlined" style={{ color: "#059669", fontSize: "20px" }}>check_circle</span>
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-5" noValidate>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Full Name Field */}
+                <div>
+                  <label htmlFor="fullName" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <input
+                      id="fullName"
+                      type="text"
+                      placeholder="Juan Dela Cruz"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      {...register("fullName")}
+                      required
+                    />
+                  </div>
+                  {errors.fullName && <p className="text-red-500 text-xs mt-1.5">{errors.fullName.message}</p>}
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    School Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="juan@pclu.edu.ph"
+                      autoComplete="email"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      {...register("email")}
+                      required
+                    />
+                  </div>
+                  {errors.email && <p className="text-red-500 text-xs mt-1.5">{errors.email.message}</p>}
+                </div>
               </div>
-            )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Department Field */}
+                <div>
+                  <label htmlFor="departmentId" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Department
+                  </label>
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <select
+                      id="departmentId"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none"
+                      {...register("departmentId")}
+                    >
+                      <option value="" disabled>Select Department</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.code}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {errors.departmentId && <p className="text-red-500 text-xs mt-1.5">{errors.departmentId.message}</p>}
+                </div>
+
+                {/* Year Level Field */}
+                <div>
+                  <label htmlFor="yearLevel" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Year Level
+                  </label>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <select
+                      id="yearLevel"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none"
+                      {...register("yearLevel")}
+                    >
+                      <option value="" disabled>Select Year</option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                    </select>
+                  </div>
+                  {errors.yearLevel && <p className="text-red-500 text-xs mt-1.5">{errors.yearLevel.message}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Password Field */}
+                <div>
+                  <label htmlFor="password" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create password"
+                      autoComplete="new-password"
+                      className="w-full h-12 pl-11 pr-10 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      {...register("password")}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569] transition-colors p-1"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {errors.password && <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>}
+                </div>
+
+                {/* Confirm Password Field */}
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm password"
+                      autoComplete="new-password"
+                      className="w-full h-12 pl-11 pr-10 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      {...register("confirmPassword")}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569] transition-colors p-1"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <p className="text-red-500 text-xs mt-1.5">{errors.confirmPassword.message}</p>}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full h-12 mt-2 bg-gradient-to-r from-[#1A3A8F] to-blue-600 hover:from-[#15307A] hover:to-blue-700 active:from-[#0F2460] active:to-blue-800 text-white font-bold text-sm rounded-xl transition-all duration-300 shadow-[0_8px_16px_-4px_rgba(26,58,143,0.3)] hover:shadow-[0_12px_24px_-6px_rgba(26,58,143,0.4)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    Create Account & Get My QR Code
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 mt-8">
+              <div className="flex-1 h-px bg-[#F1F5F9]" />
+              <span className="text-[#94A3B8] text-xs">or</span>
+              <div className="flex-1 h-px bg-[#F1F5F9]" />
+            </div>
+
+            {/* Login Link */}
+            <p className="mt-6 text-center text-sm text-[#475569]">
+              Already have an account?{" "}
+              <a href="/login" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors">
+                Sign in
+              </a>
+            </p>
+
+
           </div>
-          {errors.confirmPassword && <p style={errorTextStyle}>{errors.confirmPassword.message}</p>}
         </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          style={{
-            width: "100%",
-            marginTop: "32px",
-            backgroundColor: "#00236f",
-            color: "#ffffff",
-            fontWeight: 600,
-            fontSize: "16px",
-            padding: "14px 24px",
-            borderRadius: "6px",
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            cursor: isSubmitting ? "not-allowed" : "pointer",
-            opacity: isSubmitting ? 0.7 : 1,
-            transition: "background-color 0.2s, opacity 0.2s",
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
-            boxSizing: "border-box",
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = isSubmitting ? "#00236f" : "rgba(0, 35, 111, 0.9)"}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#00236f"}
-        >
-          {isSubmitting ? (
-            "Creating Account..."
-          ) : (
-            <>
-              Create Account & Get My QR Code
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_forward</span>
-            </>
-          )}
-        </button>
-      </form>
+      </div>
     </div>
   )
 }

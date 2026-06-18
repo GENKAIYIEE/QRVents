@@ -87,22 +87,23 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8 w-full max-w-full pb-10">
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="material-symbols-outlined text-blue-500 text-sm">home</span>
-            <span className="text-slate-400 text-xs font-semibold">/</span>
-            <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Dept Admins</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="material-symbols-outlined text-blue-600 text-sm [font-variation-settings:'FILL'_1]">home</span>
+            <span className="text-slate-300 text-xs font-bold">/</span>
+            <span className="text-blue-600/80 text-[10px] font-extrabold uppercase tracking-widest">Dept Admins</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Department Admins</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-none">Department Admins</h1>
         </div>
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-colors shadow-sm shadow-blue-600/20"
+          className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 shrink-0"
         >
-          <span className="material-symbols-outlined text-[20px]">person_add</span>
+          <span className="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">person_add</span>
           Register Admin
         </button>
       </div>
@@ -227,23 +228,25 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
           </div>
           
           {totalPages > 1 && (
-            <div className="flex justify-center gap-2 p-4 border-t border-slate-100">
+            <div className="flex justify-center items-center gap-3 p-6 border-t border-slate-100 bg-slate-50/50">
               <button 
                 disabled={page === 1}
                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-4 py-2 rounded-lg border border-slate-200 disabled:opacity-50 font-medium text-slate-600 hover:bg-slate-50"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-slate-600 hover:bg-white transition-colors shadow-sm text-sm flex items-center gap-1"
               >
-                Previous
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                Prev
               </button>
-              <div className="px-4 py-2 font-medium text-slate-600">
-                Page {page} of {totalPages}
+              <div className="px-4 py-2 font-bold text-slate-500 text-sm bg-white border border-slate-100 rounded-lg shadow-sm">
+                {page} <span className="text-slate-300 mx-1">/</span> {totalPages}
               </div>
               <button 
                 disabled={page === totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className="px-4 py-2 rounded-lg border border-slate-200 disabled:opacity-50 font-medium text-slate-600 hover:bg-slate-50"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-slate-600 hover:bg-white transition-colors shadow-sm text-sm flex items-center gap-1"
               >
                 Next
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
               </button>
             </div>
           )}

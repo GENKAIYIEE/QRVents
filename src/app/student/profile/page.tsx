@@ -1,4 +1,9 @@
 "use client"
 export default function StudentProfilePage() {
-  return <h1>Student Profile</h1>
+  return (
+        <div>
+          <h1>Page</h1>
+          <p>This page will be redesigned.</p>
+        </div>
+      );
 }

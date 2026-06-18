@@ -3,12 +3,7 @@ import { getDashboardData } from "@/lib/student/dashboard-data"
 import { StatCards } from "@/components/student/dashboard/StatCards"
 import { UpcomingEventsList } from "@/components/student/dashboard/UpcomingEventsList"
 import { RecentAttendance } from "@/components/student/dashboard/RecentAttendance"
-import { StatCardsSkeleton } from "@/components/student/dashboard/skeletons/StatCardsSkeleton"
-import { UpcomingEventsSkeleton } from "@/components/student/dashboard/skeletons/UpcomingEventsSkeleton"
-import { RecentAttendanceSkeleton } from "@/components/student/dashboard/skeletons/RecentAttendanceSkeleton"
-import { Toaster } from "sonner"
 import { CalendarDays, History } from "lucide-react"
-
 import { StudentLayoutWrapper } from "@/components/student/dashboard/StudentLayoutWrapper"
 
 function SectionCard({
@@ -25,48 +20,22 @@ function SectionCard({
   action?: React.ReactNode
 }) {
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "16px",
-        border: "1px solid #F1F5F9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.05), 0 4px 20px rgba(0,0,0,0.03)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          padding: "20px 24px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #F8FAFC",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              background: "#EFF6FF",
-              borderRadius: "9px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon color="#3B82F6" size={18} />
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+      <div className="p-5 flex items-center justify-between border-b border-slate-50/50 bg-slate-50/30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+            <Icon color="#3B82F6" size={20} strokeWidth={2.5} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>{title}</div>
+            <div className="font-extrabold text-slate-900 text-sm tracking-tight">{title}</div>
             {subtitle && (
-              <div style={{ color: "#94A3B8", fontSize: "11px", marginTop: "1px" }}>{subtitle}</div>
+              <div className="text-slate-400 text-[11px] font-medium mt-0.5">{subtitle}</div>
             )}
           </div>
         </div>
         {action}
       </div>
-      <div>{children}</div>
+      <div className="flex-1">{children}</div>
     </div>
   )
 }
@@ -75,50 +44,42 @@ export default async function StudentDashboardPage() {
   const data = await getDashboardData()
 
   return (
-    <StudentLayoutWrapper session={data.session} department={data.department} studentUser={data.studentUser}>
-      <Toaster position="bottom-right" richColors />
-      
-      <Suspense fallback={<StatCardsSkeleton />}>
-        <StatCards 
-          data={{
-            upcomingEventsCount: data.upcomingEvents.length,
-            eventsAttendedCount: data.attendanceCount,
-            departmentsVisitedCount: data.distinctDeptsVisited,
-            department: data.department
-          }} 
-        />
-      </Suspense>
+    <StudentLayoutWrapper 
+      session={data.session} 
+      department={data.department}
+      studentUser={data.studentUser}
+    >
+      <div className="flex flex-col gap-6 w-full max-w-full pb-10">
+        <StatCards data={{
+          upcomingEventsCount: data.upcomingEvents.length,
+          eventsAttendedCount: data.attendanceCount,
+          departmentsVisitedCount: data.distinctDeptsVisited,
+          department: data.department
+        }} />
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-        }}
-      >
-        <Suspense fallback={
-          <SectionCard title="Upcoming Events" subtitle="Events visible to you" icon={CalendarDays}>
-            <div style={{ padding: "20px 24px" }}>
-              <UpcomingEventsSkeleton />
-            </div>
-          </SectionCard>
-        }>
-          <SectionCard title="Upcoming Events" subtitle="Events visible to you" icon={CalendarDays}>
-            <div style={{ padding: "20px 24px" }}>
-              <UpcomingEventsList events={data.upcomingEvents} department={data.department} />
-            </div>
-          </SectionCard>
-        </Suspense>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <SectionCard
+              title="Upcoming Events"
+              subtitle="Events you can attend"
+              icon={CalendarDays}
+            >
+              <div className="p-5">
+                <UpcomingEventsList events={data.upcomingEvents} department={data.department} />
+              </div>
+            </SectionCard>
+          </div>
 
-        <Suspense fallback={
-          <SectionCard title="Recently Attended Events" subtitle="Your last 5 events" icon={History}>
-            <RecentAttendanceSkeleton />
-          </SectionCard>
-        }>
-          <SectionCard title="Recently Attended Events" subtitle="Your last 5 events" icon={History}>
-            <RecentAttendance logs={data.recentAttendance} studentDepartmentId={data.department?.id || ""} />
-          </SectionCard>
-        </Suspense>
+          <div className="lg:col-span-1">
+            <SectionCard
+              title="Recent Attendance"
+              subtitle="Events you recently checked into"
+              icon={History}
+            >
+              <RecentAttendance logs={data.recentAttendance} studentDepartmentId={data.session.departmentId || ""} />
+            </SectionCard>
+          </div>
+        </div>
       </div>
     </StudentLayoutWrapper>
   )
