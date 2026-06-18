@@ -82,45 +82,44 @@ export function EventsClient({ departments }: { departments: any[] }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
+    <div className="flex flex-col gap-8 w-full max-w-full pb-10">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-            <span className="material-symbols-outlined text-blue-500 text-sm">home</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="material-symbols-outlined text-blue-600 text-sm [font-variation-settings:'FILL'_1]">home</span>
             <span className="text-slate-300 text-xs font-bold">/</span>
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Events</span>
+            <span className="text-blue-600/80 text-[10px] font-extrabold uppercase tracking-widest">Events</span>
           </div>
-          <h1 style={{ fontSize: "30px", fontWeight: 900, color: "#1E293B", letterSpacing: "-0.5px", margin: 0 }}>Events Management</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-none">Events Management</h1>
         </div>
         
         <button 
           onClick={openCreateModal}
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", backgroundColor: "#2563EB", color: "white", padding: "12px 24px", borderRadius: "12px", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0, boxShadow: "0 10px 15px -3px rgba(37, 99, 235, 0.2)", border: "none", cursor: "pointer" }}
-          className="hover:bg-blue-700 transition-all"
+          className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 shrink-0"
         >
-          <span className="material-symbols-outlined text-[20px]">add</span>
+          <span className="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">add</span>
           Create Event
         </button>
       </div>
 
-      <div style={{ backgroundColor: "white", padding: "20px", borderRadius: "16px", border: "1px solid #F1F5F9", display: "flex", flexWrap: "wrap", gap: "20px", alignItems: "center", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
-        <div style={{ flex: "1 1 auto", position: "relative", minWidth: "250px" }}>
-          <span className="material-symbols-outlined absolute text-slate-400" style={{ left: "16px", top: "50%", transform: "translateY(-50%)" }}>search</span>
+      {/* Filter Bar */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col md:flex-row gap-4 items-center shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="flex-1 w-full relative min-w-[250px]">
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 [font-variation-settings:'FILL'_1]">search</span>
           <input 
             type="text" 
             placeholder="Search events by title or venue..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "100%", padding: "12px 16px 12px 48px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "12px", outline: "none", fontSize: "15px" }}
-            className="focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="w-full py-3 pr-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
           />
         </div>
-        <div style={{ width: "100%", maxWidth: "220px", flexShrink: 0 }}>
+        <div className="w-full md:w-[220px] shrink-0">
           <select 
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            style={{ width: "100%", padding: "12px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "12px", outline: "none", fontWeight: 600, color: "#334155", fontSize: "15px", cursor: "pointer", appearance: "auto" }}
-            className="focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="w-full py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-700 text-sm cursor-pointer focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
           >
             <option value="ALL">All Statuses</option>
             <option value="UPCOMING">Upcoming</option>
@@ -131,12 +130,13 @@ export function EventsClient({ departments }: { departments: any[] }) {
         </div>
       </div>
 
+      {/* Content Area */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
+        <div className="flex justify-center py-20">
+          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500 [font-variation-settings:'FILL'_1]">progress_activity</span>
         </div>
       ) : (
-        <>
+        <div className="flex flex-col gap-6">
           <EventsTable 
             events={events}
             onEdit={openEditModal}
@@ -145,27 +145,29 @@ export function EventsClient({ departments }: { departments: any[] }) {
           />
           
           {totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
+            <div className="flex justify-center items-center gap-3 mt-4">
               <button 
                 disabled={page === 1}
                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-4 py-2 rounded-lg border border-slate-200 disabled:opacity-50 font-medium text-slate-600 hover:bg-slate-50"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm text-sm flex items-center gap-1"
               >
-                Previous
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                Prev
               </button>
-              <div className="px-4 py-2 font-medium text-slate-600">
-                Page {page} of {totalPages}
+              <div className="px-4 py-2 font-bold text-slate-500 text-sm bg-white border border-slate-100 rounded-lg shadow-sm">
+                {page} <span className="text-slate-300 mx-1">/</span> {totalPages}
               </div>
               <button 
                 disabled={page === totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className="px-4 py-2 rounded-lg border border-slate-200 disabled:opacity-50 font-medium text-slate-600 hover:bg-slate-50"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm text-sm flex items-center gap-1"
               >
                 Next
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {isModalOpen && (

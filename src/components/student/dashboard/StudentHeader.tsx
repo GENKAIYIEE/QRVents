@@ -25,74 +25,47 @@ export function StudentHeader({ session, department, studentUser, onMenuClick }:
   const deptLightBg = department?.lightBg || "#EFF6FF"
 
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 30,
-        background: "rgba(255,255,255,0.95)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(59,130,246,0.1)",
-        padding: "0 32px",
-        height: "80px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "24px",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
-      }}
-    >
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 h-20 flex items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
       {/* Mobile hamburger */}
       <button
-        className="md:hidden"
+        className="md:hidden p-2.5 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors"
         onClick={onMenuClick}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "10px",
-          borderRadius: "10px",
-          color: "#1E3A8A",
-          backgroundColor: "#EFF6FF",
-        }}
       >
         <Menu size={24} />
       </button>
 
       {/* Page breadcrumb / title area */}
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "2px" }}>
-          <h1 style={{ fontSize: "20px", fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.5px" }}>
+      <div className="flex-1 min-w-0 flex flex-col hidden sm:flex">
+        <div className="flex items-center gap-3 mt-0.5">
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight m-0">
             Dashboard
           </h1>
         </div>
-        <div style={{ fontSize: "13px", fontWeight: 500, color: "#64748B", marginTop: "4px" }}>
+        <div className="text-[13px] font-medium text-slate-500 mt-1 truncate">
           Welcome back, {session?.fullName}! Here are your upcoming events.
         </div>
       </div>
 
+      <div className="flex-1 flex sm:hidden">
+         {/* Mobile title fallback */}
+         <h1 className="text-lg font-extrabold text-slate-900 tracking-tight m-0 truncate">
+            Dashboard
+         </h1>
+      </div>
+
       {/* Right side actions */}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px", flexShrink: 0 }}>
+      <div className="flex items-center gap-4 shrink-0">
         {/* Live clock */}
-        <div className="hidden sm:block" style={{ fontSize: "13px", fontWeight: 600, color: "#475569" }}>
+        <div className="hidden lg:block text-[13px] font-semibold text-slate-600 tracking-tight">
           {mounted ? format(time, "EEEE, MMMM d, yyyy · h:mm:ss a") : "Loading clock..."}
         </div>
 
         {/* Dept Badge */}
         <div
-          style={{
-            padding: "6px 12px",
-            background: deptLightBg,
-            color: deptColor,
-            borderRadius: "20px",
-            fontSize: "12px",
-            fontWeight: 700,
-            display: "flex",
-            alignItems: "center",
-            gap: "6px"
-          }}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm"
+          style={{ background: deptLightBg, color: deptColor }}
         >
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: deptColor }} />
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: deptColor }} />
           {department?.code || "No Dept"} · {studentUser?.yearLevel || "N/A"}
         </div>
       </div>

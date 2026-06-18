@@ -12,37 +12,31 @@ interface UpcomingEventsListProps {
 export function UpcomingEventsList({ events, department }: UpcomingEventsListProps) {
   if (events.length === 0) {
     return (
-      <div style={{ height: "200px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#94A3B8", textAlign: "center", padding: "0 20px" }}>
-        <Calendar size={32} style={{ marginBottom: "12px" }} color="#CBD5E1" />
-        <div style={{ fontSize: "14px", fontWeight: 600 }}>No upcoming events at the moment.</div>
-        <div style={{ fontSize: "12px", marginTop: "4px" }}>Check back soon!</div>
+      <div className="h-[200px] flex flex-col items-center justify-center text-slate-400 text-center px-5">
+        <Calendar size={32} className="mb-3 text-slate-300" />
+        <div className="text-sm font-bold text-slate-500">No upcoming events at the moment.</div>
+        <div className="text-xs mt-1">Check back soon!</div>
       </div>
     )
   }
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-        gap: "16px",
-      }}
-    >
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {events.map((event, idx) => {
         const isSchoolWide = event.eventType === "SCHOOL_WIDE"
         const eventDate = new Date(event.date)
         const isEventToday = isToday(eventDate)
         
-        let statusBadge = { label: "Upcoming", color: "#64748B", bg: "#F1F5F9" }
+        let statusBadge = { label: "Upcoming", color: "text-slate-600 bg-slate-100" }
         if (isEventToday) {
-          statusBadge = { label: "Today", color: "#059669", bg: "#D1FAE5" }
+          statusBadge = { label: "Today", color: "text-emerald-600 bg-emerald-100" }
         } else if (event.status === "ONGOING") {
-          statusBadge = { label: "Ongoing", color: "#D97706", bg: "#FEF3C7" }
+          statusBadge = { label: "Ongoing", color: "text-amber-600 bg-amber-100" }
         }
 
         const typeBadge = isSchoolWide 
-          ? { label: "School-Wide", color: "#1D4ED8", bg: "#DBEAFE" } 
-          : { label: event.department?.code || "Department", color: department?.color || "#3B82F6", bg: department?.lightBg || "#EFF6FF" }
+          ? { label: "School-Wide", color: "text-blue-700 bg-blue-100" } 
+          : { label: event.department?.code || "Department", color: "text-blue-700 bg-blue-100" }
 
         return (
           <motion.div
@@ -51,82 +45,40 @@ export function UpcomingEventsList({ events, department }: UpcomingEventsListPro
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1, duration: 0.4 }}
             whileHover={{ y: -4 }}
-            style={{
-              padding: "16px",
-              borderRadius: "14px",
-              background: "#FFFFFF",
-              border: "1px solid #F1F5F9",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 15px rgba(0,0,0,0.02)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              transition: "transform 200ms ease, box-shadow 200ms ease",
-            }}
+            className="p-4 rounded-2xl bg-white border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_15px_rgba(0,0,0,0.02)] flex flex-col gap-3 transition-all duration-200"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, color: "#0F172A", lineHeight: 1.3 }}>{event.title}</div>
-              <div style={{ 
-                fontSize: "10px", 
-                fontWeight: 700, 
-                background: statusBadge.bg, 
-                color: statusBadge.color, 
-                padding: "3px 8px", 
-                borderRadius: "10px", 
-                textTransform: "uppercase",
-                flexShrink: 0
-              }}>
+            <div className="flex justify-between items-start gap-2">
+              <div className="text-[15px] font-bold text-slate-900 leading-tight">{event.title}</div>
+              <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0 ${statusBadge.color}`}>
                 {statusBadge.label}
               </div>
             </div>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              <div style={{ 
-                fontSize: "10px", 
-                fontWeight: 700, 
-                background: typeBadge.bg, 
-                color: typeBadge.color, 
-                padding: "2px 8px", 
-                borderRadius: "6px",
-              }}>
+            <div className="flex flex-wrap gap-1.5">
+              <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${typeBadge.color}`}>
                 {typeBadge.label}
               </div>
-              <div style={{ 
-                fontSize: "10px", 
-                fontWeight: 600, 
-                background: "#F8FAFC", 
-                color: "#64748B", 
-                border: "1px solid #E2E8F0",
-                padding: "2px 8px", 
-                borderRadius: "6px",
-              }}>
+              <div className="text-[10px] font-semibold bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-md">
                 {event.department?.name || "School-Wide"}
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "4px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#475569" }}>
+            <div className="flex flex-col gap-1.5 mt-1">
+              <div className="flex items-center gap-2 text-slate-600">
                 <Calendar size={14} />
-                <span style={{ fontSize: "12px", fontWeight: 500 }}>
+                <span className="text-xs font-medium">
                   {format(eventDate, "MMMM d, yyyy")} · {event.startTime}
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#475569" }}>
+              <div className="flex items-center gap-2 text-slate-600">
                 <MapPin size={14} />
-                <span style={{ fontSize: "12px", fontWeight: 500 }}>{event.venue}</span>
+                <span className="text-xs font-medium">{event.venue}</span>
               </div>
             </div>
 
-            <div style={{ 
-              marginTop: "auto", 
-              paddingTop: "12px", 
-              borderTop: "1px dashed #E2E8F0",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#64748B"
-            }}>
+            <div className="mt-auto pt-3 border-t border-dashed border-slate-200 flex items-center gap-2 text-slate-500">
               <QrCode size={14} />
-              <span style={{ fontSize: "11px", fontWeight: 500 }}>Scan your QR code at the venue to check in</span>
+              <span className="text-[11px] font-medium">Scan your QR code at the venue to check in</span>
             </div>
           </motion.div>
         )

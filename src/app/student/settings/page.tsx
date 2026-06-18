@@ -1,4 +1,9 @@
 "use client"
 export default function StudentSettingsPage() {
-  return <h1>Student Settings</h1>
+  return (
+        <div>
+          <h1>Page</h1>
+          <p>This page will be redesigned.</p>
+        </div>
+      );
 }

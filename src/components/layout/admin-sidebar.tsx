@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
 import { logoutAction } from "@/app/admin/actions"
 
 const NAV_ITEMS = [
@@ -65,114 +64,47 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
   const pathname = usePathname()
 
   const SidebarContent = () => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        background: "linear-gradient(180deg, #001A4D 0%, #00205B 50%, #001A4D 100%)",
-        overflow: "hidden",
-      }}
-    >
+    <div className="flex flex-col h-full bg-[#0F1E45] overflow-hidden relative shadow-[4px_0_24px_rgba(15,30,69,0.1)]">
+      {/* Decorative gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none" />
+
       {/* Top logo area */}
-      <div
-        style={{
-          padding: "28px 20px 20px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+      <div className="p-7 pb-5 border-b border-white/5 shrink-0 relative z-10">
+        <div className="flex items-center gap-3 mb-5">
           {/* Logo mark */}
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              background: "linear-gradient(135deg, #3B82F6, #1D4ED8)",
-              borderRadius: "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 15px rgba(59,130,246,0.4)",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ color: "#fff", fontSize: "22px", fontVariationSettings: "'FILL' 1" }}
-            >
+          <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_4px_15px_rgba(37,99,235,0.4)] shrink-0">
+            <span className="material-symbols-outlined text-white text-[22px] [font-variation-settings:'FILL'_1]">
               qr_code_2
             </span>
           </div>
           <div>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: "18px", letterSpacing: "-0.3px", lineHeight: 1 }}>
+            <div className="text-white font-extrabold text-[18px] tracking-tight leading-none">
               QRVents
             </div>
-            <div style={{ color: "#FFFFFF", fontSize: "11px", fontWeight: 700, marginTop: "3px", letterSpacing: "1px", opacity: 0.9 }}>
+            <div className="text-white/90 text-[10px] font-bold mt-1 tracking-widest uppercase">
               SUPER ADMIN
             </div>
           </div>
         </div>
 
         {/* Admin badge */}
-        <div
-          style={{
-            background: "rgba(59,130,246,0.12)",
-            border: "1px solid rgba(59,130,246,0.25)",
-            borderRadius: "10px",
-            padding: "10px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <div
-            style={{
-              width: "34px",
-              height: "34px",
-              background: "linear-gradient(135deg, #1E40AF, #3B82F6)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ color: "#fff", fontSize: "18px", fontVariationSettings: "'FILL' 1" }}
-            >
+        <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-2.5 flex items-center gap-3">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-700 to-blue-500 rounded-full flex items-center justify-center shrink-0 shadow-inner">
+            <span className="material-symbols-outlined text-white text-[18px] [font-variation-settings:'FILL'_1]">
               admin_panel_settings
             </span>
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ color: "#FFFFFF", fontSize: "12px", fontWeight: 700 }}>System Administrator</div>
-            <div style={{ color: "#BFDBFE", fontSize: "11px", marginTop: "1px" }}>admin@gmail.com</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-white text-xs font-bold truncate">System Admin</div>
+            <div className="text-blue-200/70 text-[11px] truncate">admin@gmail.com</div>
           </div>
-          <div
-            style={{
-              marginLeft: "auto",
-              width: "8px",
-              height: "8px",
-              background: "#22C55E",
-              borderRadius: "50%",
-              flexShrink: 0,
-              boxShadow: "0 0 6px #22C55E",
-            }}
-          />
+          <div className="ml-auto w-2 h-2 bg-green-500 rounded-full shrink-0 shadow-[0_0_6px_#22C55E]" />
         </div>
       </div>
 
       {/* Navigation */}
-      <nav
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "12px 10px",
-          scrollbarWidth: "none",
-        }}
-      >
-        <div style={{ marginBottom: "6px" }}>
+      <nav className="flex-1 overflow-y-auto p-3 scrollbar-none relative z-10">
+        <div className="flex flex-col gap-0.5">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
             return (
@@ -180,83 +112,39 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 onClick={onMobileClose}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "11px 14px",
-                  borderRadius: "10px",
-                  marginBottom: "2px",
-                  textDecoration: "none",
-                  transition: "all 200ms ease",
-                  background: isActive
-                    ? "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(29,78,216,0.15))"
-                    : "transparent",
-                  border: isActive ? "1px solid rgba(59,130,246,0.3)" : "1px solid transparent",
-                  position: "relative",
-                }}
-                className={`sidebar-nav-link${isActive ? " sidebar-nav-active" : ""}`}
+                className={`flex items-center gap-3.5 p-2.5 rounded-xl transition-all duration-200 relative group overflow-hidden ${
+                  isActive 
+                    ? "bg-blue-500/15 border border-blue-400/20" 
+                    : "border border-transparent hover:bg-white/5"
+                }`}
               >
+                {/* Active left indicator */}
                 {isActive && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: "20%",
-                      bottom: "20%",
-                      width: "3px",
-                      background: "linear-gradient(180deg, #3B82F6, #1D4ED8)",
-                      borderRadius: "0 3px 3px 0",
-                    }}
-                  />
+                  <div className="absolute left-0 top-[20%] bottom-[20%] w-[3px] bg-blue-500 rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
                 )}
-                <div
-                  style={{
-                    width: "34px",
-                    height: "34px",
-                    background: isActive
-                      ? "linear-gradient(135deg, #3B82F6, #1D4ED8)"
-                      : "rgba(255,255,255,0.05)",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    transition: "all 200ms ease",
-                    boxShadow: isActive ? "0 4px 12px rgba(59,130,246,0.35)" : "none",
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{
-                      color: isActive ? "#fff" : "#BFDBFE",
-                      fontSize: "18px",
-                      fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
-                    }}
-                  >
+                
+                {/* Icon wrapper */}
+                <div className={`w-[34px] h-[34px] rounded-[10px] flex items-center justify-center shrink-0 transition-all duration-200 ${
+                  isActive
+                    ? "bg-blue-600 shadow-[0_4px_12px_rgba(37,99,235,0.35)]"
+                    : "bg-white/5 group-hover:bg-white/10"
+                }`}>
+                  <span className={`material-symbols-outlined text-[18px] transition-colors ${
+                    isActive ? "text-white [font-variation-settings:'FILL'_1]" : "text-blue-200/60 group-hover:text-blue-100"
+                  }`}>
                     {item.icon}
                   </span>
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      color: isActive ? "#FFFFFF" : "#E2E8F0",
-                      fontSize: "13.5px",
-                      fontWeight: isActive ? 700 : 600,
-                      lineHeight: 1,
-                    }}
-                  >
+
+                <div className="min-w-0">
+                  <div className={`text-[13px] leading-tight transition-colors ${
+                    isActive ? "text-white font-bold" : "text-blue-100/80 font-semibold group-hover:text-white"
+                  }`}>
                     {item.label}
                   </div>
-                  <div
-                    style={{
-                      color: isActive ? "#FFFFFF" : "#93C5FD",
-                      fontSize: "10.5px",
-                      marginTop: "3px",
-                      fontWeight: isActive ? 500 : 500,
-                      opacity: isActive ? 0.9 : 0.8,
-                    }}
-                  >
+                  <div className={`text-[10px] mt-0.5 font-medium transition-colors ${
+                    isActive ? "text-blue-200/90" : "text-blue-200/40 group-hover:text-blue-200/60"
+                  }`}>
                     {item.description}
                   </div>
                 </div>
@@ -267,58 +155,20 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
       </nav>
 
       {/* Bottom actions */}
-      <div
-        style={{
-          padding: "12px 10px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          flexShrink: 0,
-        }}
-      >
+      <div className="p-3 pb-5 border-t border-white/5 shrink-0 relative z-10">
         <form action={logoutAction}>
           <button
             type="submit"
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px 14px",
-              background: "rgba(239,68,68,0.08)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: "10px",
-              cursor: "pointer",
-              transition: "all 200ms ease",
-              textAlign: "left",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.15)"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.08)"
-            }}
+            className="w-full flex items-center gap-3 p-2.5 bg-red-500/5 hover:bg-red-500/15 border border-red-500/10 hover:border-red-500/25 rounded-xl transition-all duration-200 text-left group"
           >
-            <div
-              style={{
-                width: "34px",
-                height: "34px",
-                background: "rgba(239,68,68,0.15)",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{ color: "#EF4444", fontSize: "18px" }}
-              >
+            <div className="w-[34px] h-[34px] bg-red-500/10 group-hover:bg-red-500/20 rounded-[10px] flex items-center justify-center shrink-0 transition-colors">
+              <span className="material-symbols-outlined text-red-500 text-[18px] group-hover:scale-110 transition-transform">
                 logout
               </span>
             </div>
             <div>
-              <div style={{ color: "#FECACA", fontSize: "13px", fontWeight: 700 }}>Sign Out</div>
-              <div style={{ color: "#F87171", fontSize: "10.5px", marginTop: "2px", fontWeight: 500 }}>End your session</div>
+              <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>
+              <div className="text-red-400/70 text-[10px] mt-0.5 font-medium">End your session</div>
             </div>
           </button>
         </form>
@@ -329,48 +179,18 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside
-        style={{
-          position: "fixed",
-          left: 0,
-          top: 0,
-          height: "100vh",
-          width: "260px",
-          zIndex: 40,
-        }}
-        className="hidden md:block"
-      >
+      <aside className="hidden md:block fixed left-0 top-0 h-screen w-[260px] z-40">
         <SidebarContent />
       </aside>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 50,
-            display: "flex",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,0.6)",
-              backdropFilter: "blur(4px)",
-            }}
-            onClick={onMobileClose}
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+            onClick={onMobileClose} 
           />
-          <aside
-            style={{
-              position: "relative",
-              width: "260px",
-              height: "100%",
-              zIndex: 51,
-              animation: "slide-in-right-from-left 0.25s ease",
-            }}
-          >
+          <aside className="relative w-[260px] h-full z-51 animate-[slideInRight_0.25s_ease-out]">
             <SidebarContent />
           </aside>
         </div>

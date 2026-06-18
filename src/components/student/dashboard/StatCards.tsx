@@ -75,14 +75,7 @@ export function StatCards({ data }: StatCardsProps) {
   ]
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: "16px",
-        marginBottom: "24px",
-      }}
-    >
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
       {cards.map((card, idx) => {
         const Icon = card.icon
         return (
@@ -91,63 +84,28 @@ export function StatCards({ data }: StatCardsProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1, duration: 0.4, ease: "easeOut" }}
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "22px 24px",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.04)",
-              border: "1px solid #F1F5F9",
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-              position: "relative",
-              overflow: "hidden",
-            }}
+            className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 flex flex-col gap-4 relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 group"
           >
             {/* Subtle gradient blob */}
             <div
-              style={{
-                position: "absolute",
-                top: "-30px",
-                right: "-30px",
-                width: "120px",
-                height: "120px",
-                background: card.bg,
-                borderRadius: "50%",
-                opacity: 0.3,
-              }}
+              className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-30 transition-transform group-hover:scale-110"
+              style={{ background: card.bg }}
             />
 
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+            <div className="flex items-start justify-between relative z-10">
               <div
-                style={{
-                  width: "46px",
-                  height: "46px",
-                  background: card.bg,
-                  borderRadius: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                style={{ background: card.bg }}
               >
-                <Icon color={card.color} size={22} strokeWidth={2.5} />
+                <Icon color={card.color} size={24} strokeWidth={2.5} />
               </div>
             </div>
 
-            <div>
-              <div
-                style={{
-                  fontSize: "32px",
-                  fontWeight: 800,
-                  color: "#0F172A",
-                  lineHeight: 1,
-                  letterSpacing: "-1px",
-                }}
-              >
+            <div className="relative z-10">
+              <div className="text-3xl font-extrabold text-slate-900 leading-none tracking-tight">
                 <CountUp to={card.value} />
               </div>
-              <div style={{ color: "#64748B", fontSize: "13px", fontWeight: 500, marginTop: "6px" }}>
+              <div className="text-[13px] text-slate-500 font-bold mt-2 uppercase tracking-wider">
                 {card.label}
               </div>
             </div>

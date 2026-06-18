@@ -23,12 +23,12 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete }: Events
 
   if (events.length === 0) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "96px 24px", backgroundColor: "white", borderRadius: "16px", border: "1px solid #E2E8F0", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
-        <div style={{ width: "80px", height: "80px", backgroundColor: "#F8FAFC", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", border: "1px solid #F1F5F9", boxShadow: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)" }}>
-          <span className="material-symbols-outlined text-slate-400" style={{ fontSize: "36px", fontVariationSettings: "'FILL' 0, 'wght' 300" }}>calendar_today</span>
+      <div className="flex flex-col items-center justify-center py-24 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-inner">
+          <span className="material-symbols-outlined text-slate-400 text-[36px] [font-variation-settings:'FILL'_0,'wght'_300]">calendar_today</span>
         </div>
-        <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1E293B", marginBottom: "8px", margin: "0 0 8px 0" }}>No events found</h3>
-        <p style={{ color: "#64748B", fontSize: "15px", maxWidth: "448px", textAlign: "center", lineHeight: 1.6, margin: 0 }}>
+        <h3 className="text-xl font-extrabold text-slate-900 mb-2">No events found</h3>
+        <p className="text-slate-500 text-[15px] max-w-md text-center leading-relaxed font-medium">
           There are no events matching your current filters. Try adjusting your search or create a new event to get started.
         </p>
       </div>

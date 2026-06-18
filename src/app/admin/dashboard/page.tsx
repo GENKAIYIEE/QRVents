@@ -10,7 +10,7 @@ function StatCard({
   value,
   sub,
   color,
-  bg,
+  bgClass,
   trend,
 }: {
   icon: string
@@ -18,107 +18,43 @@ function StatCard({
   value: string | number
   sub?: string
   color: string
-  bg: string
+  bgClass: string
   trend?: { dir: "up" | "down" | "neutral"; text: string }
 }) {
-  const trendColor =
-    trend?.dir === "up" ? "#22C55E" : trend?.dir === "down" ? "#EF4444" : "#94A3B8"
-  const trendIcon =
-    trend?.dir === "up" ? "trending_up" : trend?.dir === "down" ? "trending_down" : "remove"
-
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "16px",
-        padding: "22px 24px",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.04)",
-        border: "1px solid #F1F5F9",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        position: "relative",
-        overflow: "hidden",
-        transition: "transform 200ms ease, box-shadow 200ms ease",
-      }}
-    >
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-4 relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       {/* Subtle gradient blob */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-30px",
-          right: "-30px",
-          width: "120px",
-          height: "120px",
-          background: bg,
-          borderRadius: "50%",
-          opacity: 0.3,
-        }}
-      />
+      <div className={`absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-30 ${bgClass}`} />
 
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <div
-          style={{
-            width: "46px",
-            height: "46px",
-            background: bg,
-            borderRadius: "12px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ color, fontSize: "22px", fontVariationSettings: "'FILL' 1" }}
-          >
+      <div className="flex items-start justify-between relative z-10">
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bgClass}`}>
+          <span className="material-symbols-outlined text-[24px] [font-variation-settings:'FILL'_1]" style={{ color }}>
             {icon}
           </span>
         </div>
 
         {trend && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              color: trendColor,
-              fontSize: "11px",
-              fontWeight: 600,
-              background: `${trendColor}15`,
-              padding: "4px 8px",
-              borderRadius: "20px",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}
-            >
-              {trendIcon}
+          <div className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+            trend.dir === "up" ? "text-green-600 bg-green-50" : 
+            trend.dir === "down" ? "text-red-600 bg-red-50" : "text-slate-500 bg-slate-50"
+          }`}>
+            <span className="material-symbols-outlined text-[14px] [font-variation-settings:'FILL'_1]">
+              {trend.dir === "up" ? "trending_up" : trend.dir === "down" ? "trending_down" : "remove"}
             </span>
             {trend.text}
           </div>
         )}
       </div>
 
-      <div>
-        <div
-          style={{
-            fontSize: "32px",
-            fontWeight: 800,
-            color: "#0F172A",
-            lineHeight: 1,
-            letterSpacing: "-1px",
-          }}
-        >
+      <div className="relative z-10">
+        <div className="text-3xl font-extrabold text-slate-900 tracking-tight leading-none">
           {value}
         </div>
-        <div style={{ color: "#64748B", fontSize: "13px", fontWeight: 500, marginTop: "6px" }}>
+        <div className="text-slate-500 text-[13px] font-semibold mt-1.5">
           {label}
         </div>
         {sub && (
-          <div style={{ color: "#94A3B8", fontSize: "11px", marginTop: "3px" }}>{sub}</div>
+          <div className="text-slate-400 text-[11px] mt-1">{sub}</div>
         )}
       </div>
     </div>
@@ -139,53 +75,24 @@ function SectionCard({
   action?: React.ReactNode
 }) {
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "16px",
-        border: "1px solid #F1F5F9",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.05), 0 4px 20px rgba(0,0,0,0.03)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          padding: "20px 24px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #F8FAFC",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              background: "#EFF6FF",
-              borderRadius: "9px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ color: "#3B82F6", fontSize: "18px", fontVariationSettings: "'FILL' 1" }}
-            >
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
+      <div className="p-5 pb-4 flex items-center justify-between border-b border-slate-50">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-blue-50 rounded-[10px] flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-blue-500 text-[18px] [font-variation-settings:'FILL'_1]">
               {icon}
             </span>
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>{title}</div>
+            <div className="font-bold text-slate-900 text-sm leading-tight">{title}</div>
             {subtitle && (
-              <div style={{ color: "#94A3B8", fontSize: "11px", marginTop: "1px" }}>{subtitle}</div>
+              <div className="text-slate-400 text-[11px] mt-0.5 font-medium">{subtitle}</div>
             )}
           </div>
         </div>
         {action}
       </div>
-      <div style={{ padding: "20px 24px" }}>{children}</div>
+      <div className="p-5 flex-1">{children}</div>
     </div>
   )
 }
@@ -195,82 +102,44 @@ function QuickAction({
   href,
   icon,
   label,
-  color,
-  bg,
+  colorClass,
+  bgClass,
 }: {
   href: string
   icon: string
   label: string
-  color: string
-  bg: string
+  colorClass: string
+  bgClass: string
 }) {
   return (
-    <a
+    <Link
       href={href}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "10px",
-        padding: "18px 12px",
-        background: bg,
-        border: `1px solid ${color}25`,
-        borderRadius: "14px",
-        textDecoration: "none",
-        transition: "transform 200ms ease, box-shadow 200ms ease",
-        cursor: "pointer",
-      }}
+      className={`flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md border border-slate-100 ${bgClass}`}
     >
-      <div
-        style={{
-          width: "44px",
-          height: "44px",
-          background: `${color}20`,
-          borderRadius: "12px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <span
-          className="material-symbols-outlined"
-          style={{ color, fontSize: "22px", fontVariationSettings: "'FILL' 1" }}
-        >
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${bgClass} mix-blend-multiply`}>
+        <span className={`material-symbols-outlined text-[24px] [font-variation-settings:'FILL'_1] ${colorClass}`}>
           {icon}
         </span>
       </div>
-      <span style={{ color: "#374151", fontSize: "11px", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+      <span className="text-slate-700 text-[12px] font-bold text-center leading-tight">
         {label}
       </span>
-    </a>
+    </Link>
   )
 }
 
 // ── Proposal Status Badge ─────────────────────────────────────────────────────
 function ProposalBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; color: string; bg: string }> = {
-    PENDING:  { label: "Pending",  color: "#D97706", bg: "#FEF3C7" },
-    APPROVED: { label: "Approved", color: "#059669", bg: "#D1FAE5" },
-    ON_HOLD:  { label: "On Hold",  color: "#7C3AED", bg: "#EDE9FE" },
-    REJECTED: { label: "Rejected", color: "#DC2626", bg: "#FEE2E2" },
+  const map: Record<string, string> = {
+    PENDING:  "text-amber-600 bg-amber-50",
+    APPROVED: "text-emerald-600 bg-emerald-50",
+    ON_HOLD:  "text-purple-600 bg-purple-50",
+    REJECTED: "text-red-600 bg-red-50",
   }
-  const cfg = map[status] ?? { label: status, color: "#64748B", bg: "#F1F5F9" }
+  const colorClass = map[status] ?? "text-slate-500 bg-slate-100"
   return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "3px 9px",
-        borderRadius: "20px",
-        fontSize: "10px",
-        fontWeight: 700,
-        letterSpacing: "0.4px",
-        color: cfg.color,
-        background: cfg.bg,
-        textTransform: "uppercase",
-      }}
-    >
-      {cfg.label}
+    <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider uppercase ${colorClass}`}>
+      {status.replace("_", " ")}
     </span>
   )
 }
@@ -316,194 +185,226 @@ export default async function AdminDashboardPage() {
   const trendData = Object.entries(trendMap).map(([month, events]) => ({ month, events }))
 
   return (
-    <div>
-      {/* ── Page Header ─────────────────────────────────────────────────────── */}
-      {/* Header removed: moved to sticky navbar in layout */}
+    <div className="flex flex-col gap-6 w-full max-w-full pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
+          <p className="text-sm text-slate-500 font-medium mt-1">
+            System metrics and active event status.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/events"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            New Event
+          </Link>
+        </div>
+      </div>
 
-      {/* ── Stat Cards Row ───────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-          marginBottom: "24px",
-        }}
-      >
+      {/* Top Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon="school"
-          label="Students Registered"
-          value={stats.totalStudents.toLocaleString()}
-          sub="Active enrolled students"
+          icon="groups"
+          label="Total Students"
+          value={stats.totalStudents}
           color="#3B82F6"
-          bg="#EFF6FF"
-          trend={{ dir: "up", text: "All Active" }}
+          bgClass="bg-blue-50"
+          trend={{ dir: "up", text: "Active" }}
         />
         <StatCard
           icon="event_available"
           label="Finished Events"
           value={stats.finishedEvents}
-          sub="Successfully concluded"
-          color="#8B5CF6"
-          bg="#F5F3FF"
-          trend={{ dir: "neutral", text: "Verified" }}
+          color="#10B981"
+          bgClass="bg-emerald-50"
+          trend={{ dir: "up", text: "This year" }}
         />
         <StatCard
           icon="assignment_late"
           label="Pending Proposals"
           value={stats.pendingProposals}
-          sub={`${stats.onHoldProposals} on hold`}
           color="#F59E0B"
-          bg="#FFFBEB"
-          trend={
-            stats.pendingProposals > 0
-              ? { dir: "down", text: "Needs review" }
-              : { dir: "neutral", text: "All cleared" }
-          }
+          bgClass="bg-amber-50"
+          trend={stats.pendingProposals > 0 ? { dir: "neutral", text: "Needs review" } : undefined}
         />
         <StatCard
-          icon="manage_accounts"
-          label="Dept Admins"
-          value={stats.totalDeptAdmins}
-          sub="Department deans registered"
-          color="#10B981"
-          bg="#ECFDF5"
-          trend={{ dir: "up", text: "Active" }}
+          icon="wifi_tethering"
+          label="Live Attendance"
+          value={stats.attendanceCount}
+          color="#8B5CF6"
+          bgClass="bg-purple-50"
+          sub="Last 30 days"
         />
       </div>
 
-      {/* ── Charts Row ──────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: "24px",
-          alignItems: "start",
-        }}
-        className="dashboard-main-grid"
-      >
-        {/* ── Left Column: Analytics & Proposals ─────────────────────────── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px", minWidth: 0 }}>
-          {/* Department Breakdown */}
-          <SectionCard
-            title="Student Distribution per Department"
-            subtitle="Registered students count by academic unit"
-            icon="groups"
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <SectionCard 
+            title="Department Metrics" 
+            subtitle="Student count and total events per department"
+            icon="bar_chart"
           >
-            {deptChartData.length > 0 ? (
-              <>
-                <DeptBarChart data={deptChartData} />
-                <div style={{ display: "flex", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
-                  {deptChartData.map((d) => (
-                    <div key={d.code} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: d.color, display: "inline-block" }} />
-                      <span style={{ color: "#94A3B8", fontSize: "11px" }}>{d.code}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div style={{ height: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#CBD5E1", gap: "8px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "40px" }}>bar_chart</span>
-                <span style={{ fontSize: "13px" }}>No data yet</span>
-              </div>
-            )}
+            <div className="h-[280px] w-full">
+              <DeptBarChart data={deptChartData} />
+            </div>
+          </SectionCard>
+        </div>
+        <div className="lg:col-span-1 flex flex-col gap-6">
+          <SectionCard 
+            title="Events by Status" 
+            subtitle="Current academic year"
+            icon="pie_chart"
+          >
+            <div className="h-[200px] w-full flex items-center justify-center">
+              {pieData.length > 0 ? (
+                <EventPieChart data={pieData} />
+              ) : (
+                <div className="text-slate-400 text-sm font-medium">No events this year</div>
+              )}
+            </div>
+          </SectionCard>
+        </div>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quick Actions & Upcoming */}
+        <div className="flex flex-col gap-6">
+          <SectionCard title="Quick Actions" subtitle="Frequently used tools" icon="bolt">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <QuickAction
+                href="/admin/events"
+                icon="calendar_add_on"
+                label="Create Event"
+                colorClass="text-blue-600"
+                bgClass="bg-blue-50"
+              />
+              <QuickAction
+                href="/admin/scanner"
+                icon="qr_code_scanner"
+                label="Open Scanner"
+                colorClass="text-emerald-600"
+                bgClass="bg-emerald-50"
+              />
+              <QuickAction
+                href="/admin/proposals"
+                icon="assignment_turned_in"
+                label="Proposals"
+                colorClass="text-amber-600"
+                bgClass="bg-amber-50"
+              />
+              <QuickAction
+                href="/admin/reports"
+                icon="summarize"
+                label="Export Reports"
+                colorClass="text-purple-600"
+                bgClass="bg-purple-50"
+              />
+              <QuickAction
+                href="/admin/dept-admins"
+                icon="manage_accounts"
+                label="Manage Admins"
+                colorClass="text-indigo-600"
+                bgClass="bg-indigo-50"
+              />
+              <QuickAction
+                href="/admin/settings"
+                icon="settings"
+                label="Settings"
+                colorClass="text-slate-600"
+                bgClass="bg-slate-50"
+              />
+            </div>
           </SectionCard>
 
-          {/* Recent Proposals moved here to remove the gap */}
-          <SectionCard
-            title="Recent Proposals"
-            subtitle="Latest event proposals from departments"
-            icon="assignment"
+          <SectionCard 
+            title="Upcoming Events" 
+            subtitle="Next scheduled activities"
+            icon="event_upcoming"
             action={
-              <Link href="/admin/proposals" style={{ color: "#3B82F6", fontSize: "12px", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
-                View all <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>chevron_right</span>
+              <Link href="/admin/events" className="text-blue-600 hover:text-blue-700 text-xs font-bold transition-colors">
+                View All
               </Link>
             }
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {stats.recentProposals.length > 0 ? (
-                stats.recentProposals.map((proposal: any) => (
-                  <div key={proposal.id} style={{ padding: "14px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #F1F5F9", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: proposal.department.color + "15", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span className="material-symbols-outlined" style={{ color: proposal.department.color, fontSize: "20px" }}>corporate_fare</span>
+            {stats.upcomingEventsList.length > 0 ? (
+              <div className="flex flex-col divide-y divide-slate-50">
+                {stats.upcomingEventsList.map((evt) => (
+                  <div key={evt.id} className="py-3 flex items-center justify-between group">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex flex-col items-center justify-center shrink-0 border border-blue-100">
+                        <span className="text-[10px] font-bold uppercase leading-none">{format(new Date(evt.date), "MMM")}</span>
+                        <span className="text-[14px] font-extrabold leading-tight">{format(new Date(evt.date), "dd")}</span>
                       </div>
-                      <div>
-                        <div style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A" }}>{proposal.title}</div>
-                        <div style={{ fontSize: "11px", color: "#64748B", marginTop: "2px" }}>{proposal.department.code} · Submitted by {proposal.submittedBy.fullName}</div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-slate-900 text-sm truncate group-hover:text-blue-600 transition-colors">
+                          {evt.title}
+                        </div>
+                        <div className="text-slate-500 text-xs truncate mt-0.5 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">schedule</span>
+                          {evt.startTime} • {evt.venue}
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "6px", background: proposal.status === "PENDING" ? "#FEF3C7" : "#E0E7FF", color: proposal.status === "PENDING" ? "#92400E" : "#3730A3", textTransform: "uppercase" }}>{proposal.status}</div>
-                      <div style={{ fontSize: "10px", color: "#94A3B8", marginTop: "4px" }}>{format(new Date(proposal.submittedAt), "MMM d")}</div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div style={{ height: "200px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#CBD5E1", gap: "10px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>assignment</span>
-                  <span style={{ fontSize: "13px" }}>No proposals yet</span>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 flex flex-col items-center justify-center text-center">
+                <span className="material-symbols-outlined text-4xl text-slate-200 mb-2">event_busy</span>
+                <p className="text-slate-500 text-sm font-medium">No upcoming events scheduled.</p>
+              </div>
+            )}
           </SectionCard>
         </div>
 
-        {/* ── Right Column: Events & Actions ───────────────────────────── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <SectionCard
-            title="Upcoming Campus Events"
-            subtitle="Major events & activities"
-            icon="calendar_today"
+        {/* Recent Proposals */}
+        <div className="flex flex-col gap-6">
+          <SectionCard 
+            title="Recent Event Proposals" 
+            subtitle="Latest requests from departments"
+            icon="rate_review"
+            action={
+              <Link href="/admin/proposals" className="text-blue-600 hover:text-blue-700 text-xs font-bold transition-colors">
+                View All
+              </Link>
+            }
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {stats.upcomingEventsList.length > 0 ? (
-                stats.upcomingEventsList.map((event: any) => (
-                  <div key={event.id} style={{ padding: "12px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #F1F5F9", display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <div style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A" }}>{event.title}</div>
-                      <div style={{ fontSize: "10px", fontWeight: 700, background: "#DBEAFE", color: "#1E40AF", padding: "2px 8px", borderRadius: "10px", textTransform: "uppercase" }}>{event.startTime}</div>
+            {stats.recentProposals.length > 0 ? (
+              <div className="flex flex-col divide-y divide-slate-50 h-full">
+                {stats.recentProposals.map((prop) => (
+                  <div key={prop.id} className="py-3.5 flex items-start gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                      style={{ backgroundColor: prop.department.color + "15", color: prop.department.color }}
+                    >
+                      <span className="font-extrabold text-[11px]">{prop.department.code}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>location_on</span>
-                      <span style={{ fontSize: "12px" }}>{event.venue}</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>calendar_month</span>
-                      <span style={{ fontSize: "12px" }}>{format(new Date(event.date), "MMM d, yyyy")}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="font-bold text-slate-900 text-sm truncate">{prop.title}</div>
+                        <ProposalBadge status={prop.status} />
+                      </div>
+                      <div className="text-slate-500 text-xs mt-1">
+                        By {prop.submittedBy.fullName} • {formatDistanceToNow(new Date(prop.submittedAt), { addSuffix: true })}
+                      </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div style={{ height: "160px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#94A3B8", textAlign: "center", padding: "0 20px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "24px", marginBottom: "8px" }}>event_busy</span>
-                  <div style={{ fontSize: "13px", fontWeight: 600 }}>No upcoming events</div>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 flex flex-col items-center justify-center text-center">
+                <span className="material-symbols-outlined text-4xl text-slate-200 mb-2">inbox</span>
+                <p className="text-slate-500 text-sm font-medium">No recent proposals.</p>
+              </div>
+            )}
           </SectionCard>
-
-          {/* Quick Actions */}
-          <SectionCard title="Quick Actions" subtitle="Common admin tasks" icon="bolt">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              {[
-                { label: "New Event", icon: "add_circle", color: "#3B82F6" },
-                { label: "Reports", icon: "description", color: "#10B981" },
-                { label: "Scan QR", icon: "qr_code_scanner", color: "#8B5CF6" },
-                { label: "Add Dept Admin", icon: "person_add", color: "#EC4899" },
-              ].map((action) => (
-                <button key={action.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px", background: "#F8FAFC", border: "1px solid #F1F5F9", borderRadius: "12px", cursor: "pointer", transition: "all 200ms ease" }}>
-                  <span className="material-symbols-outlined" style={{ color: action.color, fontSize: "24px" }}>{action.icon}</span>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569" }}>{action.label}</span>
-                </button>
-              ))}
-            </div>
-          </SectionCard>
-          {/* System Activity removed */}
         </div>
       </div>
-
-      {/* Departmental Performance removed */}
     </div>
   )
 }
