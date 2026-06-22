@@ -43,6 +43,10 @@ function SectionCard({
 export default async function StudentDashboardPage() {
   const data = await getDashboardData()
 
+  // Separate events into Department and School-Wide
+  const deptEvents = data.upcomingEvents.filter((e: any) => e.eventType === "DEPARTMENT")
+  const schoolWideEvents = data.upcomingEvents.filter((e: any) => e.eventType === "SCHOOL_WIDE")
+
   return (
     <StudentLayoutWrapper 
       session={data.session} 
@@ -51,21 +55,40 @@ export default async function StudentDashboardPage() {
     >
       <div className="flex flex-col gap-6 w-full max-w-full pb-10">
         <StatCards data={{
-          upcomingEventsCount: data.upcomingEvents.length,
+          upcomingSchoolEventsCount: data.upcomingSchoolEventsCount,
+          upcomingDeptEventsCount: data.upcomingDeptEventsCount,
           eventsAttendedCount: data.attendanceCount,
           departmentsVisitedCount: data.distinctDeptsVisited,
           department: data.department
         }} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex flex-col gap-6">
             <SectionCard
-              title="Upcoming Events"
-              subtitle="Events you can attend"
+              title="Upcoming Department Events"
+              subtitle="Events exclusive to your department"
               icon={CalendarDays}
             >
               <div className="p-5">
-                <UpcomingEventsList events={data.upcomingEvents} department={data.department} />
+                <UpcomingEventsList 
+                  events={deptEvents} 
+                  department={data.department} 
+                  emptyMessage="No upcoming department events." 
+                />
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              title="Upcoming School-Wide Events"
+              subtitle="Events open to the entire school"
+              icon={CalendarDays}
+            >
+              <div className="p-5">
+                <UpcomingEventsList 
+                  events={schoolWideEvents} 
+                  department={data.department} 
+                  emptyMessage="No upcoming school-wide events." 
+                />
               </div>
             </SectionCard>
           </div>

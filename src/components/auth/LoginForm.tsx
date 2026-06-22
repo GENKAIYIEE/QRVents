@@ -170,7 +170,7 @@ export default function LoginForm() {
                   htmlFor="login-email"
                   className="block text-sm font-semibold text-[#0F172A] mb-2"
                 >
-                  School Email
+                  Email
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />

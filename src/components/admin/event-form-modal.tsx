@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { eventSchema, EventFormValues } from "@/lib/validations/event"
 import { EventType } from "@prisma/client"
+import { toast } from "sonner"
 
 
 
@@ -61,10 +62,12 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
         throw new Error(result.error || "Something went wrong")
       }
       
+      toast.success(isEditing ? "Event successfully updated!" : "Event successfully created!")
       reset()
       onSuccess()
     } catch (err: any) {
       setError(err.message)
+      toast.error(err.message || "Failed to save event")
     } finally {
       setIsSubmitting(false)
     }
@@ -137,67 +140,31 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "16px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>Start Time</label>
-                <input 
-                  type="time"
-                  {...register("startTime")} 
-                  style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px", fontFamily: "inherit" }}
-                  className="focus:ring-2 focus:ring-blue-500"
-                />
+                <div style={{ position: "relative" }}>
+                  <input 
+                    type="time"
+                    {...register("startTime")} 
+                    style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px", fontFamily: "inherit" }}
+                    className="focus:ring-2 focus:ring-blue-500 transition-shadow duration-200 cursor-pointer"
+                  />
+                </div>
                 {errors.startTime && <p style={{ color: "#EF4444", fontSize: "12px", marginTop: "4px" }}>{errors.startTime.message}</p>}
               </div>
               <div>
                 <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>End Time</label>
-                <input 
-                  type="time"
-                  {...register("endTime")} 
-                  style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px", fontFamily: "inherit" }}
-                  className="focus:ring-2 focus:ring-blue-500"
-                />
+                <div style={{ position: "relative" }}>
+                  <input 
+                    type="time"
+                    {...register("endTime")} 
+                    style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px", fontFamily: "inherit" }}
+                    className="focus:ring-2 focus:ring-blue-500 transition-shadow duration-200 cursor-pointer"
+                  />
+                </div>
                 {errors.endTime && <p style={{ color: "#EF4444", fontSize: "12px", marginTop: "4px" }}>{errors.endTime.message}</p>}
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "16px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>Event Type</label>
-                <select 
-                  {...register("eventType")}
-                  style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px", appearance: "auto", cursor: "pointer" }}
-                  className="focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="SCHOOL_WIDE">School Wide</option>
-                  <option value="DEPARTMENT">Departmental</option>
-                </select>
-              </div>
-              
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>Expected Attendees</label>
-                <input 
-                  type="number"
-                  {...register("expectedAttendees")} 
-                  style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px" }}
-                  className="focus:ring-2 focus:ring-blue-500"
-                  placeholder="Optional"
-                />
-              </div>
-            </div>
 
-            {eventType === "DEPARTMENT" && (
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>Department</label>
-                <select 
-                  {...register("departmentId")}
-                  style={{ width: "100%", padding: "10px 16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "15px", appearance: "auto", cursor: "pointer" }}
-                  className="focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Department...</option>
-                  {departments.map(d => (
-                    <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
-                  ))}
-                </select>
-                {errors.departmentId && <p style={{ color: "#EF4444", fontSize: "12px", marginTop: "4px" }}>{errors.departmentId.message}</p>}
-              </div>
-            )}
           </form>
         </div>
         

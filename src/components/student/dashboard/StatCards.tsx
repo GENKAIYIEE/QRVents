@@ -36,7 +36,8 @@ function CountUp({ to }: { to: number }) {
 
 interface StatCardsProps {
   data: {
-    upcomingEventsCount: number
+    upcomingSchoolEventsCount: number
+    upcomingDeptEventsCount: number
     eventsAttendedCount: number
     departmentsVisitedCount: number
     department: any
@@ -49,10 +50,18 @@ export function StatCards({ data }: StatCardsProps) {
 
   const cards = [
     {
-      id: "upcoming",
+      id: "upcoming-school",
       icon: CalendarDays,
-      label: "Upcoming Events",
-      value: data.upcomingEventsCount,
+      label: "Upcoming School Events",
+      value: data.upcomingSchoolEventsCount,
+      color: "#4F46E5", // Indigo for school events
+      bg: "#EEF2FF",
+    },
+    {
+      id: "upcoming-dept",
+      icon: CalendarDays,
+      label: "Upcoming Dept Events",
+      value: data.upcomingDeptEventsCount,
       color: deptColor,
       bg: deptBg,
     },
@@ -61,21 +70,21 @@ export function StatCards({ data }: StatCardsProps) {
       icon: CalendarCheck,
       label: "Events Attended",
       value: data.eventsAttendedCount,
-      color: deptColor,
-      bg: deptBg,
+      color: "#10B981", // Emerald for attended
+      bg: "#ECFDF5",
     },
     {
       id: "visited",
       icon: Award,
       label: "Departments Visited",
       value: data.departmentsVisitedCount,
-      color: deptColor,
-      bg: deptBg,
+      color: "#F59E0B", // Amber for visited
+      bg: "#FFFBEB",
     },
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {cards.map((card, idx) => {
         const Icon = card.icon
         return (

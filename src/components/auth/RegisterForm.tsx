@@ -193,14 +193,14 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                 {/* Email Field */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-semibold text-[#0F172A] mb-2">
-                    School Email
+                    Email
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
                     <input
                       id="email"
                       type="email"
-                      placeholder="juan@pclu.edu.ph"
+                      placeholder="juan@gmail.com"
                       autoComplete="email"
                       className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
                       {...register("email")}

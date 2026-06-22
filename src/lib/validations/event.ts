@@ -8,8 +8,11 @@ export const eventSchema = z.object({
   endTime: z.string().min(1, "End time is required"),
   venue: z.string().min(3, "Venue must be at least 3 characters"),
   eventType: z.enum(["SCHOOL_WIDE", "DEPARTMENT"]),
-  departmentId: z.string().optional().nullable(),
-  expectedAttendees: z.coerce.number().min(1, "Must expect at least 1 attendee").optional().nullable(),
+  departmentId: z.preprocess((val) => val === "" ? null : val, z.string().optional().nullable()),
+  expectedAttendees: z.preprocess(
+    (val) => (val === "" || val == null) ? null : Number(val),
+    z.number().min(1, "Must expect at least 1 attendee").optional().nullable()
+  ),
 }).refine(
   (data) => {
     // If it's a department event, departmentId must be provided
