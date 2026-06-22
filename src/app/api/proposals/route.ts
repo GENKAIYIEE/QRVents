@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: "Invalid data", details: result.error.errors },
+        { error: "Invalid data", details: result.error.flatten().fieldErrors },
         { status: 400 }
       )
     }
