@@ -4,6 +4,7 @@ import { useState } from "react"
 import { format } from "date-fns"
 import { ProposalStatus } from "@prisma/client"
 import { toast } from "sonner"
+import { formatTimeString } from "@/lib/utils"
 
 interface ProposalDrawerProps {
   proposal: any | null
@@ -109,7 +110,7 @@ export function ProposalDrawer({ proposal, isOpen, onClose, onSuccess }: Proposa
                 <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Time</div>
                 <div className="flex items-center gap-2 text-slate-700 font-medium text-sm">
                   <span className="material-symbols-outlined text-lg text-slate-400">schedule</span>
-                  {proposal.startTime} - {proposal.endTime}
+                  {formatTimeString(proposal.startTime)} - {formatTimeString(proposal.endTime)}
                 </div>
               </div>
             </div>

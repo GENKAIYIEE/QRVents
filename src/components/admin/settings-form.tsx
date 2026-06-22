@@ -19,7 +19,6 @@ interface SettingsFormProps {
 
 export function SettingsForm({ user, systemSettings }: SettingsFormProps) {
   const [activeTab, setActiveTab] = useState<"profile" | "security" | "system">("profile")
-  
   // Profile State
   const [fullName, setFullName] = useState(user.fullName)
   const [email, setEmail] = useState(user.email)
@@ -274,6 +273,7 @@ export function SettingsForm({ user, systemSettings }: SettingsFormProps) {
           )}
         </div>
       </div>
+
     </div>
   )
 }

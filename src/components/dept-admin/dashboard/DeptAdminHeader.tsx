@@ -14,12 +14,16 @@ export function DeptAdminHeader({ session, department }: { session: any; departm
     return () => clearInterval(interval)
   }, [])
 
+  const formattedName = session?.fullName 
+    ? session.fullName.charAt(0).toUpperCase() + session.fullName.slice(1) 
+    : ""
+
   return (
     <header className="bg-white border-b border-slate-200 px-6 lg:px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 md:ml-0 ml-12">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Welcome back, <span className="font-medium text-slate-700">{session.fullName}</span>! Here's what's happening in {department.name}.
+          Welcome back, <span className="font-medium text-slate-700">{formattedName}</span>! Here's what's happening in {department.name}.
         </p>
       </div>
       <div className="flex items-center gap-3">

@@ -14,6 +14,19 @@ export function formatTime(date: Date | string) {
   return format(new Date(date), "hh:mm a")
 }
 
+export function formatTimeString(timeStr: string) {
+  if (!timeStr) return "";
+  const parts = timeStr.split(":");
+  if (parts.length < 2) return timeStr;
+  const [h, m] = parts;
+  let hours = parseInt(h, 10);
+  if (isNaN(hours)) return timeStr;
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+}
+
 export function formatDateTime(date: Date | string) {
   return format(new Date(date), "MMM d, yyyy — hh:mm a")
 }

@@ -18,30 +18,22 @@ const NAV_ITEMS = [
   {
     icon: QrCode,
     label: "My QR Code",
-    href: "#",
+    href: "/student/qr-code",
     description: "Your permanent QR pass",
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     icon: CalendarCheck,
     label: "Attendance History",
-    href: "#",
+    href: "/student/attendance-history",
     description: "Events you attended",
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     icon: UserCircle,
     label: "Profile",
-    href: "#",
+    href: "/student/profile",
     description: "Your student details",
-    comingSoon: true,
-  },
-  {
-    icon: Settings,
-    label: "Settings",
-    href: "#",
-    description: "Account configuration",
-    comingSoon: true,
   },
 ]
 
