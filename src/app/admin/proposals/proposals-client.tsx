@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { ProposalDrawer } from "@/components/admin/proposal-drawer"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 export function ProposalsClient() {
   const router = useRouter()
@@ -16,16 +17,18 @@ export function ProposalsClient() {
   const [selectedProposal, setSelectedProposal] = useState<any>(null)
   
   // Filters
+  const [search, setSearch] = useState(searchParams.get("search") || "")
   const [status, setStatus] = useState<string>(searchParams.get("status") || "ALL")
   const [page, setPage] = useState(parseInt(searchParams.get("page") || "1"))
   const [totalPages, setTotalPages] = useState(1)
 
-  const fetchProposals = async () => {
+  const fetchProposals = useCallback(async () => {
     setLoading(true)
     try {
       const query = new URLSearchParams()
       query.set("page", page.toString())
       if (status !== "ALL") query.set("status", status)
+      if (search) query.set("search", search)
 
       const res = await fetch(`/api/admin/proposals?${query.toString()}`)
       const { data } = await res.json()
@@ -34,16 +37,16 @@ export function ProposalsClient() {
       setTotalPages(data.pages || 1)
 
       router.replace(`${pathname}?${query.toString()}`, { scroll: false })
-    } catch (err) {
-      console.error("Failed to fetch proposals", err)
+    } catch {
+      toast.error("Failed to load proposals")
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, status, search, pathname, router])
 
   useEffect(() => {
     fetchProposals()
-  }, [page, status])
+  }, [fetchProposals])
 
   const openDrawer = (proposal: any) => {
     setSelectedProposal(proposal)
@@ -83,9 +86,10 @@ export function ProposalsClient() {
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 [font-variation-settings:'FILL'_1]">search</span>
           <input 
             type="text" 
-            placeholder="Search proposals (coming soon)..."
-            disabled
-            className="w-full py-3 pr-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 opacity-60 cursor-not-allowed font-medium"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Search by title, venue, or department..."
+            className="w-full py-3 pr-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
           />
         </div>
         <div className="w-full md:w-[220px] shrink-0">

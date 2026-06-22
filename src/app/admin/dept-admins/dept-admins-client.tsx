@@ -4,6 +4,91 @@ import { useState, useEffect } from "react"
 import { RegisterDeptAdminModal } from "@/components/admin/register-dept-admin-modal"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { format } from "date-fns"
+import { toast } from "sonner"
+
+interface ResetPasswordModalProps {
+  adminId: string
+  adminName: string
+  onClose: () => void
+  onSuccess: () => void
+}
+
+function ResetPasswordModal({ adminId, adminName, onClose, onSuccess }: ResetPasswordModalProps) {
+  const [newPassword, setNewPassword] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters")
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const res = await fetch(`/api/admin/dept-admins/${adminId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset_password", newPassword }),
+      })
+      if (res.ok) {
+        toast.success(`Password reset for ${adminName}`)
+        onSuccess()
+        onClose()
+      } else {
+        const err = await res.json()
+        toast.error(err.error || "Failed to reset password")
+      }
+    } catch {
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in fade-in zoom-in-95">
+        <h3 className="text-lg font-bold text-slate-800 mb-1">Reset Password</h3>
+        <p className="text-slate-500 text-sm mb-5">
+          Set a new password for <span className="font-semibold text-slate-700">{adminName}</span>
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              required
+              minLength={6}
+              autoFocus
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2.5 font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 py-2.5 font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isSubmitting && <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>}
+              Reset Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 export function DeptAdminsClient({ departments }: { departments: any[] }) {
   const router = useRouter()
@@ -13,6 +98,7 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
   const [admins, setAdmins] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [resetTarget, setResetTarget] = useState<{ id: string; name: string } | null>(null)
   
   // Filters
   const [search, setSearch] = useState(searchParams.get("search") || "")
@@ -35,8 +121,8 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
       setTotalPages(data.pages || 1)
 
       router.replace(`${pathname}?${query.toString()}`, { scroll: false })
-    } catch (err) {
-      console.error("Failed to fetch admins", err)
+    } catch {
+      toast.error("Failed to load administrators")
     } finally {
       setLoading(false)
     }
@@ -46,8 +132,10 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
     fetchAdmins()
   }, [page, search, departmentId])
 
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-    if (!confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'reactivate'} this admin?`)) return
+  const handleToggleStatus = async (id: string, name: string, currentStatus: boolean) => {
+    const action = currentStatus ? "deactivate" : "reactivate"
+    const confirmed = window.confirm(`Are you sure you want to ${action} ${name}?`)
+    if (!confirmed) return
 
     try {
       const res = await fetch(`/api/admin/dept-admins/${id}`, {
@@ -55,34 +143,14 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "toggle_status", isActive: !currentStatus })
       })
-      if (res.ok) fetchAdmins()
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  const handleResetPassword = async (id: string) => {
-    const newPassword = prompt("Enter new password (min 6 characters):")
-    if (!newPassword) return
-    if (newPassword.length < 6) {
-      alert("Password must be at least 6 characters")
-      return
-    }
-
-    try {
-      const res = await fetch(`/api/admin/dept-admins/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reset_password", newPassword })
-      })
       if (res.ok) {
-        alert("Password reset successfully")
+        toast.success(`Admin ${currentStatus ? "deactivated" : "reactivated"} successfully`)
+        fetchAdmins()
       } else {
-        const err = await res.json()
-        alert(err.error || "Failed to reset password")
+        toast.error("Failed to update admin status")
       }
-    } catch (err) {
-      console.error(err)
+    } catch {
+      toast.error("An unexpected error occurred")
     }
   }
 
@@ -115,14 +183,14 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
             type="text" 
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
         <div className="w-full sm:w-64">
           <select 
             value={departmentId}
-            onChange={(e) => setDepartmentId(e.target.value)}
+            onChange={(e) => { setDepartmentId(e.target.value); setPage(1) }}
             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
           >
             <option value="ALL">All Departments</option>
@@ -198,7 +266,7 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button 
-                          onClick={() => handleResetPassword(admin.id)}
+                          onClick={() => setResetTarget({ id: admin.id, name: admin.fullName })}
                           className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center gap-1"
                           title="Reset Password"
                         >
@@ -207,7 +275,7 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
                         </button>
                         
                         <button 
-                          onClick={() => handleToggleStatus(admin.id, admin.isActive)}
+                          onClick={() => handleToggleStatus(admin.id, admin.fullName, admin.isActive)}
                           className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
                             admin.isActive 
                               ? 'text-rose-500 hover:bg-rose-50 border border-transparent' 
@@ -262,6 +330,15 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
         }}
         departments={departments}
       />
+
+      {resetTarget && (
+        <ResetPasswordModal
+          adminId={resetTarget.id}
+          adminName={resetTarget.name}
+          onClose={() => setResetTarget(null)}
+          onSuccess={fetchAdmins}
+        />
+      )}
     </div>
   )
 }

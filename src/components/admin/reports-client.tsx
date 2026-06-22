@@ -35,14 +35,43 @@ export function ReportsClient() {
 
   const handleExportCSV = () => {
     if (!data) return
-    alert("Exporting CSV... (placeholder)")
-    // In production we would use XLSX or Papaparse
+
+    const headers = ["Department", "Code", "Total Students", "Total Events", "Attendance Records"]
+    const rows = (data.departments || []).map((d: any) => [
+      d.name,
+      d.code,
+      d._count?.users ?? 0,
+      d._count?.events ?? 0,
+      d._count?.attendanceLogs ?? 0,
+    ])
+
+    const csvContent = [
+      `# QRVents System Report`,
+      `# Date Range: ${startDate} to ${endDate}`,
+      `# Generated: ${format(new Date(), "yyyy-MM-dd HH:mm")}`,
+      "",
+      `Total Events,${data.totalEvents ?? 0}`,
+      `Total Students,${data.totalStudents ?? 0}`,
+      `Total Attendance,${data.totalAttendance ?? 0}`,
+      "",
+      headers.join(","),
+      ...rows.map((r: any[]) => r.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `qrvents-report-${startDate}-to-${endDate}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   const handleExportPDF = () => {
     if (!data) return
-    alert("Exporting PDF... (placeholder)")
-    // In production we would use jsPDF
+    window.print()
   }
 
   const chartData = data?.departments.map((d: any) => ({

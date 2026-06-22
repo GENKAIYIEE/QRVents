@@ -12,6 +12,7 @@ export const registerSchema = z
     yearLevel: z.enum(["1", "2", "3", "4"], {
       message: "Year level is required",
     }),
+    studentId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {
