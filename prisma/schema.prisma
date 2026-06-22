@@ -189,6 +189,15 @@ model ActivityLog {
   @@map("activity_logs")
 }
 
+model SystemSettings {
+  id                  String   @id @default("global")
+  defaultScanDuration Int      @default(120)  // seconds before scanner auto-locks
+  autoLogoutTimer     Int      @default(5)    // minutes of inactivity before logout
+  updatedAt           DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
 model Penalty {
   id           String        @id @default(uuid())
   studentId    String

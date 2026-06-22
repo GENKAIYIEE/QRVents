@@ -67,8 +67,36 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
   }, [autoRefresh, selectedEventId, page, search, status, departmentId])
 
   const handleExport = () => {
-    // In a real app we would use XLSX or similar. For now, trigger an alert or CSV download
-    alert("Exporting CSV... (placeholder)")
+    if (!logs.length || !selectedEvent) return
+
+    const headers = ["Name", "Student ID", "Year Level", "Department", "Check-In Time", "Check-Out Time", "Status"]
+    const rows = logs.map((log) => [
+      log.user.fullName,
+      log.user.studentId || "-",
+      log.user.yearLevel || "-",
+      log.user.department?.code || "Unknown",
+      format(new Date(log.checkIn), "yyyy-MM-dd HH:mm:ss"),
+      log.checkOut ? format(new Date(log.checkOut), "yyyy-MM-dd HH:mm:ss") : "-",
+      log.status,
+    ])
+
+    const csvContent = [
+      `# Attendance Report — ${selectedEvent.title}`,
+      `# Generated: ${format(new Date(), "yyyy-MM-dd HH:mm")}`,
+      "",
+      headers.join(","),
+      ...rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `attendance-${selectedEvent.title.replace(/\s+/g, "-").toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   const selectedEvent = events.find(e => e.id === selectedEventId)

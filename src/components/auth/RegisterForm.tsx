@@ -19,6 +19,7 @@ import {
   ScanLine,
   BarChart2,
   Shield,
+  IdCard,
 } from "lucide-react"
 
 type Department = {
@@ -49,6 +50,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
       confirmPassword: "",
       departmentId: "",
       yearLevel: undefined,
+      studentId: "",
     },
     mode: "onChange",
   })
@@ -208,6 +210,26 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                     />
                   </div>
                   {errors.email && <p className="text-red-500 text-xs mt-1.5">{errors.email.message}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5">
+                {/* Student ID Field */}
+                <div>
+                  <label htmlFor="studentId" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Student ID <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <div className="relative">
+                    <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <input
+                      id="studentId"
+                      type="text"
+                      placeholder="e.g. 2021-12345"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      {...register("studentId")}
+                    />
+                  </div>
+                  {errors.studentId && <p className="text-red-500 text-xs mt-1.5">{errors.studentId.message}</p>}
                 </div>
               </div>
 

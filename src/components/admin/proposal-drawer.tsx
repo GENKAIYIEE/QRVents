@@ -1,6 +1,9 @@
+"use client"
+
 import { useState } from "react"
 import { format } from "date-fns"
 import { ProposalStatus } from "@prisma/client"
+import { toast } from "sonner"
 import { formatTimeString } from "@/lib/utils"
 
 interface ProposalDrawerProps {
@@ -23,22 +26,24 @@ export function ProposalDrawer({ proposal, isOpen, onClose, onSuccess }: Proposa
       const res = await fetch("/api/admin/proposals", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          id: proposal.id, 
+        body: JSON.stringify({
+          id: proposal.id,
           status,
           rejectionReason: status === "REJECTED" ? rejectionReason : undefined
         }),
       })
 
       if (res.ok) {
+        const label = status === "APPROVED" ? "approved" : status === "REJECTED" ? "rejected" : "put on hold"
+        toast.success(`Proposal ${label} successfully`)
         onSuccess()
         onClose()
       } else {
         const err = await res.json()
-        alert(err.error || "Failed to review proposal")
+        toast.error(err.error || "Failed to review proposal")
       }
-    } catch (err) {
-      console.error(err)
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.")
     } finally {
       setIsSubmitting(false)
     }

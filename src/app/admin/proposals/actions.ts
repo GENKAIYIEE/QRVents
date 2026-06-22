@@ -6,7 +6,7 @@ import { logActivity } from "@/lib/activity-logger"
 import { ProposalStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-export async function getProposals(page = 1, pageSize = 10, status: string = "ALL") {
+export async function getProposals(page = 1, pageSize = 10, status: string = "ALL", search?: string) {
   const session = await getSession()
   if (!session || session.role !== "SUPER_ADMIN") {
     throw new Error("Unauthorized")
@@ -15,6 +15,14 @@ export async function getProposals(page = 1, pageSize = 10, status: string = "AL
   const whereClause: any = {}
   if (status !== "ALL") {
     whereClause.status = status as ProposalStatus
+  }
+  if (search) {
+    whereClause.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { venue: { contains: search, mode: "insensitive" } },
+      { department: { name: { contains: search, mode: "insensitive" } } },
+      { department: { code: { contains: search, mode: "insensitive" } } },
+    ]
   }
 
   const proposals = await prisma.eventProposal.findMany({

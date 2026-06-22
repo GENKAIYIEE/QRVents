@@ -1,0 +1,195 @@
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { PinLockScreen } from "@/components/scanner/PinLockScreen"
+import { ScannerView } from "@/components/scanner/ScannerView"
+import { EventSelector } from "@/components/scanner/EventSelector"
+import { ScanResult, ScanResultData } from "@/components/scanner/ScanResult"
+import { toast } from "sonner"
+
+interface Event {
+  id: string
+  title: string
+  date: string | Date
+  venue: string
+}
+
+interface ScannerClientProps {
+  events: Event[]
+  autoLockSeconds: number
+  basePath: string // "admin" or "dept" for the breadcrumb
+}
+
+export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClientProps) {
+  const [hasPin, setHasPin] = useState<boolean | null>(null)
+  const [isLocked, setIsLocked] = useState(true)
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(events[0]?.id || null)
+  
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [scanResult, setScanResult] = useState<ScanResultData | null>(null)
+
+  const lockTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Fetch initial PIN status
+  useEffect(() => {
+    fetch("/api/scanner/pin")
+      .then(res => res.json())
+      .then(data => {
+        setHasPin(data.hasPin)
+        setIsLocked(true)
+      })
+      .catch(() => {
+        toast.error("Failed to verify scanner security")
+        setHasPin(false)
+      })
+  }, [])
+
+  // Auto-lock timer logic
+  const resetLockTimer = () => {
+    if (lockTimerRef.current) clearTimeout(lockTimerRef.current)
+    if (!isLocked && hasPin) {
+      lockTimerRef.current = setTimeout(() => {
+        setIsLocked(true)
+        setScanResult(null)
+      }, autoLockSeconds * 1000)
+    }
+  }
+
+  // Reset timer on any interaction
+  useEffect(() => {
+    const handleActivity = () => resetLockTimer()
+    window.addEventListener("mousemove", handleActivity)
+    window.addEventListener("keydown", handleActivity)
+    window.addEventListener("touchstart", handleActivity)
+    
+    resetLockTimer() // Start initial timer when unlocked
+
+    return () => {
+      window.removeEventListener("mousemove", handleActivity)
+      window.removeEventListener("keydown", handleActivity)
+      window.removeEventListener("touchstart", handleActivity)
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current)
+    }
+  }, [isLocked, hasPin, autoLockSeconds])
+
+  const handleScan = async (qrCode: string) => {
+    if (!selectedEventId) {
+      toast.warning("Please select an event first")
+      return
+    }
+
+    setIsProcessing(true)
+    resetLockTimer() // Reset timer on scan activity
+
+    try {
+      const res = await fetch("/api/scanner/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrCode, eventId: selectedEventId }),
+      })
+      const data = await res.json()
+
+      if (res.ok) {
+        setScanResult({
+          type: "success",
+          action: data.action,
+          user: data.user,
+          message: data.message,
+        })
+      } else {
+        setScanResult({
+          type: "error",
+          user: data.user,
+          message: data.error,
+        })
+      }
+    } catch {
+      setScanResult({
+        type: "error",
+        message: "Network error processing scan",
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  return (
+    <div className="relative flex flex-col gap-6 min-h-[calc(100vh-140px)]">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="material-symbols-outlined text-blue-600 text-sm [font-variation-settings:'FILL'_1]">home</span>
+            <span className="text-slate-300 text-xs font-bold">/</span>
+            <span className="text-blue-600/80 text-[10px] font-extrabold uppercase tracking-widest">{basePath} Scanner</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-none">Event Scanner</h1>
+        </div>
+        
+        {!isLocked && (
+          <button 
+            onClick={() => setIsLocked(true)}
+            className="inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold shadow-sm transition-all"
+          >
+            <span className="material-symbols-outlined text-[18px]">lock</span>
+            Lock Scanner
+          </button>
+        )}
+      </div>
+
+      {isLocked ? (
+        <div className="flex-1 relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl min-h-[500px]">
+          <PinLockScreen 
+            hasPin={hasPin}
+            onSetup={() => { setHasPin(true); setIsLocked(false); }}
+            onUnlock={() => setIsLocked(false)}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col lg:flex-row gap-6 lg:items-start animate-in fade-in duration-500">
+          <div className="flex-1 w-full relative">
+            <ScannerView 
+              isActive={!isLocked} 
+              isProcessing={isProcessing}
+              onScan={handleScan} 
+            />
+          </div>
+          
+          <div className="w-full lg:w-[350px] shrink-0 space-y-6">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+              <EventSelector 
+                events={events} 
+                selectedEventId={selectedEventId} 
+                onSelect={setSelectedEventId} 
+                disabled={isProcessing}
+              />
+            </div>
+
+            <div className="bg-blue-50/50 p-6 rounded-3xl border border-blue-100/50">
+              <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-500">info</span>
+                Scanner Guide
+              </h3>
+              <ul className="text-sm text-slate-600 space-y-3">
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-slate-400 mt-0.5">check_circle</span>
+                  Select the active event before scanning.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-slate-400 mt-0.5">check_circle</span>
+                  Scanning a student once checks them IN. Scanning again checks them OUT.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-slate-400 mt-0.5">check_circle</span>
+                  Scanner auto-locks after {autoLockSeconds}s of inactivity.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ScanResult result={scanResult} onClear={() => setScanResult(null)} />
+    </div>
+  )
+}
