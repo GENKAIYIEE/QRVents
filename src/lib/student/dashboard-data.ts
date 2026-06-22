@@ -14,13 +14,15 @@ export async function getDashboardData() {
 
   const [
     upcomingEvents,
+    upcomingSchoolEventsCount,
+    upcomingDeptEventsCount,
     attendanceCount,
     recentAttendance,
     distinctDeptsResult,
     department,
     studentUser
   ] = await Promise.all([
-    // All upcoming events visible to this student
+    // All upcoming events visible to this student (for the list)
     prisma.event.findMany({
       where: {
         date: { gte: now },
@@ -33,6 +35,23 @@ export async function getDashboardData() {
       take: 6,
       include: { department: true }
     }),
+
+    // Count of upcoming school-wide events
+    prisma.event.count({
+      where: {
+        date: { gte: now },
+        eventType: "SCHOOL_WIDE"
+      }
+    }),
+
+    // Count of upcoming department events
+    departmentId ? prisma.event.count({
+      where: {
+        date: { gte: now },
+        eventType: "DEPARTMENT",
+        departmentId: departmentId
+      }
+    }) : Promise.resolve(0),
 
     // Total events attended count
     prisma.attendanceLog.count({
@@ -70,6 +89,8 @@ export async function getDashboardData() {
 
   return {
     upcomingEvents,
+    upcomingSchoolEventsCount,
+    upcomingDeptEventsCount,
     attendanceCount,
     recentAttendance,
     distinctDeptsVisited: distinctDeptIds.size,

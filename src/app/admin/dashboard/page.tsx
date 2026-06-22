@@ -97,36 +97,6 @@ function SectionCard({
   )
 }
 
-// ── Quick Action Button ───────────────────────────────────────────────────────
-function QuickAction({
-  href,
-  icon,
-  label,
-  colorClass,
-  bgClass,
-}: {
-  href: string
-  icon: string
-  label: string
-  colorClass: string
-  bgClass: string
-}) {
-  return (
-    <Link
-      href={href}
-      className={`flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md border border-slate-100 ${bgClass}`}
-    >
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${bgClass} mix-blend-multiply`}>
-        <span className={`material-symbols-outlined text-[24px] [font-variation-settings:'FILL'_1] ${colorClass}`}>
-          {icon}
-        </span>
-      </div>
-      <span className="text-slate-700 text-[12px] font-bold text-center leading-tight">
-        {label}
-      </span>
-    </Link>
-  )
-}
 
 // ── Proposal Status Badge ─────────────────────────────────────────────────────
 function ProposalBadge({ status }: { status: string }) {
@@ -272,55 +242,7 @@ export default async function AdminDashboardPage() {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions & Upcoming */}
         <div className="flex flex-col gap-6">
-          <SectionCard title="Quick Actions" subtitle="Frequently used tools" icon="bolt">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <QuickAction
-                href="/admin/events"
-                icon="calendar_add_on"
-                label="Create Event"
-                colorClass="text-blue-600"
-                bgClass="bg-blue-50"
-              />
-              <QuickAction
-                href="/admin/scanner"
-                icon="qr_code_scanner"
-                label="Open Scanner"
-                colorClass="text-emerald-600"
-                bgClass="bg-emerald-50"
-              />
-              <QuickAction
-                href="/admin/proposals"
-                icon="assignment_turned_in"
-                label="Proposals"
-                colorClass="text-amber-600"
-                bgClass="bg-amber-50"
-              />
-              <QuickAction
-                href="/admin/reports"
-                icon="summarize"
-                label="Export Reports"
-                colorClass="text-purple-600"
-                bgClass="bg-purple-50"
-              />
-              <QuickAction
-                href="/admin/dept-admins"
-                icon="manage_accounts"
-                label="Manage Admins"
-                colorClass="text-indigo-600"
-                bgClass="bg-indigo-50"
-              />
-              <QuickAction
-                href="/admin/settings"
-                icon="settings"
-                label="Settings"
-                colorClass="text-slate-600"
-                bgClass="bg-slate-50"
-              />
-            </div>
-          </SectionCard>
-
           <SectionCard 
             title="Upcoming Events" 
             subtitle="Next scheduled activities"

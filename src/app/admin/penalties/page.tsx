@@ -1,0 +1,179 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { AlertTriangle, Search, Filter } from "lucide-react"
+import { PenaltyStatusBadge } from "@/components/penalties/penalty-status-badge"
+import { ResolvePenaltyModal } from "@/components/penalties/resolve-penalty-modal"
+
+export default function AdminPenaltiesPage() {
+  const [penalties, setPenalties] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("ALL")
+  const [selectedPenalty, setSelectedPenalty] = useState<any | null>(null)
+
+  async function loadPenalties() {
+    setLoading(true)
+    const params = new URLSearchParams()
+    if (statusFilter !== "ALL") params.set("status", statusFilter)
+    
+    const res = await fetch(`/api/penalties?${params}`)
+    const data = await res.json()
+    setPenalties(data.penalties || [])
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    loadPenalties()
+  }, [statusFilter])
+
+  const filtered = penalties.filter(
+    (p) =>
+      p.student.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      p.event.title.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const pendingCount = penalties.filter((p) => p.status === "PENDING").length
+  const overdueCount = penalties.filter((p) => p.status === "OVERDUE").length
+
+  return (
+    <div className="p-6 lg:p-8">
+      <div className="flex items-center gap-3 mb-1">
+        <AlertTriangle className="w-6 h-6 text-amber-500" />
+        <h1 className="text-2xl font-bold text-[#0F172A]">
+          Attendance Penalties
+        </h1>
+      </div>
+      <p className="text-sm text-[#64748B] mb-6">
+        System-wide penalty tracking across all departments
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-4">
+          <p className="text-xs text-[#94A3B8] font-medium mb-1">Total Penalties</p>
+          <p className="text-2xl font-bold text-[#0F172A]">
+            {penalties.length}
+          </p>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p className="text-xs text-blue-700 font-medium mb-1">Pending</p>
+          <p className="text-2xl font-bold text-blue-700">
+            {pendingCount}
+          </p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-xs text-red-700 font-medium mb-1">Overdue</p>
+          <p className="text-2xl font-bold text-red-700">
+            {overdueCount}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search student or event..."
+            className="w-full h-10 pl-10 pr-4 bg-white border border-[#E2E8F0] rounded-lg text-sm outline-none focus:border-blue-500"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-10 px-4 bg-white border border-[#E2E8F0] rounded-lg text-sm outline-none"
+        >
+          <option value="ALL">All Statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="OVERDUE">Overdue</option>
+          <option value="RESOLVED">Resolved</option>
+          <option value="WAIVED">Waived</option>
+        </select>
+      </div>
+
+      <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+            <tr>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Student</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Department</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Event</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Type</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Amount/Hours</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Deadline</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Status</th>
+              <th className="text-left px-4 py-3 font-semibold text-[#475569]">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr><td colSpan={8} className="text-center py-8 text-[#94A3B8]">
+                Loading penalties...
+              </td></tr>
+            )}
+            {!loading && filtered.length === 0 && (
+              <tr><td colSpan={8} className="text-center py-8 text-[#94A3B8]">
+                No penalties found.
+              </td></tr>
+            )}
+            {filtered.map((p) => (
+              <tr key={p.id} className="border-b border-[#F1F5F9] hover:bg-[#F8FAFC]">
+                <td className="px-4 py-3">
+                  <p className="font-medium text-[#0F172A]">
+                    {p.student.fullName}
+                  </p>
+                  <p className="text-xs text-[#94A3B8]">
+                    {p.student.email}
+                  </p>
+                </td>
+                <td className="px-4 py-3 text-[#475569]">
+                  {p.student.department?.code}
+                </td>
+                <td className="px-4 py-3 text-[#475569]">
+                  {p.event.title}
+                </td>
+                <td className="px-4 py-3 text-[#475569]">
+                  {p.type ? p.type.replace("_", " ") : "Not chosen yet"}
+                </td>
+                <td className="px-4 py-3 text-[#475569]">
+                  {p.type === "FEE" 
+                    ? `₱${p.feeAmount}` 
+                    : p.type === "COMMUNITY_SERVICE"
+                    ? `${p.serviceHours} hrs`
+                    : `₱${p.feeAmount} / ${p.serviceHours} hrs`}
+                </td>
+                <td className="px-4 py-3 text-[#475569]">
+                  {new Date(p.deadline).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3">
+                  <PenaltyStatusBadge status={p.status} />
+                </td>
+                <td className="px-4 py-3">
+                  {(p.status === "PENDING" || p.status === "OVERDUE") && (
+                    <button
+                      onClick={() => setSelectedPenalty(p)}
+                      className="text-xs font-semibold text-[#1A3A8F] hover:underline"
+                    >
+                      Manage
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedPenalty && (
+        <ResolvePenaltyModal
+          penaltyId={selectedPenalty.id}
+          studentName={selectedPenalty.student.fullName}
+          isOpen={!!selectedPenalty}
+          onClose={() => setSelectedPenalty(null)}
+          onResolved={loadPenalties}
+        />
+      )}
+    </div>
+  )
+}

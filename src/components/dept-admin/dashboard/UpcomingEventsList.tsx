@@ -1,5 +1,6 @@
 import { format, isToday } from "date-fns"
 import { MapPin, CalendarX } from "lucide-react"
+import { formatTimeString } from "@/lib/utils"
 
 export function UpcomingEventsList({ events, department }: { events: any[]; department: any }) {
   return (
@@ -41,7 +42,7 @@ export function UpcomingEventsList({ events, department }: { events: any[]; depa
                         </div>
                         <div className="flex items-center gap-1.5 font-medium">
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                          {format(eventDate, "MMMM d, yyyy")} · {event.startTime}
+                          {format(eventDate, "MMMM d, yyyy")} · {formatTimeString(event.startTime)}
                         </div>
                       </div>
                       

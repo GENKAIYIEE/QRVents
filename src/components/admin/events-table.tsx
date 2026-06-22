@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { format } from "date-fns"
 import { EventStatus } from "@prisma/client"
+import { formatTimeString } from "@/lib/utils"
 
 interface EventsTableProps {
   events: any[]
@@ -13,6 +14,7 @@ interface EventsTableProps {
 
 export function EventsTable({ events, onEdit, onStatusChange, onDelete }: EventsTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [eventToDelete, setEventToDelete] = useState<any | null>(null)
 
   const statusConfig: Record<EventStatus, { label: string, color: string, bg: string }> = {
     UPCOMING: { label: "Upcoming", color: "text-blue-700", bg: "bg-blue-100" },
@@ -74,7 +76,7 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete }: Events
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-medium text-slate-700">{format(new Date(event.date), "MMM d, yyyy")}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{event.startTime} - {event.endTime}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{formatTimeString(event.startTime)} - {formatTimeString(event.endTime)}</div>
                   </td>
                   <td className="px-6 py-4">
                     <select 
@@ -107,10 +109,7 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete }: Events
                       <button 
                         onClick={() => {
                           if (hasAttendance) return;
-                          if (confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
-                            setDeletingId(event.id)
-                            onDelete(event.id)
-                          }
+                          setEventToDelete(event)
                         }}
                         disabled={hasAttendance || deletingId === event.id}
                         className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
@@ -134,6 +133,40 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete }: Events
           </tbody>
         </table>
       </div>
+
+      {eventToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-[400px] overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-100">
+            <div className="p-8 text-center flex flex-col items-center">
+              <div className="w-20 h-20 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mb-6 shadow-sm border border-rose-100">
+                <span className="material-symbols-outlined text-[40px] [font-variation-settings:'FILL'_1]">delete_forever</span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Delete Event?</h3>
+              <p className="text-slate-500 text-[15px] mb-8 leading-relaxed font-medium">
+                Are you sure you want to permanently delete <span className="font-bold text-slate-800">"{eventToDelete.title}"</span>? This action cannot be undone.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button 
+                  onClick={() => setEventToDelete(null)}
+                  className="flex-1 py-3.5 font-bold text-slate-600 bg-white border-2 border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setDeletingId(eventToDelete.id)
+                    onDelete(eventToDelete.id)
+                    setEventToDelete(null)
+                  }}
+                  className="flex-1 py-3.5 font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-md shadow-rose-200 hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

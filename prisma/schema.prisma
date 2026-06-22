@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -39,6 +40,18 @@ enum AttendanceStatus {
   CHECKED_OUT
 }
 
+enum PenaltyType {
+  FEE
+  COMMUNITY_SERVICE
+}
+
+enum PenaltyStatus {
+  PENDING
+  OVERDUE
+  RESOLVED
+  WAIVED
+}
+
 model Department {
   id        String   @id @default(uuid())
   code      String   @unique
@@ -70,9 +83,11 @@ model User {
   departmentId String?
   department   Department? @relation(fields: [departmentId], references: [id])
 
-  attendanceLogs AttendanceLog[]
-  proposals      EventProposal[]
-  notifications  Notification[]
+  attendanceLogs    AttendanceLog[]
+  proposals         EventProposal[]
+  notifications     Notification[]
+  penalties         Penalty[] @relation("StudentPenalties")
+  resolvedPenalties Penalty[] @relation("PenaltyResolver")
 
   @@map("users")
 }
@@ -87,6 +102,7 @@ model Event {
   venue             String
   eventType         EventType   @default(SCHOOL_WIDE)
   status            EventStatus @default(UPCOMING)
+  isMandatory       Boolean     @default(false)
   expectedAttendees Int?
   createdById       String
   createdAt         DateTime    @default(now())
@@ -96,6 +112,7 @@ model Event {
 
   attendanceLogs AttendanceLog[]
   proposal       EventProposal?
+  penalties      Penalty[]
 
   @@map("events")
 }
@@ -170,5 +187,38 @@ model ActivityLog {
   createdAt DateTime @default(now())
 
   @@map("activity_logs")
+}
+
+model Penalty {
+  id           String        @id @default(uuid())
+  studentId    String
+  student      User          @relation("StudentPenalties", fields: [studentId], references: [id])
+  eventId      String
+  event        Event         @relation(fields: [eventId], references: [id])
+  type         PenaltyType?
+  status       PenaltyStatus @default(PENDING)
+  feeAmount    Float
+  serviceHours Int
+  deadline     DateTime
+  resolvedById String?
+  resolvedBy   User?         @relation("PenaltyResolver", fields: [resolvedById], references: [id])
+  resolvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([studentId, eventId])
+  @@map("penalties")
+}
+
+model PenaltySettings {
+  id                   String   @id @default(uuid())
+  defaultDeadlineDays  Int      @default(7)
+  defaultFee           Float    @default(100)
+  defaultServiceHours  Int      @default(2)
+  overdueFeeIncrease   Float    @default(50)
+  overdueHoursIncrease Int      @default(1)
+  updatedAt            DateTime @updatedAt
+
+  @@map("penalty_settings")
 }
 

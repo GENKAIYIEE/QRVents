@@ -3,18 +3,20 @@
 import { motion } from "framer-motion"
 import { format, isToday } from "date-fns"
 import { MapPin, QrCode, Calendar } from "lucide-react"
+import { formatTimeString } from "@/lib/utils"
 
 interface UpcomingEventsListProps {
   events: any[]
   department: any
+  emptyMessage?: string
 }
 
-export function UpcomingEventsList({ events, department }: UpcomingEventsListProps) {
+export function UpcomingEventsList({ events, department, emptyMessage = "No upcoming events at the moment." }: UpcomingEventsListProps) {
   if (events.length === 0) {
     return (
       <div className="h-[200px] flex flex-col items-center justify-center text-slate-400 text-center px-5">
         <Calendar size={32} className="mb-3 text-slate-300" />
-        <div className="text-sm font-bold text-slate-500">No upcoming events at the moment.</div>
+        <div className="text-sm font-bold text-slate-500">{emptyMessage}</div>
         <div className="text-xs mt-1">Check back soon!</div>
       </div>
     )
@@ -67,7 +69,7 @@ export function UpcomingEventsList({ events, department }: UpcomingEventsListPro
               <div className="flex items-center gap-2 text-slate-600">
                 <Calendar size={14} />
                 <span className="text-xs font-medium">
-                  {format(eventDate, "MMMM d, yyyy")} · {event.startTime}
+                  {format(eventDate, "MMMM d, yyyy")} · {formatTimeString(event.startTime)}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">

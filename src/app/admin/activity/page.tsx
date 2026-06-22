@@ -4,9 +4,12 @@ import { ActivityClient } from "./activity-client"
 
 export default function ActivityPage() {
   return (
-        <div>
-          <h1>Page</h1>
-          <p>This page will be redesigned.</p>
-        </div>
-      );
+    <Suspense fallback={
+      <div className="flex justify-center py-20">
+        <span className="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
+      </div>
+    }>
+      <ActivityClient />
+    </Suspense>
+  );
 }
