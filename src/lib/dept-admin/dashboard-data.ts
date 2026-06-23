@@ -45,7 +45,11 @@ export async function getDeptLayoutData() {
     departmentId: user.departmentId,
   }
 
-  return { session, department }
+  const unreadNotifications = await prisma.notification.count({
+    where: { userId: user.id, isRead: false }
+  })
+
+  return { session, department, unreadNotifications }
 }
 
 export async function getDashboardData() {

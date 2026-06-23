@@ -5,6 +5,7 @@ import { PinLockScreen } from "@/components/scanner/PinLockScreen"
 import { ScannerView } from "@/components/scanner/ScannerView"
 import { EventSelector } from "@/components/scanner/EventSelector"
 import { ScanResult, ScanResultData } from "@/components/scanner/ScanResult"
+import { HardwareScannerView } from "@/components/scanner/HardwareScannerView"
 import { toast } from "sonner"
 
 interface Event {
@@ -24,6 +25,7 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
   const [hasPin, setHasPin] = useState<boolean | null>(null)
   const [isLocked, setIsLocked] = useState(true)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(events[0]?.id || null)
+  const [scanMode, setScanMode] = useState<"camera" | "hardware">("camera")
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResultData | null>(null)
@@ -137,6 +139,35 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
         )}
       </div>
 
+      {!isLocked && (
+        <div className="flex justify-center mb-[-1rem] z-10 relative">
+          <div className="bg-slate-200/50 p-1 rounded-2xl flex items-center gap-1 shadow-inner border border-slate-200">
+            <button
+              onClick={() => setScanMode("camera")}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                scanMode === "camera" 
+                  ? "bg-white text-blue-600 shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+              Built-in Camera
+            </button>
+            <button
+              onClick={() => setScanMode("hardware")}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                scanMode === "hardware" 
+                  ? "bg-white text-blue-600 shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">barcode_scanner</span>
+              Hardware Scanner
+            </button>
+          </div>
+        </div>
+      )}
+
       {isLocked ? (
         <div className="flex-1 relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl min-h-[500px]">
           <PinLockScreen 
@@ -148,11 +179,19 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
       ) : (
         <div className="flex flex-col lg:flex-row gap-6 lg:items-start animate-in fade-in duration-500">
           <div className="flex-1 w-full relative">
-            <ScannerView 
-              isActive={!isLocked} 
-              isProcessing={isProcessing}
-              onScan={handleScan} 
-            />
+            {scanMode === "camera" ? (
+              <ScannerView 
+                isActive={!isLocked} 
+                isProcessing={isProcessing}
+                onScan={handleScan} 
+              />
+            ) : (
+              <HardwareScannerView 
+                isActive={!isLocked} 
+                isProcessing={isProcessing}
+                onScan={handleScan} 
+              />
+            )}
           </div>
           
           <div className="w-full lg:w-[350px] shrink-0 space-y-6">

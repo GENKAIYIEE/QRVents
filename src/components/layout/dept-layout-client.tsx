@@ -1,15 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { DeptSidebar } from "@/components/layout/dept-sidebar"
 
 interface DeptLayoutClientProps {
   children: React.ReactNode
   session: any
   department: any
+  unreadNotifications?: number
 }
 
-export function DeptLayoutClient({ children, session, department }: DeptLayoutClientProps) {
+export function DeptLayoutClient({ children, session, department, unreadNotifications }: DeptLayoutClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const deptColor = department?.color || "#3B82F6"
 
@@ -63,12 +65,16 @@ export function DeptLayoutClient({ children, session, department }: DeptLayoutCl
           {/* Right side actions */}
           <div className="flex items-center gap-4 shrink-0">
             {/* Notification bell */}
-            <button className="w-11 h-11 bg-white border border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm relative group">
+            <Link href="/dept/notifications" className="w-11 h-11 bg-white border border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm relative group">
               <span className="material-symbols-outlined text-slate-500 text-[22px] group-hover:text-blue-600 transition-colors">
                 notifications
               </span>
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </button>
+              {unreadNotifications ? (
+                <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white leading-none">
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </span>
+              ) : null}
+            </Link>
 
             {/* Admin avatar */}
             <div className="flex items-center gap-3 p-1 pl-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition-colors cursor-pointer shadow-sm">

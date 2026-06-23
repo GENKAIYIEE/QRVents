@@ -14,7 +14,7 @@ export default async function ScannerPage() {
 
   // Fetch only ONGOING events for scanning
   const events = await prisma.event.findMany({
-    where: { status: "ONGOING" },
+    where: { status: "ONGOING", eventType: "SCHOOL_WIDE" },
     orderBy: { date: "desc" },
     select: {
       id: true,
