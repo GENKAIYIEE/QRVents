@@ -42,6 +42,13 @@ const NAV_ITEMS = [
     comingSoon: false,
   },
   {
+    icon: "warning",
+    label: "Penalties",
+    href: "/dept/penalties",
+    description: "Manage student fines",
+    comingSoon: false,
+  },
+  {
     icon: "bar_chart",
     label: "Reports",
     href: "/dept/reports",
@@ -53,7 +60,7 @@ const NAV_ITEMS = [
     label: "Settings",
     href: "/dept/settings",
     description: "System configuration",
-    comingSoon: true,
+    comingSoon: false,
   },
 ]
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Bell, Check, CircleAlert, Calendar, Info } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import Link from "next/link"
 import { getStudentNotifications, markAsRead, markAllAsRead } from "@/app/student/notifications/actions"
 
 type Notification = {
@@ -189,8 +190,14 @@ export function StudentNotifications() {
             )}
           </div>
           
-          <div className="p-3 border-t border-slate-100 bg-slate-50/50 text-center">
-             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">End of notifications</span>
+          <div className="border-t border-slate-100 bg-slate-50/50">
+             <Link 
+               href="/student/notifications"
+               className="block w-full p-3 text-center text-[10px] font-extrabold text-blue-600 hover:text-blue-700 hover:bg-slate-100/50 transition-colors uppercase tracking-widest"
+               onClick={() => setIsOpen(false)}
+             >
+               View all in Inbox
+             </Link>
           </div>
         </div>
       )}

@@ -156,48 +156,36 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="material-symbols-outlined text-blue-600 text-sm [font-variation-settings:'FILL'_1]">home</span>
-            <span className="text-slate-300 text-xs font-bold">/</span>
-            <span className="text-blue-600/80 text-[10px] font-extrabold uppercase tracking-widest">Dept Admins</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-none">Department Admins</h1>
-        </div>
-        
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 shrink-0"
-        >
-          <span className="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">person_add</span>
-          Register Admin
-        </button>
-      </div>
-
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+      {/* Toolbar */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center">
+        <div className="flex-1 w-full relative lg:max-w-md">
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
           <input 
             type="text" 
             placeholder="Search by name or email..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium"
           />
         </div>
-        <div className="w-full sm:w-64">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto shrink-0">
           <select 
             value={departmentId}
             onChange={(e) => { setDepartmentId(e.target.value); setPage(1) }}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
+            className="w-full sm:w-[180px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold text-slate-700 text-sm"
           >
             <option value="ALL">All Departments</option>
-            {departments.map(d => (
+            {departments.map((d: any) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-sm hover:shadow-md transition-all shrink-0"
+          >
+            <span className="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">person_add</span>
+            Register Admin
+          </button>
         </div>
       </div>
 

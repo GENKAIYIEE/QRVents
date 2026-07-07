@@ -51,16 +51,7 @@ export function ActivityClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="material-symbols-outlined text-blue-500 text-sm">home</span>
-            <span className="text-slate-400 text-xs font-semibold">/</span>
-            <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Audit</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Activity Log</h1>
-        </div>
-      </div>
+
 
       <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <form onSubmit={handleSearch} className="flex gap-4">
