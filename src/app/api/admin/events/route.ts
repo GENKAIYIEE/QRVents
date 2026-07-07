@@ -23,8 +23,6 @@ export async function GET(request: Request) {
   }
 }
 
-import { prisma } from "@/lib/prisma"
-
 export async function POST(request: Request) {
   try {
     const session = await getSession()
@@ -33,38 +31,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { 
-      title, 
-      description, 
-      date,
-      startTime,
-      endTime,
-      venue,
-      isMandatory,
-      eventType,
-      departmentId,
-      expectedAttendees,
-      ...otherFields 
-    } = body
+    const validatedData = eventSchema.parse(body)
+    const event = await createEvent(validatedData)
 
-    const event = await prisma.event.create({
-      data: {
-        title,
-        description,
-        date: new Date(date),
-        startTime,
-        endTime,
-        venue,
-        eventType,
-        departmentId: departmentId || null,
-        expectedAttendees: expectedAttendees || 0,
-        createdById: session.userId,
-        isMandatory: isMandatory === true || isMandatory === "true" ? true : false,
-      }
-    })
-    
     return NextResponse.json({ success: true, data: event })
   } catch (error: any) {
+    if (error.name === "ZodError") {
+      return NextResponse.json(
+        { success: false, error: "Validation error", details: error.errors },
+        { status: 400 }
+      )
+    }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }

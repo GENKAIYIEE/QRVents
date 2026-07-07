@@ -98,7 +98,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
         {/* Personal Information Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <div className="sticky top-6">
+            <div>
               <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 <span className="material-symbols-outlined text-blue-600 [font-variation-settings:'FILL'_1]">person</span>
                 Personal Information
@@ -185,7 +185,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
         {/* Academic Details Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
           <div className="lg:col-span-1">
-            <div className="sticky top-6">
+            <div>
               <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 <span className="material-symbols-outlined text-indigo-500 [font-variation-settings:'FILL'_1]">school</span>
                 Academic Details
@@ -222,7 +222,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
         {/* Security Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
           <div className="lg:col-span-1">
-            <div className="sticky top-6">
+            <div>
               <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 <span className="material-symbols-outlined text-rose-500 [font-variation-settings:'FILL'_1]">lock</span>
                 Security & Password

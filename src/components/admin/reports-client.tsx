@@ -83,61 +83,53 @@ export function ReportsClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="material-symbols-outlined text-blue-500 text-sm">home</span>
-            <span className="text-slate-400 text-xs font-semibold">/</span>
-            <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Reports</span>
+      {/* Toolbar */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-end lg:items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-end w-full lg:w-auto">
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Start Date</label>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium"
+            />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Analytics & Reports</h1>
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">End Date</label>
+            <input 
+              type="date" 
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium"
+            />
+          </div>
+          <button 
+            onClick={fetchReports}
+            className="w-full sm:w-auto px-6 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold rounded-xl transition-colors"
+          >
+            Apply Filter
+          </button>
         </div>
-        
-        <div className="flex gap-2">
+
+        <div className="flex gap-2 w-full lg:w-auto pt-2 lg:pt-0 border-t border-slate-100 lg:border-t-0 mt-2 lg:mt-0">
           <button 
             onClick={handleExportCSV}
             disabled={loading || !data}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 lg:flex-none flex justify-center items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 text-sm"
           >
-            <span className="material-symbols-outlined text-[20px]">table_chart</span>
-            Export Excel
+            <span className="material-symbols-outlined text-[18px]">table_chart</span>
+            CSV
           </button>
           <button 
             onClick={handleExportPDF}
             disabled={loading || !data}
-            className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 shadow-sm shadow-rose-600/20"
+            className="flex-1 lg:flex-none flex justify-center items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 shadow-sm shadow-rose-600/20 text-sm"
           >
-            <span className="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-            Export PDF
+            <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            PDF
           </button>
         </div>
-      </div>
-
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
-        <div className="w-full sm:w-auto">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Start Date</label>
-          <input 
-            type="date" 
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
-        <div className="w-full sm:w-auto">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">End Date</label>
-          <input 
-            type="date" 
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
-        <button 
-          onClick={fetchReports}
-          className="w-full sm:w-auto px-6 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold rounded-xl transition-colors"
-        >
-          Apply Filter
-        </button>
       </div>
 
       {loading ? (

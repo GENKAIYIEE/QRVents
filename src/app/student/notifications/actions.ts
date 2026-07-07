@@ -57,3 +57,20 @@ export async function markAllAsRead() {
   revalidatePath("/student/dashboard")
   return { success: true }
 }
+
+export async function deleteAllRead() {
+  const session = await getSession()
+  if (!session || session.role !== "STUDENT") {
+    throw new Error("Unauthorized")
+  }
+
+  await prisma.notification.deleteMany({
+    where: { 
+      userId: session.userId,
+      isRead: true
+    }
+  })
+
+  revalidatePath("/student/dashboard")
+  return { success: true }
+}
