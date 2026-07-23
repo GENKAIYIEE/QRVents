@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
-import crypto from "crypto"
 
 const prisma = new PrismaClient()
 
@@ -63,7 +62,6 @@ async function main() {
   }
 
   const hashedPasswordAdmin = await bcrypt.hash("password123", 12)
-  const hashedPasswordStudent = await bcrypt.hash("Student@123", 12)
 
   // STEP 2 — Create Super Admin
   const superAdmin = await prisma.user.upsert({
@@ -79,82 +77,7 @@ async function main() {
     },
   })
 
-  // STEP 3 — Create BSIT Dept Admin
-  const deptAdmin = await prisma.user.upsert({
-    where: { email: "richelle@pclaunion.edu.ph" },
-    update: {},
-    create: {
-      email: "richelle@pclaunion.edu.ph",
-      fullName: "Richelle Santos",
-      passwordHash: hashedPasswordAdmin,
-      role: "DEPT_ADMIN",
-      departmentId: createdDepartments["BSIT"],
-    },
-  })
-
-  // STEP 4 — Create 2 sample students
-  await prisma.user.upsert({
-    where: { email: "juan@pclaunion.edu.ph" },
-    update: {},
-    create: {
-      fullName: "Juan dela Cruz",
-      email: "juan@pclaunion.edu.ph",
-      passwordHash: hashedPasswordStudent,
-      role: "STUDENT",
-      departmentId: createdDepartments["BSIT"],
-      yearLevel: "2nd Year",
-      studentId: "2024-00123",
-      qrCode: crypto.randomUUID(),
-    },
-  })
-
-  await prisma.user.upsert({
-    where: { email: "maria@pclaunion.edu.ph" },
-    update: {},
-    create: {
-      fullName: "Maria Santos",
-      email: "maria@pclaunion.edu.ph",
-      passwordHash: hashedPasswordStudent,
-      role: "STUDENT",
-      departmentId: createdDepartments["BSHM"],
-      yearLevel: "3rd Year",
-      studentId: "2024-00456",
-      qrCode: crypto.randomUUID(),
-    },
-  })
-
-  // STEP 5 — Create 2 sample events
-  const future30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-  const future15Days = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
-
-  await prisma.event.create({
-    data: {
-      title: "College Foundation Day 2025",
-      eventType: "SCHOOL_WIDE",
-      status: "UPCOMING",
-      date: future30Days,
-      startTime: "8:00 AM",
-      endTime: "5:00 PM",
-      venue: "PCLaUnion Gymnasium",
-      createdById: superAdmin.id,
-    },
-  })
-
-  await prisma.event.create({
-    data: {
-      title: "IT Day 2025",
-      eventType: "DEPARTMENT",
-      status: "UPCOMING",
-      departmentId: createdDepartments["BSIT"],
-      date: future15Days,
-      startTime: "8:00 AM",
-      endTime: "5:00 PM",
-      venue: "Computer Laboratory",
-      createdById: deptAdmin.id,
-    },
-  })
-
-  console.log("Seeding complete!")
+  console.log("Seeding complete! (Base data and Super Admin only)")
 }
 
 main()
@@ -165,4 +88,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
-

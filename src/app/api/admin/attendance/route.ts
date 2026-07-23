@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status") || "ALL"
     const departmentId = searchParams.get("departmentId") || "ALL"
 
-    const data = await getAttendanceLogs(eventId, page, 50, search, status, departmentId)
+    const data = await getAttendanceLogs(eventId, page, 20, search, status, departmentId)
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
