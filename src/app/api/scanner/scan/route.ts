@@ -28,9 +28,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Event is not currently ongoing" }, { status: 400 })
     }
 
-    // Find the user by QR code
-    const user = await prisma.user.findUnique({
-      where: { qrCode },
+    let extractedUserId: string | null = null
+    let extractedEventId: string | null = null
+
+    try {
+      const decodedQr = Buffer.from(qrCode, 'base64').toString('utf-8')
+      if (decodedQr.startsWith("QRV-EVT|")) {
+        const parts = decodedQr.split("|")
+        extractedUserId = parts[1]
+        extractedEventId = parts[2]
+      }
+    } catch (e) {
+      // Not base64 or invalid, proceed to fallback logic
+    }
+
+    if (extractedEventId && extractedEventId !== eventId) {
+      return NextResponse.json({ error: "QR code belongs to a different event" }, { status: 400 })
+    }
+
+    // Find the user by dynamic userId OR fallback to static qrCode
+    const user = await prisma.user.findFirst({
+      where: extractedUserId 
+        ? { id: extractedUserId }
+        : { qrCode },
       select: { id: true, fullName: true, role: true, departmentId: true, isActive: true },
     })
 

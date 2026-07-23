@@ -104,6 +104,7 @@ model Event {
   eventType         EventType   @default(SCHOOL_WIDE)
   status            EventStatus @default(UPCOMING)
   isMandatory       Boolean     @default(false)
+  penaltiesGenerated Boolean    @default(false)
   expectedAttendees Int?
   createdById       String
   createdAt         DateTime    @default(now())
@@ -129,6 +130,7 @@ model EventProposal {
   status          ProposalStatus @default(PENDING)
   rejectionReason String?
   isPublished     Boolean        @default(false)
+  isArchived      Boolean        @default(false)
   submittedAt     DateTime       @default(now())
   reviewedAt      DateTime?
   updatedAt       DateTime       @updatedAt

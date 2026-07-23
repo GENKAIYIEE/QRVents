@@ -14,8 +14,9 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "1")
     const status = searchParams.get("status") || "ALL"
     const search = searchParams.get("search") || undefined
+    const archived = searchParams.get("archived") === "true"
 
-    const data = await getProposals(page, 10, status, search)
+    const data = await getProposals(page, 10, status, search, archived)
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })

@@ -18,6 +18,10 @@ export default async function DeptEventsPage() {
     select: { departmentId: true }
   })
 
+  // Auto-sync real-time statuses
+  const { syncEventStatuses } = await import("@/lib/event-sync")
+  await syncEventStatuses()
+
   // Fetch approved events (upcoming/ongoing) that the dept admin can manage/see
   const events = await prisma.event.findMany({
     where: { 
@@ -45,34 +49,8 @@ export default async function DeptEventsPage() {
       </div>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-          <span className="material-symbols-outlined text-blue-500">event_available</span>
-          Active Events
-        </h2>
-        
-        <EventsClient upcomingEvents={upcomingEvents} />
+        <EventsClient upcomingEvents={upcomingEvents} pastEvents={pastEvents} />
       </section>
-
-      {pastEvents.length > 0 && (
-        <section>
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 opacity-70">
-            <span className="material-symbols-outlined text-slate-500">history</span>
-            Past Events
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-70">
-             {pastEvents.map(event => (
-               <div key={event.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-                 <h3 className="font-bold text-slate-700 line-clamp-1 mb-1">{event.title}</h3>
-                 <div className="text-xs text-slate-500 mb-3">{format(new Date(event.date), "MMM d, yyyy")} • {event.venue}</div>
-                 <div className="flex items-center justify-between">
-                   <span className="px-2 py-0.5 rounded-md bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">{event.status}</span>
-                   <span className="text-xs font-bold text-slate-600">{event._count.attendanceLogs} Attended</span>
-                 </div>
-               </div>
-             ))}
-          </div>
-        </section>
-      )}
     </div>
   )
 }

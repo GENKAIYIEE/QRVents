@@ -24,6 +24,12 @@ const NAV_ITEMS = [
     description: "Review dept proposals",
   },
   {
+    icon: "archive",
+    label: "Archives",
+    href: "/admin/archives",
+    description: "Manage historical records",
+  },
+  {
     icon: "qr_code_scanner",
     label: "Campus Scanner",
     href: "/admin/scanner",

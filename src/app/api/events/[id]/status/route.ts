@@ -78,24 +78,9 @@ export async function PATCH(
       data: { status },
     })
 
-    let penaltyResult = null
-
-    // Only generate penalties when 
-    // transitioning INTO Completed 
-    // status (not if it was already 
-    // completed before)
-    if (
-      status === "COMPLETED" && 
-      event.status !== "COMPLETED" &&
-      event.isMandatory
-    ) {
-      penaltyResult = await generatePenaltiesForEvent(resolvedParams.id)
-    }
-
     return NextResponse.json({
       success: true,
       event: updatedEvent,
-      penaltyResult,
     })
 
   } catch (error) {
