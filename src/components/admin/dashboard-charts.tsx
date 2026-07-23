@@ -50,6 +50,7 @@ export function DeptBarChart({ data }: { data: DeptChartData[] }) {
             fontSize: "12px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
           }}
+          itemStyle={{ color: "#E2E8F0" }}
         />
         <Bar dataKey="students" name="Students" radius={[4, 4, 0, 0]}>
           {data.map((entry, i) => (
@@ -92,6 +93,7 @@ export function EventPieChart({ data }: { data: PieData[] }) {
             color: "#E2E8F0",
             fontSize: "12px",
           }}
+          itemStyle={{ color: "#E2E8F0" }}
         />
         <Legend
           iconType="circle"
@@ -136,6 +138,7 @@ export function TrendAreaChart({ data }: { data: TrendData[] }) {
             color: "#E2E8F0",
             fontSize: "12px",
           }}
+          itemStyle={{ color: "#E2E8F0" }}
         />
         <Area
           type="monotone"

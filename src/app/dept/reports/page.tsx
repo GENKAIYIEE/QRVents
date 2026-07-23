@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { format } from "date-fns"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Reports — QRVents Dept Admin",
@@ -84,14 +85,21 @@ export default async function DeptReportsPage() {
                   </div>
                 </div>
 
-                <div className="shrink-0">
+                <div className="shrink-0 flex items-center gap-3">
+                  <Link
+                    href={`/dept/reports/${event.id}`}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 border border-blue-100"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">visibility</span>
+                    View Details
+                  </Link>
                   <a 
                     href={`/api/reports/export?eventId=${event.id}`}
                     download
                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm border ${
                       event._count.attendanceLogs === 0 
                         ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed pointer-events-none'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 hover:shadow-md group-hover:scale-[1.02]'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:shadow-md'
                     }`}
                   >
                     <span className="material-symbols-outlined text-[18px]">download</span>

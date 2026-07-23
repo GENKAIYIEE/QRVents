@@ -68,6 +68,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
   }
 
   const passwordValue = watch("password") || ""
+  const yearLevelValue = watch("yearLevel")
   
   const passwordRequirements = [
     { label: "Minimum of 8 characters", met: passwordValue.length >= 8 },
@@ -315,14 +316,22 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                   </label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
-                    <input
+                    <select
                       id="section"
-                      type="text"
-                      placeholder="e.g. A, 1, Alpha"
-                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none"
                       {...register("section")}
-                      required
-                    />
+                    >
+                      <option value="" disabled>Select Section</option>
+                      {(() => {
+                        const letters = ['A', 'B', 'C', 'D'];
+                        const years = yearLevelValue ? [yearLevelValue] : ['1', '2', '3', '4'];
+                        return years.flatMap(y => 
+                          letters.map(l => (
+                            <option key={`${y}${l}`} value={`${y}${l}`}>{y}{l}</option>
+                          ))
+                        );
+                      })()}
+                    </select>
                   </div>
                   {errors.section && <p className="text-red-500 text-xs mt-1.5">{errors.section.message}</p>}
                 </div>
