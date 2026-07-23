@@ -1,9 +1,17 @@
-"use client"
-export default function StudentNotificationsPage() {
+import { getDashboardData } from "@/lib/student/dashboard-data"
+import { StudentLayoutWrapper } from "@/components/student/dashboard/StudentLayoutWrapper"
+import { NotificationsClient } from "./notifications-client"
+
+export default async function StudentNotificationsPage() {
+  const data = await getDashboardData()
+
   return (
-        <div>
-          <h1>Page</h1>
-          <p>This page will be redesigned.</p>
-        </div>
-      );
+    <StudentLayoutWrapper 
+      session={data.session} 
+      department={data.department}
+      studentUser={data.studentUser}
+    >
+      <NotificationsClient />
+    </StudentLayoutWrapper>
+  )
 }

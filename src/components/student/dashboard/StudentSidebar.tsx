@@ -4,8 +4,9 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logoutAction } from "@/app/admin/actions"
+
 import { toast } from "sonner"
-import { LayoutDashboard, QrCode, CalendarCheck, UserCircle, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, QrCode, CalendarCheck, UserCircle, Settings, AlertTriangle, Bell } from "lucide-react"
 
 const NAV_ITEMS = [
   {
@@ -30,10 +31,23 @@ const NAV_ITEMS = [
     comingSoon: false,
   },
   {
+    icon: AlertTriangle,
+    label: "Penalties",
+    href: "/student/penalties",
+    description: "Missed mandatory events",
+    comingSoon: false,
+  },
+  {
     icon: UserCircle,
     label: "Profile",
     href: "/student/profile",
     description: "Your student details",
+  },
+  {
+    icon: Bell,
+    label: "Inbox",
+    href: "/student/notifications",
+    description: "All notifications",
   },
 ]
 
@@ -150,35 +164,17 @@ export function StudentSidebar({ mobileOpen, onMobileClose, session, department,
         </div>
       </nav>
 
-      {/* Bottom actions & user info */}
+      {/* Bottom actions */}
       <div className="p-3 pb-5 border-t border-white/5 shrink-0">
-        {/* Student info */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 flex items-center gap-2.5 mb-3">
-          <div
-            className="w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: deptColor }}
-          >
-            <span className="text-white font-bold text-sm">
-              {session?.fullName?.charAt(0) || "S"}
-            </span>
-          </div>
-          <div className="min-w-0">
-            <div className="text-white text-xs font-bold whitespace-nowrap overflow-hidden text-ellipsis">
-              {session?.fullName}
-            </div>
-            <div className="text-blue-200 text-[11px] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
-              {department?.code || "No Dept"} · {studentUser?.yearLevel || "N/A"}
-            </div>
-          </div>
-        </div>
-
         <form action={logoutAction}>
           <button
             type="submit"
             className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
           >
             <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <LogOut size={18} color="#EF4444" />
+              <span className="material-symbols-outlined text-red-500 text-[18px]">
+                logout
+              </span>
             </div>
             <div>
               <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>

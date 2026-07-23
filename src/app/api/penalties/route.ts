@@ -26,31 +26,22 @@ export async function GET(
       where = { studentId: session.userId }
     } else if (session.role === "DEPT_ADMIN") {
       where = {
-        event: { 
-          departmentId: session.departmentId 
-        },
+        event: { departmentId: session.departmentId }
       }
-    } else if (session.role !== "SUPER_ADMIN") {
+    } else if (session.role === "SUPER_ADMIN") {
+      // Super Admin sees all penalties across all departments and event types
+    } else {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }
       )
     }
-    // SUPER_ADMIN gets no filter — sees all
 
     const { searchParams } = new URL(request.url)
     const statusFilter = searchParams.get("status")
-    const deptFilter = searchParams.get("department")
 
     if (statusFilter && statusFilter !== "ALL") {
       where.status = statusFilter
-    }
-
-    if (deptFilter && deptFilter !== "ALL" && session.role === "SUPER_ADMIN") {
-      where.event = { 
-        ...where.event,
-        departmentId: deptFilter 
-      }
     }
 
     const penalties = await prisma.penalty.findMany({

@@ -156,23 +156,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-full pb-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
-          <p className="text-sm text-slate-500 font-medium mt-1">
-            System metrics and active event status.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/events"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            New Event
-          </Link>
-        </div>
-      </div>
+
 
       {/* Top Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

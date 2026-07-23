@@ -29,7 +29,7 @@ export async function PATCH(
 
     const penalty = await prisma.penalty.findUnique({
       where: { id: resolvedParams.id },
-      include: { event: true },
+      include: { event: true, student: true },
     })
 
     if (!penalty) {
@@ -44,7 +44,17 @@ export async function PATCH(
       penalty.event.departmentId !== session.departmentId
     ) {
       return NextResponse.json(
-        { error: "You can only manage penalties from your own department" },
+        { error: "You can only manage penalties for events hosted by your department" },
+        { status: 403 }
+      )
+    }
+
+    if (
+      session.role === "SUPER_ADMIN" && 
+      penalty.event.eventType !== "SCHOOL_WIDE"
+    ) {
+      return NextResponse.json(
+        { error: "Super Admins can only manage penalties for school-wide events" },
         { status: 403 }
       )
     }

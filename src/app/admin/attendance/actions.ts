@@ -54,31 +54,39 @@ export async function getAttendanceLogs(eventId: string, page = 1, pageSize = 50
     whereClause.user.departmentId = departmentId
   }
 
-  const logs = await prisma.attendanceLog.findMany({
-    where: whereClause,
-    orderBy: { checkIn: "desc" },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    include: {
-      user: {
-        select: {
-          fullName: true,
-          studentId: true,
-          yearLevel: true,
-          department: { select: { code: true, color: true } }
+  const [logs, total, groupBy] = await Promise.all([
+    prisma.attendanceLog.findMany({
+      where: whereClause,
+      orderBy: [
+        { checkIn: "desc" },
+        { id: "desc" }
+      ],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            studentId: true,
+            yearLevel: true,
+            department: { select: { code: true, color: true } }
+          }
         }
       }
-    }
-  })
+    }),
+    prisma.attendanceLog.count({ where: whereClause }),
+    prisma.attendanceLog.groupBy({
+      by: ['status'],
+      where: { eventId },
+      _count: true
+    })
+  ]);
 
-  const total = await prisma.attendanceLog.count({ where: whereClause })
-  
-  // Also return some quick stats for the event
   const stats = {
-    total: await prisma.attendanceLog.count({ where: { eventId } }),
-    present: await prisma.attendanceLog.count({ where: { eventId, status: "PRESENT" } }),
-    checkedOut: await prisma.attendanceLog.count({ where: { eventId, status: "CHECKED_OUT" } }),
-    guest: await prisma.attendanceLog.count({ where: { eventId, status: "GUEST" } }),
+    total: groupBy.reduce((acc, curr) => acc + curr._count, 0),
+    present: groupBy.find(g => g.status === "PRESENT")?._count || 0,
+    checkedOut: groupBy.find(g => g.status === "CHECKED_OUT")?._count || 0,
+    guest: groupBy.find(g => g.status === "GUEST")?._count || 0,
   }
 
   return { logs, total, pages: Math.ceil(total / pageSize), stats }
