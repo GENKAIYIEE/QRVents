@@ -14,7 +14,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
   const [logs, setLogs] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   
   // Filters
   const [search, setSearch] = useState("")
@@ -67,36 +67,15 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
   }, [autoRefresh, selectedEventId, page, search, status, departmentId])
 
   const handleExport = () => {
-    if (!logs.length || !selectedEvent) return
+    if (!logs.length || !selectedEventId) return
 
-    const headers = ["Name", "Student ID", "Year Level", "Department", "Check-In Time", "Check-Out Time", "Status"]
-    const rows = logs.map((log) => [
-      log.user.fullName,
-      log.user.studentId || "-",
-      log.user.yearLevel || "-",
-      log.user.department?.code || "Unknown",
-      format(new Date(log.checkIn), "yyyy-MM-dd HH:mm:ss"),
-      log.checkOut ? format(new Date(log.checkOut), "yyyy-MM-dd HH:mm:ss") : "-",
-      log.status,
-    ])
+    const query = new URLSearchParams()
+    query.set("eventId", selectedEventId)
+    if (search) query.set("search", search)
+    if (status !== "ALL") query.set("status", status)
+    if (departmentId !== "ALL") query.set("departmentId", departmentId)
 
-    const csvContent = [
-      `# Attendance Report — ${selectedEvent.title}`,
-      `# Generated: ${format(new Date(), "yyyy-MM-dd HH:mm")}`,
-      "",
-      headers.join(","),
-      ...rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
-    ].join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `attendance-${selectedEvent.title.replace(/\s+/g, "-").toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    window.location.href = `/api/admin/attendance/export?${query.toString()}`
   }
 
   const selectedEvent = events.find(e => e.id === selectedEventId)
@@ -227,9 +206,15 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
           </div>
 
           <div className="overflow-x-auto min-h-[400px] relative">
-            {loading && logs.length === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                <span className="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-50/40 backdrop-blur-[2px] z-10 animate-in fade-in duration-300">
+                <div className="bg-white px-5 py-3 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center gap-4 border border-slate-100/50">
+                  <div className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                  </div>
+                  <span className="text-sm font-bold text-slate-700 tracking-wide">Syncing records...</span>
+                </div>
               </div>
             )}
             
@@ -303,7 +288,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
 
           <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs">
             <div className="text-slate-500">
-              Last updated: <span className="font-medium text-slate-700">{format(lastUpdated, "hh:mm:ss a")}</span>
+              Last updated: <span className="font-medium text-slate-700">{lastUpdated ? format(lastUpdated, "hh:mm:ss a") : "--:--:--"}</span>
             </div>
             
             {totalPages > 1 && (

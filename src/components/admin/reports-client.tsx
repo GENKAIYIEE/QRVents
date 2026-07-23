@@ -36,13 +36,15 @@ export function ReportsClient() {
   const handleExportCSV = () => {
     if (!data) return
 
+    const totalStudents = (data.departments || []).reduce((acc: number, d: any) => acc + (d._count?.users || 0), 0)
+
     const headers = ["Department", "Code", "Total Students", "Total Events", "Attendance Records"]
     const rows = (data.departments || []).map((d: any) => [
       d.name,
       d.code,
       d._count?.users ?? 0,
       d._count?.events ?? 0,
-      d._count?.attendanceLogs ?? 0,
+      d.attendanceCount ?? 0,
     ])
 
     const csvContent = [
@@ -50,9 +52,9 @@ export function ReportsClient() {
       `# Date Range: ${startDate} to ${endDate}`,
       `# Generated: ${format(new Date(), "yyyy-MM-dd HH:mm")}`,
       "",
-      `Total Events,${data.totalEvents ?? 0}`,
-      `Total Students,${data.totalStudents ?? 0}`,
-      `Total Attendance,${data.totalAttendance ?? 0}`,
+      `Total Events,${data.summary?.totalEvents ?? 0}`,
+      `Total Students,${totalStudents}`,
+      `Total Attendance,${data.summary?.totalAttendance ?? 0}`,
       "",
       headers.join(","),
       ...rows.map((r: any[]) => r.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),

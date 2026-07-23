@@ -29,9 +29,7 @@ export async function GET(
         event: { departmentId: session.departmentId }
       }
     } else if (session.role === "SUPER_ADMIN") {
-      where = {
-        event: { eventType: "SCHOOL_WIDE" }
-      }
+      // Super Admin sees all penalties across all departments and event types
     } else {
       return NextResponse.json(
         { error: "Forbidden" },

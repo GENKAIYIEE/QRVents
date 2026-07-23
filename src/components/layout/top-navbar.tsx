@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { logoutAction } from "@/app/admin/actions"
+import { formatDistanceToNow } from "date-fns"
 
 interface TopNavbarProps {
   session: {
@@ -77,10 +78,58 @@ export function TopNavbar({ session, onMobileMenuOpen }: TopNavbarProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
 
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isLoadingNotifs, setIsLoadingNotifs] = useState(true)
+
   const profileRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
 
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("/api/notifications?limit=10")
+      const { data } = await res.json()
+      if (data) {
+        setNotifications(data.notifications || [])
+        setUnreadCount(data.unreadCount || 0)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsLoadingNotifs(false)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+      setUnreadCount(0)
+      await fetch("/api/notifications", {
+        method: "POST",
+        body: JSON.stringify({ action: "mark_all_read" })
+      })
+    } catch (err) {
+      fetchNotifications()
+    }
+  }
+
+  const markAsRead = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
+      setUnreadCount(prev => Math.max(0, prev - 1))
+      await fetch("/api/notifications", {
+        method: "POST",
+        body: JSON.stringify({ action: "mark_read", notificationId: id })
+      })
+    } catch (err) {
+      fetchNotifications()
+    }
+  }
+
   useEffect(() => {
+    fetchNotifications()
+    
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false)
@@ -152,46 +201,59 @@ export function TopNavbar({ session, onMobileMenuOpen }: TopNavbarProps) {
             <span className={`material-symbols-outlined text-[22px] transition-colors ${isNotifOpen ? 'text-blue-600 [font-variation-settings:\'FILL\'_1]' : 'text-slate-500 group-hover:text-blue-600'}`}>
               notifications
             </span>
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            {unreadCount > 0 && (
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            )}
           </button>
           
           {isNotifOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 origin-top-right">
               <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                 <span className="font-bold text-slate-800">Notifications</span>
-                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">2 New</span>
+                {unreadCount > 0 && (
+                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">{unreadCount} New</span>
+                )}
               </div>
               <div className="flex flex-col max-h-[300px] overflow-y-auto">
-                <div className="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors flex gap-3 items-start relative group">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                  <div>
-                    <div className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">New event proposal</div>
-                    <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">BSIT proposed "Tech Symposium 2026". Review required.</div>
-                    <div className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">10 mins ago</div>
+                {isLoadingNotifs ? (
+                  <div className="px-4 py-6 text-center flex justify-center">
+                    <span className="material-symbols-outlined animate-spin text-blue-500 text-2xl">progress_activity</span>
                   </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors flex gap-3 items-start relative group">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                  <div>
-                    <div className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">Scanner Alert</div>
-                    <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">Multiple duplicate scans detected at Main Gate.</div>
-                    <div className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">2 hours ago</div>
+                ) : notifications.length === 0 ? (
+                  <div className="px-4 py-8 text-center">
+                    <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">notifications_off</span>
+                    <div className="text-sm font-semibold text-slate-600">All caught up!</div>
+                    <div className="text-xs text-slate-400 mt-1">No new notifications.</div>
                   </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors flex gap-3 items-start">
-                  <div className="w-2 h-2 rounded-full bg-transparent mt-1.5 shrink-0" />
-                  <div>
-                    <div className="text-sm font-medium text-slate-600 leading-tight">System Update</div>
-                    <div className="text-xs text-slate-400 mt-0.5 leading-relaxed">QRVents has been updated to v1.0.4 successfully.</div>
-                    <div className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">1 day ago</div>
-                  </div>
-                </div>
+                ) : (
+                  notifications.map(notif => (
+                    <div 
+                      key={notif.id} 
+                      onClick={(e) => !notif.isRead && markAsRead(notif.id, e)}
+                      className={`px-4 py-3 transition-colors flex gap-3 items-start relative group ${notif.isRead ? 'hover:bg-slate-50' : 'bg-blue-50/30 hover:bg-blue-50/50 cursor-pointer'}`}
+                    >
+                      <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.isRead ? 'bg-transparent' : 'bg-blue-500'}`} />
+                      <div>
+                        <div className={`text-sm font-semibold transition-colors leading-tight ${notif.isRead ? 'text-slate-600' : 'text-slate-800 group-hover:text-blue-600'}`}>{notif.title}</div>
+                        <div className={`text-xs mt-0.5 leading-relaxed ${notif.isRead ? 'text-slate-400' : 'text-slate-500'}`}>{notif.message}</div>
+                        <div className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">
+                          {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-              <div className="px-4 pt-2 pb-1 border-t border-slate-100">
-                <button className="w-full py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors text-center">
-                  Mark all as read
-                </button>
-              </div>
+              {notifications.length > 0 && unreadCount > 0 && (
+                <div className="px-4 pt-2 pb-1 border-t border-slate-100">
+                  <button 
+                    onClick={markAllAsRead}
+                    className="w-full py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors text-center"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
