@@ -55,13 +55,7 @@ const NAV_ITEMS = [
     description: "Generate & export reports",
     comingSoon: false,
   },
-  {
-    icon: "gavel",
-    label: "Penalties",
-    href: "/dept/penalties",
-    description: "Manage student penalties",
-    comingSoon: false,
-  },
+
   {
     icon: "settings",
     label: "Settings",
@@ -199,7 +193,14 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
 
       {/* Bottom actions */}
       <div className="p-3 pb-5 border-t border-white/5 shrink-0">
-        <form action={logoutAction}>
+        <form 
+          action={logoutAction}
+          onSubmit={(e) => {
+            if (!window.confirm("Are you sure you want to sign out?")) {
+              e.preventDefault();
+            }
+          }}
+        >
           <button
             type="submit"
             className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"

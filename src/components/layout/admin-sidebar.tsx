@@ -48,6 +48,12 @@ const NAV_ITEMS = [
     description: "Register department deans",
   },
   {
+    icon: "groups",
+    label: "Students",
+    href: "/admin/students",
+    description: "Manage registered students",
+  },
+  {
     icon: "warning",
     label: "Penalties",
     href: "/admin/penalties",
