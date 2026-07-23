@@ -1,7 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { updateStudentProfile, changePassword } from "./actions"
+
+const profileSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters").trim(),
+  email: z.string().email("Please enter a valid email address").trim(),
+  yearLevel: z.string().optional(),
+})
+
+type ProfileFormValues = z.infer<typeof profileSchema>
 
 interface ProfileClientProps {
   user: {
@@ -16,9 +27,14 @@ interface ProfileClientProps {
 }
 
 export function ProfileClient({ user }: ProfileClientProps) {
-  const [fullName, setFullName] = useState(user.fullName)
-  const [email, setEmail] = useState(user.email)
-  const [yearLevel, setYearLevel] = useState(user.yearLevel || "")
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      fullName: user.fullName,
+      email: user.email,
+      yearLevel: user.yearLevel || "",
+    }
+  })
   
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -31,17 +47,16 @@ export function ProfileClient({ user }: ProfileClientProps) {
   const [securitySuccess, setSecuritySuccess] = useState(false)
   const [securityError, setSecurityError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmitProfile = async (values: ProfileFormValues) => {
     setIsSubmitting(true)
     setSuccess(false)
     setError("")
     
     try {
       await updateStudentProfile({ 
-        fullName, 
-        email, 
-        yearLevel: yearLevel.trim() === "" ? null : yearLevel 
+        fullName: values.fullName, 
+        email: values.email, 
+        yearLevel: values.yearLevel?.trim() === "" ? null : values.yearLevel 
       })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
@@ -81,7 +96,10 @@ export function ProfileClient({ user }: ProfileClientProps) {
     }
   }
 
-  const isDirty = fullName !== user.fullName || email !== user.email || yearLevel !== (user.yearLevel || "")
+  const watchFullName = watch("fullName")
+  const watchEmail = watch("email")
+  const watchYearLevel = watch("yearLevel")
+  const isDirty = watchFullName !== user.fullName || watchEmail !== user.email || watchYearLevel !== (user.yearLevel || "")
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
@@ -110,7 +128,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
           </div>
 
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6">
+            <form onSubmit={handleSubmit(onSubmitProfile)} className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6">
               {error && (
                 <div className="p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-100 text-sm font-bold flex items-center gap-2 animate-in shake">
                   <span className="material-symbols-outlined text-[18px]">error</span>
@@ -123,30 +141,27 @@ export function ProfileClient({ user }: ProfileClientProps) {
                   <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
                   <input 
                     type="text" 
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
+                    {...register("fullName")}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-medium text-slate-800"
                   />
+                  {errors.fullName && <p className="text-rose-500 text-xs mt-1 font-semibold">{errors.fullName.message}</p>}
                 </div>
                 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
                   <input 
                     type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    {...register("email")}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-medium text-slate-800"
                   />
+                  {errors.email && <p className="text-rose-500 text-xs mt-1 font-semibold">{errors.email.message}</p>}
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Year Level</label>
                 <select 
-                  value={yearLevel}
-                  onChange={(e) => setYearLevel(e.target.value)}
+                  {...register("yearLevel")}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-medium text-slate-800 cursor-pointer appearance-none"
                 >
                   <option value="">Select Year Level</option>
@@ -155,6 +170,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
                   <option value="3rd Year">3rd Year</option>
                   <option value="4th Year">4th Year</option>
                 </select>
+                {errors.yearLevel && <p className="text-rose-500 text-xs mt-1 font-semibold">{errors.yearLevel.message}</p>}
               </div>
 
               <div className="pt-4 mt-6 border-t border-slate-100 flex items-center justify-between">

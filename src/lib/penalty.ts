@@ -35,16 +35,16 @@ export async function getMissingAttendees(eventId: string) {
     throw new Error("Event not found")
   }
 
-  // Determine expected attendees scope
   const expectedStudents = 
   event.eventType === "SCHOOL_WIDE"
     ? await prisma.user.findMany({
-        where: { role: "STUDENT" },
+        where: { role: "STUDENT", isActive: true },
         select: { id: true },
       })
     : await prisma.user.findMany({
         where: {
           role: "STUDENT",
+          isActive: true,
           departmentId: event.departmentId,
         },
         select: { id: true },

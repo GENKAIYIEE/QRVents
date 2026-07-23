@@ -76,6 +76,7 @@ model User {
   role         Role        @default(STUDENT)
   studentId    String?
   yearLevel    String?
+  section      String?
   qrCode       String?     @unique
   isActive     Boolean     @default(true)
   createdAt    DateTime    @default(now())

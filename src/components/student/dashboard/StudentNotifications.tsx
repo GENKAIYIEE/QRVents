@@ -25,6 +25,11 @@ export function StudentNotifications() {
   useEffect(() => {
     fetchNotifications()
 
+    // Poll for new notifications every 15 seconds
+    const pollInterval = setInterval(() => {
+      fetchNotifications()
+    }, 15000)
+
     // Handle click outside
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -33,12 +38,18 @@ export function StudentNotifications() {
     }
 
     document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    return () => {
+      clearInterval(pollInterval)
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
   }, [])
 
   const fetchNotifications = async () => {
     try {
       const data = await getStudentNotifications()
+      
+      // If we got new notifications that we didn't have before, we could theoretically play a sound here
+      // But for now, we just silently update the list and unread count
       setNotifications(data.notifications)
       setUnreadCount(data.unreadCount)
     } catch (error) {

@@ -10,6 +10,7 @@ const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   departmentId: z.string().min(1),
   yearLevel: z.enum(["1", "2", "3", "4"]),
+  section: z.string().min(1),
   studentId: z.string().optional(),
 })
 
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { fullName, email, password, departmentId, yearLevel, studentId } = result.data
+    const { fullName, email, password, departmentId, yearLevel, section, studentId } = result.data
 
     // Check for existing email
     const existing = await prisma.user.findUnique({ where: { email } })
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
         passwordHash,
         role: "STUDENT",
         yearLevel,
+        section,
         studentId: studentId || null,
         departmentId,
         qrCode,

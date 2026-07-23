@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerAction } from "@/app/(auth)/register/actions"
@@ -20,6 +21,7 @@ import {
   BarChart2,
   Shield,
   IdCard,
+  Check,
 } from "lucide-react"
 
 type Department = {
@@ -40,6 +42,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -50,6 +53,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
       confirmPassword: "",
       departmentId: "",
       yearLevel: undefined,
+      section: "",
       studentId: "",
     },
     mode: "onChange",
@@ -61,6 +65,33 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
     if (result?.error) {
       setServerError(result.error)
     }
+  }
+
+  const passwordValue = watch("password") || ""
+  
+  const passwordRequirements = [
+    { label: "Minimum of 8 characters", met: passwordValue.length >= 8 },
+    { label: "Uppercase & lowercase letters", met: /[a-z]/.test(passwordValue) && /[A-Z]/.test(passwordValue) },
+    { label: "Numbers", met: /\d/.test(passwordValue) },
+    { label: "Special characters", met: /[^A-Za-z0-9]/.test(passwordValue) },
+  ]
+  
+  const metCount = passwordRequirements.filter((r) => r.met).length
+  let strengthLabel = "Weak"
+  let strengthColor = "bg-red-500"
+
+  if (passwordValue.length === 0) {
+    strengthLabel = ""
+    strengthColor = "bg-slate-200"
+  } else if (metCount >= 4) {
+    strengthLabel = "Strong"
+    strengthColor = "bg-emerald-500"
+  } else if (metCount >= 3) {
+    strengthLabel = "Medium"
+    strengthColor = "bg-amber-500"
+  } else {
+    strengthLabel = "Weak"
+    strengthColor = "bg-red-500"
   }
 
   return (
@@ -77,13 +108,13 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
 
           {/* Branding */}
           <div className="relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-                <span className="text-white font-bold text-lg">QR</span>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
+                <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
               </div>
               <div>
-                <p className="text-white font-bold text-xl leading-none tracking-tight">QRVents</p>
-                <p className="text-blue-300/70 text-xs font-medium tracking-widest uppercase mt-1">
+                <p className="text-white font-bold text-2xl leading-none tracking-tight">QRVents</p>
+                <p className="text-blue-300/70 text-xs font-semibold tracking-widest uppercase mt-1.5">
                   Polytechnic College of La Union
                 </p>
               </div>
@@ -141,11 +172,11 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
         <div className="w-full md:w-7/12 bg-white flex flex-col justify-center p-6 sm:p-10 lg:p-14 overflow-y-auto overflow-x-hidden">
           <div className="w-full max-w-xl mx-auto my-auto py-8">
             {/* Mobile logo */}
-            <div className="flex md:hidden items-center gap-2 mb-6">
-              <div className="w-9 h-9 bg-[#1A3A8F] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">QR</span>
+            <div className="flex md:hidden items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
+                <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
               </div>
-              <span className="font-bold text-[#0F172A] text-lg">QRVents</span>
+              <span className="font-bold text-[#0F172A] text-xl">QRVents</span>
             </div>
 
             {/* Form Header */}
@@ -276,11 +307,30 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                   </div>
                   {errors.yearLevel && <p className="text-red-500 text-xs mt-1.5">{errors.yearLevel.message}</p>}
                 </div>
+
+                {/* Section Field */}
+                <div>
+                  <label htmlFor="section" className="block text-sm font-semibold text-[#0F172A] mb-2">
+                    Section
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                    <input
+                      id="section"
+                      type="text"
+                      placeholder="e.g. A, 1, Alpha"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
+                      {...register("section")}
+                      required
+                    />
+                  </div>
+                  {errors.section && <p className="text-red-500 text-xs mt-1.5">{errors.section.message}</p>}
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start">
                 {/* Password Field */}
-                <div>
+                <div className="flex flex-col">
                   <label htmlFor="password" className="block text-sm font-semibold text-[#0F172A] mb-2">
                     Password
                   </label>
@@ -304,10 +354,47 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                     </button>
                   </div>
                   {errors.password && <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>}
+                  
+                  {/* Password Strength Indicator */}
+                  {passwordValue.length > 0 && (
+                    <div className="mt-4 flex flex-col gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="text-[#475569] font-medium">Password strength</span>
+                        <span className={`font-semibold ${
+                          strengthLabel === "Strong" ? "text-emerald-600" :
+                          strengthLabel === "Medium" ? "text-amber-600" : "text-red-600"
+                        }`}>{strengthLabel}</span>
+                      </div>
+                      <div className="flex h-1.5 w-full gap-1.5">
+                        <div className={`h-full flex-1 rounded-full transition-colors duration-300 ${passwordValue.length > 0 ? (metCount >= 1 ? strengthColor : "bg-red-500") : "bg-slate-200"}`} />
+                        <div className={`h-full flex-1 rounded-full transition-colors duration-300 ${metCount >= 3 ? strengthColor : "bg-slate-200"}`} />
+                        <div className={`h-full flex-1 rounded-full transition-colors duration-300 ${metCount >= 4 ? strengthColor : "bg-slate-200"}`} />
+                      </div>
+                      
+                      <div className="flex flex-col gap-y-2 mt-2">
+                        {passwordRequirements.map((req, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            {req.met ? (
+                              <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <Check className="w-2.5 h-2.5 text-emerald-600" />
+                              </div>
+                            ) : (
+                              <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                                <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                              </div>
+                            )}
+                            <span className={`text-[11px] leading-tight ${req.met ? "text-slate-700" : "text-slate-500"}`}>
+                              {req.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Confirm Password Field */}
-                <div>
+                <div className="flex flex-col">
                   <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#0F172A] mb-2">
                     Confirm Password
                   </label>

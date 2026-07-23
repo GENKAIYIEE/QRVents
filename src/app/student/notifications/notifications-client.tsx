@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Bell, Check, CircleAlert, Calendar, Info, Inbox, Trash2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { getStudentNotifications, markAsRead, markAllAsRead, deleteAllRead } from "@/app/student/notifications/actions"
+import { toast } from "sonner"
 
 type Notification = {
   id: string
@@ -47,6 +48,7 @@ export function NotificationsClient() {
       await markAsRead(id)
     } catch (error) {
       fetchNotifications()
+      toast.error("Failed to update notification status")
     }
   }
 
@@ -57,6 +59,7 @@ export function NotificationsClient() {
       await markAllAsRead()
     } catch (error) {
       fetchNotifications()
+      toast.error("Failed to update notifications")
     }
   }
 
@@ -67,6 +70,7 @@ export function NotificationsClient() {
       await deleteAllRead()
     } catch (error) {
       fetchNotifications()
+      toast.error("Failed to delete notifications")
     }
   }
 

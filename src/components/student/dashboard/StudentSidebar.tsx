@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { logoutAction } from "@/app/admin/actions"
+import { logoutAction } from "@/lib/auth-actions"
 
 import { toast } from "sonner"
 import { LayoutDashboard, QrCode, CalendarCheck, UserCircle, Settings, AlertTriangle, Bell } from "lucide-react"
@@ -61,6 +61,7 @@ interface StudentSidebarProps {
 
 export function StudentSidebar({ mobileOpen, onMobileClose, session, department, studentUser }: StudentSidebarProps) {
   const pathname = usePathname()
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const handleComingSoon = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -76,17 +77,11 @@ export function StudentSidebar({ mobileOpen, onMobileClose, session, department,
       <div className="p-7 pb-5 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3 mb-4">
           {/* Logo mark */}
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg"
-            style={{ 
-              background: `linear-gradient(135deg, ${deptColor}, #1D4ED8)`,
-              boxShadow: `0 4px 15px ${deptColor}40`
-            }}
-          >
-            <QrCode color="#fff" size={22} strokeWidth={2.5} />
+          <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center shadow-lg">
+            <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-[2px]" />
           </div>
           <div className="min-w-0">
-            <div className="text-white font-extrabold text-[18px] tracking-tight leading-none">
+            <div className="text-white font-extrabold text-[20px] tracking-tight leading-none">
               QRVents
             </div>
             <div className="text-white/90 text-[10px] font-extrabold mt-1 tracking-widest uppercase whitespace-nowrap overflow-hidden text-ellipsis">
@@ -166,11 +161,10 @@ export function StudentSidebar({ mobileOpen, onMobileClose, session, department,
 
       {/* Bottom actions */}
       <div className="p-3 pb-5 border-t border-white/5 shrink-0">
-        <form action={logoutAction}>
-          <button
-            type="submit"
-            className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
-          >
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
+        >
             <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-red-500 text-[18px]">
                 logout
@@ -181,7 +175,6 @@ export function StudentSidebar({ mobileOpen, onMobileClose, session, department,
               <div className="text-red-400 text-[10.5px] mt-0.5 font-medium group-hover:text-red-300 transition-colors">End your session</div>
             </div>
           </button>
-        </form>
       </div>
     </div>
   )
@@ -203,6 +196,39 @@ export function StudentSidebar({ mobileOpen, onMobileClose, session, department,
           <aside className="relative w-[260px] h-full z-51 animate-in slide-in-from-left duration-200">
             <SidebarContent />
           </aside>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowLogoutModal(false)} />
+          <div className="relative bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-sm animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6 mx-auto">
+              <span className="material-symbols-outlined text-[32px]">logout</span>
+            </div>
+            <h3 className="text-xl font-extrabold text-center text-slate-900 mb-2">Sign Out</h3>
+            <p className="text-center text-slate-500 font-medium mb-8">
+              Are you sure you want to end your current session?
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowLogoutModal(false)}
+                type="button"
+                className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <form action={logoutAction} className="flex-1">
+                <button 
+                  type="submit"
+                  className="w-full py-3 px-4 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95"
+                >
+                  Sign Out
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </>

@@ -104,13 +104,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Perform Check-In
-    await prisma.attendanceLog.create({
-      data: {
-        userId: user.id,
-        eventId: event.id,
-        status: isGuest ? "GUEST" : "PRESENT",
-      },
-    })
+    try {
+      await prisma.attendanceLog.create({
+        data: {
+          userId: user.id,
+          eventId: event.id,
+          status: isGuest ? "GUEST" : "PRESENT",
+        },
+      })
+    } catch (e: any) {
+      if (e.code === "P2002") {
+        // Concurrency double-fire: log was already created by parallel request
+        return NextResponse.json({
+          success: true,
+          action: "check-in",
+          user: { fullName: user.fullName, isGuest },
+          message: "Checked in successfully"
+        })
+      }
+      throw e
+    }
 
     return NextResponse.json({
       success: true,

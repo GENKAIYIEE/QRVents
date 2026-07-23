@@ -20,10 +20,13 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || ""
     const status = searchParams.get("status") || "ALL"
     const departmentId = searchParams.get("departmentId") || "ALL"
+    const yearLevel = searchParams.get("yearLevel") || "ALL"
+    const section = searchParams.get("section") || "ALL"
 
-    const data = await getAttendanceLogs(eventId, page, 20, search, status, departmentId)
+    const data = await getAttendanceLogs(eventId, page, 20, search, status, departmentId, yearLevel, section)
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
+    console.error("API ATTENDANCE ERROR:", error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }

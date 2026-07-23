@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { logoutAction } from "@/app/admin/actions"
+import { logoutAction } from "@/lib/auth-actions"
 
 const NAV_ITEMS = [
   {
@@ -84,13 +84,11 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
       <div className="p-7 pb-5 border-b border-white/5 shrink-0 relative z-10">
         <div className="flex items-center gap-3 mb-5">
           {/* Logo mark */}
-          <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_4px_15px_rgba(37,99,235,0.4)] shrink-0">
-            <span className="material-symbols-outlined text-white text-[22px] [font-variation-settings:'FILL'_1]">
-              qr_code_2
-            </span>
+          <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center shadow-[0_4px_15px_rgba(37,99,235,0.4)]">
+            <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-[2px]" />
           </div>
           <div>
-            <div className="text-white font-extrabold text-[18px] tracking-tight leading-none">
+            <div className="text-white font-extrabold text-[20px] tracking-tight leading-none">
               QRVents
             </div>
             <div className="text-white/90 text-[10px] font-bold mt-1 tracking-widest uppercase">
