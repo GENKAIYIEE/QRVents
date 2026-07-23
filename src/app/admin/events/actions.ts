@@ -6,18 +6,25 @@ import { logActivity } from "@/lib/activity-logger"
 import { EventFormValues } from "@/lib/validations/event"
 import { revalidatePath } from "next/cache"
 import { EventStatus, EventType } from "@prisma/client"
+import { syncEventStatuses } from "@/lib/event-sync"
 
-export async function getEvents(page = 1, pageSize = 10, search = "", status?: EventStatus) {
+export async function getEvents(page = 1, pageSize = 10, search = "", status?: EventStatus, eventType?: EventType) {
   const session = await getSession()
   if (!session || session.role !== "SUPER_ADMIN") {
     throw new Error("Unauthorized")
   }
 
+  // Auto-sync events before fetching to ensure real-time statuses
+  await syncEventStatuses()
+
   const whereClause: any = {
     title: { contains: search, mode: "insensitive" },
   }
-  if (status) {
+  if (status && status !== "ALL" as any) {
     whereClause.status = status
+  }
+  if (eventType && eventType !== "ALL" as any) {
+    whereClause.eventType = eventType
   }
 
   const events = await prisma.event.findMany({

@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { EventsTable } from "@/components/admin/events-table"
 import { EventFormModal } from "@/components/admin/event-form-modal"
-import { EventStatus } from "@prisma/client"
+import { CompleteEventModal } from "@/components/admin/complete-event-modal"
+import { EventStatus, EventType } from "@prisma/client"
+import { toast } from "sonner"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 export function EventsClient({ departments }: { departments: any[] }) {
@@ -15,10 +17,12 @@ export function EventsClient({ departments }: { departments: any[] }) {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [eventToEdit, setEventToEdit] = useState<any>(null)
+  const [eventToComplete, setEventToComplete] = useState<any | null>(null)
   
   // Filters
   const [search, setSearch] = useState(searchParams.get("search") || "")
   const [status, setStatus] = useState<string>(searchParams.get("status") || "ALL")
+  const [eventType, setEventType] = useState<string>(searchParams.get("eventType") || "ALL")
   const [page, setPage] = useState(parseInt(searchParams.get("page") || "1"))
   const [totalPages, setTotalPages] = useState(1)
 
@@ -29,6 +33,7 @@ export function EventsClient({ departments }: { departments: any[] }) {
       query.set("page", page.toString())
       if (search) query.set("search", search)
       if (status !== "ALL") query.set("status", status)
+      if (eventType !== "ALL") query.set("eventType", eventType)
 
       const res = await fetch(`/api/admin/events?${query.toString()}`)
       if (!res.ok) {
@@ -52,9 +57,15 @@ export function EventsClient({ departments }: { departments: any[] }) {
 
   useEffect(() => {
     fetchEvents()
-  }, [page, search, status])
+  }, [page, search, status, eventType])
 
   const handleStatusChange = async (id: string, newStatus: EventStatus) => {
+    if (newStatus === "COMPLETED") {
+      const evt = events.find(e => e.id === id)
+      if (evt) setEventToComplete(evt)
+      return
+    }
+
     try {
       const res = await fetch(`/api/admin/events/${id}`, {
         method: "PATCH",
@@ -65,6 +76,12 @@ export function EventsClient({ departments }: { departments: any[] }) {
     } catch (err) {
       console.error(err)
     }
+  }
+
+  const handleCompleteConfirmed = () => {
+    toast.success("Event completed successfully! Penalties have been processed.")
+    fetchEvents()
+    setEventToComplete(null)
   }
 
   const handleDelete = async (id: string) => {
@@ -102,6 +119,15 @@ export function EventsClient({ departments }: { departments: any[] }) {
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto shrink-0">
           <select 
+            value={eventType}
+            onChange={(e) => setEventType(e.target.value)}
+            className="w-full sm:w-[180px] py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-700 text-sm cursor-pointer focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
+          >
+            <option value="ALL">All Classifications</option>
+            <option value="SCHOOL_WIDE">School-Wide</option>
+            <option value="DEPARTMENT">Department</option>
+          </select>
+          <select 
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             className="w-full sm:w-[180px] py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-700 text-sm cursor-pointer focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
@@ -134,6 +160,7 @@ export function EventsClient({ departments }: { departments: any[] }) {
             onEdit={openEditModal}
             onStatusChange={handleStatusChange}
             onDelete={handleDelete}
+            onGeneratePenalties={setEventToComplete}
           />
           
           {totalPages > 1 && (
@@ -172,6 +199,16 @@ export function EventsClient({ departments }: { departments: any[] }) {
           }}
           departments={departments}
           eventToEdit={eventToEdit}
+        />
+      )}
+
+      {eventToComplete && (
+        <CompleteEventModal
+          eventId={eventToComplete.id}
+          eventTitle={eventToComplete.title}
+          isOpen={!!eventToComplete}
+          onClose={() => setEventToComplete(null)}
+          onConfirmed={handleCompleteConfirmed}
         />
       )}
     </div>

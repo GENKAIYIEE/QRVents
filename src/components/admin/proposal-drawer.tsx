@@ -58,6 +58,28 @@ export function ProposalDrawer({ proposal, isOpen, onClose, onSuccess }: Proposa
 
   const status = statusConfig[proposal.status] || { color: "text-slate-700", bg: "bg-slate-100" }
 
+  const handleArchive = async () => {
+    setIsSubmitting(true)
+    try {
+      const res = await fetch(`/api/admin/proposals/${proposal.id}/archive`, {
+        method: "POST",
+      })
+
+      if (res.ok) {
+        toast.success("Proposal archived successfully")
+        onSuccess()
+        onClose()
+      } else {
+        const err = await res.json()
+        toast.error(err.error || "Failed to archive proposal")
+      }
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
@@ -196,6 +218,23 @@ export function ProposalDrawer({ proposal, isOpen, onClose, onSuccess }: Proposa
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {proposal.status === "APPROVED" && (!proposal.event || proposal.event.status === "COMPLETED") && !proposal.isArchived && (
+          <div className="p-6 border-t border-slate-100 bg-slate-50">
+            <button 
+              onClick={handleArchive}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-900 font-semibold text-sm disabled:opacity-50 transition-colors"
+            >
+              <span className="material-symbols-outlined">archive</span>
+              Archive Proposal
+            </button>
+            <p className="text-center text-xs text-slate-500 mt-3 font-medium">
+              {proposal.event ? "This event is completed. " : "This is a legacy proposal with no active event. "}
+              You can archive this proposal to hide it from the active views.
+            </p>
           </div>
         )}
       </div>

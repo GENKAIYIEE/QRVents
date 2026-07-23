@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getEvents, createEvent } from "@/app/admin/events/actions"
 import { eventSchema } from "@/lib/validations/event"
 import { getSession } from "@/lib/auth"
-import { EventStatus } from "@prisma/client"
+import { EventStatus, EventType } from "@prisma/client"
 
 export async function GET(request: Request) {
   try {
@@ -15,8 +15,9 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "1")
     const search = searchParams.get("search") || ""
     const status = searchParams.get("status") as EventStatus | undefined
+    const eventType = searchParams.get("eventType") as EventType | undefined
 
-    const data = await getEvents(page, 10, search, status)
+    const data = await getEvents(page, 10, search, status, eventType)
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })

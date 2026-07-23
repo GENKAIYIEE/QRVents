@@ -10,9 +10,10 @@ interface EventsTableProps {
   onEdit: (event: any) => void
   onStatusChange: (id: string, status: EventStatus) => void
   onDelete: (id: string) => void
+  onGeneratePenalties?: (event: any) => void
 }
 
-export function EventsTable({ events, onEdit, onStatusChange, onDelete }: EventsTableProps) {
+export function EventsTable({ events, onEdit, onStatusChange, onDelete, onGeneratePenalties }: EventsTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [eventToDelete, setEventToDelete] = useState<any | null>(null)
 
@@ -98,6 +99,16 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete }: Events
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
+                      {event.status === "COMPLETED" && event.isMandatory && !event.penaltiesGenerated && onGeneratePenalties && (
+                        <button
+                          onClick={() => onGeneratePenalties(event)}
+                          className="px-3 py-1.5 flex items-center gap-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 font-bold text-xs transition-colors border border-amber-200"
+                          title="Generate Penalties"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">gavel</span>
+                          Generate Penalties
+                        </button>
+                      )}
                       <button 
                         onClick={() => onEdit(event)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
