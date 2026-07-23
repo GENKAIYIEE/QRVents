@@ -57,12 +57,19 @@ export function PenaltiesClient() {
               <PenaltyStatusBadge status={p.status} />
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-[#475569] mb-4">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[#475569] mb-4">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-[#94A3B8]" />
                 Deadline:{" "}
                 <span className="font-medium">
                   {new Date(p.deadline).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                Reason:{" "}
+                <span className="font-medium text-rose-600">
+                  Missed mandatory event
                 </span>
               </div>
             </div>

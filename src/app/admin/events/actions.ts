@@ -6,6 +6,7 @@ import { logActivity } from "@/lib/activity-logger"
 import { EventFormValues } from "@/lib/validations/event"
 import { revalidatePath } from "next/cache"
 import { EventStatus, EventType } from "@prisma/client"
+import { generatePenaltiesForEvent } from "@/lib/penalty"
 
 export async function getEvents(page = 1, pageSize = 10, search = "", status?: EventStatus) {
   const session = await getSession()
@@ -97,10 +98,26 @@ export async function updateEventStatus(id: string, status: EventStatus) {
     throw new Error("Unauthorized")
   }
 
+  const existingEvent = await prisma.event.findUnique({
+    where: { id },
+    select: { status: true },
+  })
+
+  if (!existingEvent) throw new Error("Event not found")
+
   const event = await prisma.event.update({
     where: { id },
     data: { status },
   })
+
+  // Trigger penalties if transitioning to COMPLETED
+  if (status === "COMPLETED" && existingEvent.status !== "COMPLETED") {
+    try {
+      await generatePenaltiesForEvent(id)
+    } catch (e) {
+      console.error("Failed to process penalties:", e)
+    }
+  }
 
   await logActivity(session.userId, session.fullName, "Updated Event Status", `Event: ${event.title} -> ${status}`)
   revalidatePath("/admin/events")
@@ -119,6 +136,18 @@ export async function deleteEvent(id: string) {
   if (logCount > 0) {
     throw new Error("Cannot delete event with existing attendance records")
   }
+
+  // Check if there are any penalties
+  const penaltyCount = await prisma.penalty.count({ where: { eventId: id } })
+  if (penaltyCount > 0) {
+    throw new Error("Cannot delete event with existing penalties")
+  }
+
+  // Unlink any related event proposals so they aren't orphaned or cause deletion failure
+  await prisma.eventProposal.updateMany({
+    where: { eventId: id },
+    data: { eventId: null }
+  })
 
   const event = await prisma.event.delete({ where: { id } })
 

@@ -30,7 +30,16 @@ export async function getEventsForAttendance() {
   })
 }
 
-export async function getAttendanceLogs(eventId: string, page = 1, pageSize = 50, search = "", status = "ALL", departmentId = "ALL") {
+export async function getAttendanceLogs(
+  eventId: string, 
+  page = 1, 
+  pageSize = 50, 
+  search = "", 
+  status = "ALL", 
+  departmentId = "ALL",
+  yearLevel = "ALL",
+  section = "ALL"
+) {
   const session = await getSession()
   if (!session || session.role !== "SUPER_ADMIN") {
     throw new Error("Unauthorized")
@@ -54,6 +63,14 @@ export async function getAttendanceLogs(eventId: string, page = 1, pageSize = 50
     whereClause.user.departmentId = departmentId
   }
 
+  if (yearLevel !== "ALL") {
+    whereClause.user.yearLevel = yearLevel
+  }
+
+  if (section !== "ALL") {
+    whereClause.user.section = { equals: section, mode: "insensitive" }
+  }
+
   const [logs, total, groupBy] = await Promise.all([
     prisma.attendanceLog.findMany({
       where: whereClause,
@@ -69,6 +86,7 @@ export async function getAttendanceLogs(eventId: string, page = 1, pageSize = 50
             fullName: true,
             studentId: true,
             yearLevel: true,
+            section: true,
             department: { select: { code: true, color: true } }
           }
         }

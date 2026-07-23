@@ -65,13 +65,13 @@ export default function LoginForm() {
 
           {/* Branding */}
           <div className="relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-                <span className="text-white font-bold text-lg">QR</span>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
+                <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
               </div>
               <div>
-                <p className="text-white font-bold text-xl leading-none tracking-tight">QRVents</p>
-                <p className="text-blue-300/70 text-xs font-medium tracking-widest uppercase mt-1">
+                <p className="text-white font-bold text-2xl leading-none tracking-tight">QRVents</p>
+                <p className="text-blue-300/70 text-xs font-semibold tracking-widest uppercase mt-1.5">
                   Polytechnic College of La Union
                 </p>
               </div>
@@ -130,11 +130,11 @@ export default function LoginForm() {
           <div className="w-full max-w-sm mx-auto">
 
             {/* Mobile logo */}
-            <div className="flex md:hidden items-center gap-2 mb-8">
-              <div className="w-9 h-9 bg-[#1A3A8F] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">QR</span>
+            <div className="flex md:hidden items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
+                <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-[2px]" />
               </div>
-              <span className="font-bold text-[#0F172A] text-lg">QRVents</span>
+              <span className="font-bold text-[#0F172A] text-xl">QRVents</span>
             </div>
 
             {/* Form Header */}

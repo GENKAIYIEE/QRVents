@@ -87,7 +87,7 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
         venue: proposal.venue,
         eventType: "DEPARTMENT",
         departmentId: proposal.departmentId,
-        createdById: session.userId,
+        createdById: proposal.submittedById,
         status: "UPCOMING",
       },
     })

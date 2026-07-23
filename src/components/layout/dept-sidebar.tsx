@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { logoutAction } from "@/app/admin/actions"
+import { logoutAction } from "@/lib/auth-actions"
 import { toast } from "sonner"
 
 const NAV_ITEMS = [
@@ -94,19 +94,11 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
       <div className="p-7 pb-5 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3 mb-4">
           {/* Logo mark */}
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg"
-            style={{ 
-              background: `linear-gradient(135deg, ${deptColor}, #1D4ED8)`,
-              boxShadow: `0 4px 15px ${deptColor}40`
-            }}
-          >
-            <span className="material-symbols-outlined text-white text-[22px] [font-variation-settings:'FILL'_1]">
-              qr_code_2
-            </span>
+          <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center shadow-lg">
+            <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-[2px]" />
           </div>
           <div className="min-w-0">
-            <div className="text-white font-extrabold text-[18px] tracking-tight leading-none">
+            <div className="text-white font-extrabold text-[20px] tracking-tight leading-none">
               QRVents
             </div>
             <div className="text-white/90 text-[10px] font-extrabold mt-1 tracking-widest uppercase whitespace-nowrap overflow-hidden text-ellipsis">

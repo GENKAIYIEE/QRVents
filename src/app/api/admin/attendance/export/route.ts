@@ -21,6 +21,8 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || ""
     const status = searchParams.get("status") || "ALL"
     const departmentId = searchParams.get("departmentId") || "ALL"
+    const yearLevel = searchParams.get("yearLevel") || "ALL"
+    const section = searchParams.get("section") || "ALL"
 
     const whereClause: any = {
       eventId,
@@ -40,6 +42,14 @@ export async function GET(request: Request) {
       whereClause.user.departmentId = departmentId
     }
 
+    if (yearLevel !== "ALL") {
+      whereClause.user.yearLevel = yearLevel
+    }
+
+    if (section !== "ALL") {
+      whereClause.user.section = { equals: section, mode: "insensitive" }
+    }
+
     const event = await prisma.event.findUnique({ where: { id: eventId } })
     const title = event?.title.replace(/\s+/g, "-").toLowerCase() || "event"
     const filename = `attendance-${title}-${format(new Date(), "yyyy-MM-dd")}.csv`
@@ -49,7 +59,7 @@ export async function GET(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         // Send BOM and headers
-        const headers = "Name,Student ID,Year Level,Department,Check-In Time,Check-Out Time,Status\n"
+        const headers = "Name,Student ID,Year Level,Section,Department,Check-In Time,Check-Out Time,Status\n"
         controller.enqueue(new TextEncoder().encode("\uFEFF" + headers))
 
         let skip = 0
@@ -67,6 +77,7 @@ export async function GET(request: Request) {
                   fullName: true,
                   studentId: true,
                   yearLevel: true,
+                  section: true,
                   department: { select: { code: true } }
                 }
               }
@@ -86,6 +97,7 @@ export async function GET(request: Request) {
               log.user.fullName,
               log.user.studentId || "-",
               log.user.yearLevel || "-",
+              log.user.section || "-",
               log.user.department?.code || "Unknown",
               checkIn,
               checkOut,

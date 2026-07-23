@@ -20,6 +20,8 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("ALL")
   const [departmentId, setDepartmentId] = useState("ALL")
+  const [yearLevel, setYearLevel] = useState("ALL")
+  const [section, setSection] = useState("ALL")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -35,6 +37,8 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
       if (search) query.set("search", search)
       if (status !== "ALL") query.set("status", status)
       if (departmentId !== "ALL") query.set("departmentId", departmentId)
+      if (yearLevel !== "ALL") query.set("yearLevel", yearLevel)
+      if (section !== "ALL") query.set("section", section)
 
       const res = await fetch(`/api/admin/attendance?${query.toString()}`)
       const { data } = await res.json()
@@ -53,7 +57,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
   // Initial fetch and dependency fetch
   useEffect(() => {
     fetchLogs(true)
-  }, [selectedEventId, page, search, status, departmentId])
+  }, [selectedEventId, page, search, status, departmentId, yearLevel, section])
 
   // Polling
   useEffect(() => {
@@ -64,7 +68,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
     }, 15000) // Poll every 15s
     
     return () => clearInterval(interval)
-  }, [autoRefresh, selectedEventId, page, search, status, departmentId])
+  }, [autoRefresh, selectedEventId, page, search, status, departmentId, yearLevel, section])
 
   const handleExport = () => {
     if (!logs.length || !selectedEventId) return
@@ -74,6 +78,8 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
     if (search) query.set("search", search)
     if (status !== "ALL") query.set("status", status)
     if (departmentId !== "ALL") query.set("departmentId", departmentId)
+    if (yearLevel !== "ALL") query.set("yearLevel", yearLevel)
+    if (section !== "ALL") query.set("section", section)
 
     window.location.href = `/api/admin/attendance/export?${query.toString()}`
   }
@@ -180,22 +186,44 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
               </div>
             </div>
             
-            <div className="flex gap-2 w-full lg:w-auto">
+            <div className="flex flex-wrap gap-2 w-full lg:w-auto">
               <select 
                 value={departmentId}
                 onChange={(e) => { setDepartmentId(e.target.value); setPage(1); }}
-                className="flex-1 lg:w-40 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
+                className="flex-1 lg:w-32 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
               >
                 <option value="ALL">All Depts</option>
                 {departments.map(d => (
                   <option key={d.id} value={d.id}>{d.code}</option>
                 ))}
               </select>
+
+              <select 
+                value={yearLevel}
+                onChange={(e) => { setYearLevel(e.target.value); setPage(1); }}
+                className="flex-1 lg:w-28 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
+              >
+                <option value="ALL">All Years</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+
+              <div className="relative flex-1 lg:w-28">
+                <input 
+                  type="text" 
+                  placeholder="Section (e.g. A)"
+                  value={section === "ALL" ? "" : section}
+                  onChange={(e) => { setSection(e.target.value || "ALL"); setPage(1); }}
+                  className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
+                />
+              </div>
               
               <select 
                 value={status}
                 onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                className="flex-1 lg:w-36 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
+                className="flex-1 lg:w-32 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium text-slate-700"
               >
                 <option value="ALL">All Status</option>
                 <option value="PRESENT">Present</option>
@@ -222,7 +250,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
               <thead className="bg-slate-50 text-slate-500 font-semibold sticky top-0 shadow-sm z-0">
                 <tr>
                   <th className="px-6 py-3">Attendee</th>
-                  <th className="px-6 py-3">ID / Year</th>
+                  <th className="px-6 py-3">ID / Yr & Sec</th>
                   <th className="px-6 py-3">Department</th>
                   <th className="px-6 py-3">Time</th>
                   <th className="px-6 py-3 text-right">Status</th>
@@ -247,7 +275,10 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
                       </td>
                       <td className="px-6 py-3">
                         <div className="text-slate-600 font-mono text-xs">{log.user.studentId || '-'}</div>
-                        <div className="text-xs text-slate-400">{log.user.yearLevel || '-'}</div>
+                        <div className="text-xs text-slate-400">
+                          {log.user.yearLevel ? `Year ${log.user.yearLevel}` : '-'}
+                          {log.user.section ? ` / Sec ${log.user.section}` : ''}
+                        </div>
                       </td>
                       <td className="px-6 py-3">
                         {log.user.department ? (

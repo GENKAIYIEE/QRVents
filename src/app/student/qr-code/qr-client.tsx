@@ -101,6 +101,30 @@ export function QrClient() {
 
   if (!data) return null
 
+  // Fallback UI if QR Code is missing
+  if (!data.qrCode) {
+    return (
+      <div className="flex flex-col gap-8 w-full max-w-full pb-10">
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-lg mx-auto bg-white rounded-[2rem] border border-slate-100 mt-10">
+          <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-6">
+            <BadgeInfo className="w-10 h-10 text-rose-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">QR Code Unavailable</h2>
+          <p className="text-slate-500 max-w-md mb-8">
+            We couldn't load your digital QR pass. This may happen if your account was created improperly or if your pass got corrupted.
+          </p>
+          <button 
+            onClick={() => window.location.href = "mailto:it-support@pclu.edu.ph?subject=Requesting%20New%20QR%20Code%20-%20" + encodeURIComponent(data.fullName)}
+            className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-colors flex items-center gap-2"
+          >
+            <RefreshCw className="w-5 h-5" />
+            Request IT Support for New QR
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
 
