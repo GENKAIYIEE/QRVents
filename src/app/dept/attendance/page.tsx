@@ -35,27 +35,26 @@ export default async function DeptAttendancePage() {
     }
   })
 
-  let upcomingEventsToday = []
-  if (activeEvents.length === 0) {
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
 
-    upcomingEventsToday = await prisma.event.findMany({
-      where: {
-        status: "UPCOMING",
-        date: { gte: todayStart, lte: todayEnd },
-        OR: [
-          { departmentId: user?.departmentId },
-          { eventType: "SCHOOL_WIDE" }
-        ]
-      },
-      select: {
-        id: true, title: true, date: true, startTime: true, endTime: true, venue: true
-      }
-    })
-  }
+  const upcomingEventsToday = activeEvents.length === 0 
+    ? await prisma.event.findMany({
+        where: {
+          status: "UPCOMING",
+          date: { gte: todayStart, lte: todayEnd },
+          OR: [
+            { departmentId: user?.departmentId },
+            { eventType: "SCHOOL_WIDE" }
+          ]
+        },
+        select: {
+          id: true, title: true, date: true, startTime: true, endTime: true, venue: true
+        }
+      })
+    : []
 
   // Get initial attendance logs for these active events
   const initialLogs = await prisma.attendanceLog.findMany({

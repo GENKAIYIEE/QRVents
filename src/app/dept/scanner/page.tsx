@@ -38,27 +38,26 @@ export default async function DeptScannerPage() {
     },
   })
 
-  let upcomingEventsToday = []
-  if (events.length === 0) {
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
 
-    upcomingEventsToday = await prisma.event.findMany({
-      where: {
-        status: "UPCOMING",
-        date: { gte: todayStart, lte: todayEnd },
-        OR: [
-          { departmentId: user?.departmentId },
-          { eventType: "SCHOOL_WIDE" }
-        ]
-      },
-      select: {
-        id: true, title: true, date: true, startTime: true, endTime: true, venue: true
-      }
-    })
-  }
+  const upcomingEventsToday = events.length === 0 
+    ? await prisma.event.findMany({
+        where: {
+          status: "UPCOMING",
+          date: { gte: todayStart, lte: todayEnd },
+          OR: [
+            { departmentId: user?.departmentId },
+            { eventType: "SCHOOL_WIDE" }
+          ]
+        },
+        select: {
+          id: true, title: true, date: true, startTime: true, endTime: true, venue: true
+        }
+      })
+    : []
 
   // Fetch global settings for auto-lock timer
   const settings = await prisma.systemSettings.findUnique({
