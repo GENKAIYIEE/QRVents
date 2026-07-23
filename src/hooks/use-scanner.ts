@@ -90,24 +90,37 @@ export function useScanner({
       const scanner = new Html5Qrcode(elementId)
       scannerRef.current = scanner
 
-      await scanner.start(
-        { facingMode: "environment" }, // Use back camera on mobile
-        {
-          fps,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-        },
-        (decodedText: string) => {
-          if (!isMountedRef.current) return
-          const result = { text: decodedText, timestamp: new Date() }
-          setLastResult(result)
-          onScan(decodedText)
-        },
-        () => {
-          // Ignore per-frame errors (expected while scanning)
+      const config = {
+        fps,
+        disableFlip: false,
+      }
+
+      const onScanSuccess = (decodedText: string) => {
+        if (!isMountedRef.current) return
+        const result = { text: decodedText, timestamp: new Date() }
+        setLastResult(result)
+        onScan(decodedText)
+      }
+      const onScanFailure = () => {}
+
+      try {
+        // First try the environment (rear) camera
+        await scanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+      } catch (err: any) {
+        if (err?.name === "NotAllowedError") throw err
+        
+        // If environment camera fails (common on laptops), fetch available cameras and use the first one
+        const cameras = await Html5Qrcode.getCameras()
+        if (cameras && cameras.length > 0) {
+          // Ensure we completely stopped the previous failed instance before restarting
+          if (scanner.isScanning) await scanner.stop()
+          scanner.clear()
+          
+          await scanner.start(cameras[0].id, config, onScanSuccess, onScanFailure)
+        } else {
+          throw new Error("No cameras found on this device.")
         }
-      )
+      }
 
       if (isMountedRef.current) {
         setStatus("scanning")

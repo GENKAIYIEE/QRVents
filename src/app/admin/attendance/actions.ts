@@ -12,7 +12,8 @@ export async function getEventsForAttendance() {
 
   return await prisma.event.findMany({
     where: { 
-      status: { in: ["ONGOING", "UPCOMING", "COMPLETED"] } 
+      status: { in: ["ONGOING", "UPCOMING", "COMPLETED"] },
+      eventType: "SCHOOL_WIDE"
     },
     orderBy: [
       { status: "asc" }, // ONGOING first

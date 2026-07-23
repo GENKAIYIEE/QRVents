@@ -50,7 +50,7 @@ export async function getDashboardStats() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.event.findMany({
-      where: { status: "UPCOMING" },
+      where: { status: "UPCOMING", eventType: "SCHOOL_WIDE" },
       orderBy: { date: "asc" },
       take: 4,
       select: {

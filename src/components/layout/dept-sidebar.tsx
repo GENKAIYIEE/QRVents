@@ -56,6 +56,13 @@ const NAV_ITEMS = [
     comingSoon: false,
   },
   {
+    icon: "gavel",
+    label: "Penalties",
+    href: "/dept/penalties",
+    description: "Manage student penalties",
+    comingSoon: false,
+  },
+  {
     icon: "settings",
     label: "Settings",
     href: "/dept/settings",

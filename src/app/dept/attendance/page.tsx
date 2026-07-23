@@ -4,6 +4,8 @@ import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { AttendanceClient } from "./attendance-client"
 
+import { UpcomingEventsPrompt } from "@/components/dept/upcoming-events-prompt"
+
 export const metadata: Metadata = {
   title: "Live Attendance — QRVents Dept Admin",
 }
@@ -32,6 +34,27 @@ export default async function DeptAttendancePage() {
       expectedAttendees: true,
     }
   })
+
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
+  const upcomingEventsToday = activeEvents.length === 0 
+    ? await prisma.event.findMany({
+        where: {
+          status: "UPCOMING",
+          date: { gte: todayStart, lte: todayEnd },
+          OR: [
+            { departmentId: user?.departmentId },
+            { eventType: "SCHOOL_WIDE" }
+          ]
+        },
+        select: {
+          id: true, title: true, date: true, startTime: true, endTime: true, venue: true
+        }
+      })
+    : []
 
   // Get initial attendance logs for these active events
   const initialLogs = await prisma.attendanceLog.findMany({
@@ -64,11 +87,15 @@ export default async function DeptAttendancePage() {
       </div>
 
       {activeEvents.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
-          <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">videocam_off</span>
-          <h3 className="text-lg font-bold text-slate-700">No Ongoing Events</h3>
-          <p className="text-slate-500 text-sm mt-1">There are no active events currently being scanned.</p>
-        </div>
+        upcomingEventsToday.length > 0 ? (
+          <UpcomingEventsPrompt events={upcomingEventsToday} />
+        ) : (
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
+            <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">videocam_off</span>
+            <h3 className="text-lg font-bold text-slate-700">No Ongoing Events</h3>
+            <p className="text-slate-500 text-sm mt-1">There are no active events currently being scanned.</p>
+          </div>
+        )
       ) : (
         <AttendanceClient 
           activeEvents={activeEvents} 
