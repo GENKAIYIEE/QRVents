@@ -38,5 +38,64 @@ export async function getStudentQRCode() {
     departmentCode: user.department?.code || "N/A",
     departmentName: user.department?.name || "No Department",
     departmentColor: user.department?.color || "#3B82F6",
+    id: user.id
   }
+}
+
+export async function getStudentActiveEvents() {
+  const session = await getSession()
+  if (!session || session.role !== "STUDENT") {
+    throw new Error("Unauthorized")
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { id: true, departmentId: true }
+  })
+
+  if (!user) {
+    throw new Error("User not found")
+  }
+
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
+  const events = await prisma.event.findMany({
+    where: {
+      OR: [
+        { status: "ONGOING" },
+        { 
+          status: "UPCOMING", 
+          date: { gte: todayStart, lte: todayEnd }
+        }
+      ],
+      AND: [
+        {
+          OR: [
+            { eventType: "SCHOOL_WIDE" },
+            { departmentId: user.departmentId }
+          ]
+        }
+      ]
+    },
+    orderBy: { date: "asc" },
+    select: {
+      id: true,
+      title: true,
+      date: true,
+      startTime: true,
+      endTime: true,
+      venue: true,
+      status: true,
+      attendanceLogs: {
+        where: { userId: user.id },
+        select: { checkOut: true, status: true, checkIn: true }
+      }
+    }
+  })
+
+  return events
 }

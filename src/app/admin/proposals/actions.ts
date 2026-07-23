@@ -6,13 +6,15 @@ import { logActivity } from "@/lib/activity-logger"
 import { ProposalStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-export async function getProposals(page = 1, pageSize = 10, status: string = "ALL", search?: string) {
+export async function getProposals(page = 1, pageSize = 10, status: string = "ALL", search?: string, archived: boolean = false) {
   const session = await getSession()
   if (!session || session.role !== "SUPER_ADMIN") {
     throw new Error("Unauthorized")
   }
 
-  const whereClause: any = {}
+  const whereClause: any = {
+    isArchived: archived,
+  }
   if (status !== "ALL") {
     whereClause.status = status as ProposalStatus
   }
@@ -33,6 +35,7 @@ export async function getProposals(page = 1, pageSize = 10, status: string = "AL
     include: {
       department: { select: { code: true, name: true, color: true } },
       submittedBy: { select: { fullName: true, email: true } },
+      event: { select: { status: true } },
     },
   })
 
@@ -52,8 +55,36 @@ export async function getProposalById(id: string) {
     include: {
       department: { select: { code: true, name: true, color: true } },
       submittedBy: { select: { fullName: true, email: true } },
+      event: { select: { status: true } },
     },
   })
+}
+
+export async function archiveProposal(id: string) {
+  const session = await getSession()
+  if (!session || session.role !== "SUPER_ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  const proposal = await prisma.eventProposal.findUnique({ 
+    where: { id },
+    include: { event: true } 
+  })
+  if (!proposal) throw new Error("Proposal not found")
+  if (proposal.status !== "APPROVED" || (proposal.event && proposal.event.status !== "COMPLETED")) {
+    throw new Error("Only approved proposals with completed events (or legacy proposals without events) can be archived")
+  }
+
+  const updatedProposal = await prisma.eventProposal.update({
+    where: { id },
+    data: { isArchived: true },
+  })
+
+  await logActivity(session.userId, session.fullName, "Archived Proposal", `Proposal: ${proposal.title}`)
+  
+  revalidatePath("/admin/proposals")
+  
+  return updatedProposal
 }
 
 export async function reviewProposal(id: string, status: ProposalStatus, rejectionReason?: string) {

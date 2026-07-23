@@ -41,20 +41,17 @@ export function CompleteEventModal({
     setSubmitting(true)
     try {
       const res = await fetch(
-        `/api/events/${eventId}/status`,
+        `/api/events/${eventId}/penalties`,
         {
-          method: "PATCH",
+          method: "POST",
           headers: { 
             "Content-Type": "application/json" 
           },
-          body: JSON.stringify({ 
-            status: "COMPLETED" 
-          }),
         }
       )
 
       if (!res.ok) {
-        throw new Error("Failed to update event")
+        throw new Error("Failed to generate penalties")
       }
 
       onConfirmed()
@@ -75,7 +72,7 @@ export function CompleteEventModal({
               <AlertTriangle className="w-5 h-5 text-amber-600" />
             </div>
             <h3 className="text-lg font-semibold text-[#0F172A]">
-              Mark Event as Completed?
+              Generate Penalties?
             </h3>
           </div>
           <button
@@ -87,11 +84,10 @@ export function CompleteEventModal({
         </div>
 
         <p className="text-sm text-[#475569] mb-4">
-          You are about to mark{" "}
+          You are about to generate penalties for missing students in{" "}
           <span className="font-semibold text-[#0F172A]">
             {eventTitle}
-          </span>{" "}
-          as completed.
+          </span>.
         </p>
 
         {loading && (
