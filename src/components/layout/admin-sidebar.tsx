@@ -24,12 +24,7 @@ const NAV_ITEMS = [
     href: "/admin/proposals",
     description: "Review dept proposals",
   },
-  {
-    icon: "archive",
-    label: "Archives",
-    href: "/admin/archives",
-    description: "Manage historical records",
-  },
+
   {
     icon: "qr_code_scanner",
     label: "Campus Scanner",
@@ -65,12 +60,6 @@ const NAV_ITEMS = [
     label: "Reports",
     href: "/admin/reports",
     description: "Generate & export reports",
-  },
-  {
-    icon: "settings",
-    label: "Settings",
-    href: "/admin/settings",
-    description: "System configuration",
   },
 ]
 

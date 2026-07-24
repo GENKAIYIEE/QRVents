@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { deleteArchivePermanent } from "@/app/admin/archives/actions"
+import { deleteArchivePermanent } from "@/app/admin/proposals/actions"
 import { getSession } from "@/lib/auth"
 
 export async function DELETE(

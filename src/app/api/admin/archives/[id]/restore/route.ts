@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { restoreArchive } from "@/app/admin/archives/actions"
+import { restoreArchive } from "@/app/admin/proposals/actions"
 import { getSession } from "@/lib/auth"
 
 export async function POST(

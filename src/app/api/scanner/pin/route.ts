@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { action, pin } = await request.json()
+    const { action, pin, oldPin } = await request.json()
 
     if (!pin || pin.length < 4) {
       return NextResponse.json({ error: "Invalid PIN format" }, { status: 400 })
@@ -61,6 +61,31 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json({ success: true })
+    }
+
+    if (action === "update") {
+      const existingPin = await prisma.scannerPin.findUnique({
+        where: { userId: session.userId },
+      })
+
+      if (!existingPin) {
+        return NextResponse.json({ error: "No PIN configured" }, { status: 400 })
+      }
+
+      const isValid = await bcrypt.compare(oldPin, existingPin.pinHash)
+      
+      if (!isValid) {
+        return NextResponse.json({ error: "Incorrect current PIN" }, { status: 401 })
+      }
+
+      const pinHash = await bcrypt.hash(pin, 10)
+      
+      await prisma.scannerPin.update({
+        where: { userId: session.userId },
+        data: { pinHash },
+      })
+
+      return NextResponse.json({ success: true, message: "PIN updated successfully" })
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 })

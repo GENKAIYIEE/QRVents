@@ -59,29 +59,29 @@ export function ScannerView({ isActive, onScan, isProcessing = false }: ScannerV
   }, [])
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto rounded-3xl overflow-hidden bg-slate-900 aspect-square sm:aspect-video shadow-2xl border-4 border-slate-800">
+    <div className="relative w-full max-w-4xl mx-auto rounded-[2rem] overflow-hidden bg-slate-900 min-h-[500px] h-[60vh] sm:h-[550px] shadow-2xl border-4 border-slate-800 ring-1 ring-white/10">
       {status === "initializing" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-300 z-10">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500 mb-4">progress_activity</span>
-          <p className="font-semibold text-sm tracking-wider uppercase">Initializing Camera...</p>
+          <span className="material-symbols-outlined animate-spin text-5xl text-indigo-500 mb-6">progress_activity</span>
+          <p className="font-bold text-sm tracking-widest uppercase text-indigo-200">Initializing Lens</p>
         </div>
       )}
 
       {status === "permission_denied" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-rose-400 z-10 p-6 text-center">
-          <span className="material-symbols-outlined text-5xl mb-4">no_photography</span>
-          <p className="font-bold text-lg mb-2 text-white">Camera Access Denied</p>
-          <p className="text-sm opacity-80 max-w-sm">Please enable camera permissions in your browser settings to use the scanner.</p>
+          <span className="material-symbols-outlined text-6xl mb-4 text-rose-500">no_photography</span>
+          <p className="font-black text-2xl mb-2 text-white tracking-tight">Camera Access Denied</p>
+          <p className="text-sm text-slate-400 max-w-sm">Please enable camera permissions in your browser settings to use the scanner.</p>
         </div>
       )}
 
       {status === "error" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-rose-400 z-10 p-6 text-center">
-          <span className="material-symbols-outlined text-5xl mb-4">error</span>
-          <p className="font-bold text-lg mb-2 text-white">Scanner Error</p>
-          <p className="text-sm opacity-80 max-w-sm">{error || "Failed to start camera. Make sure no other app is using it."}</p>
-          <button onClick={() => start()} className="mt-6 px-6 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors">
-            Try Again
+          <span className="material-symbols-outlined text-6xl mb-4 text-rose-500">error</span>
+          <p className="font-black text-2xl mb-2 text-white tracking-tight">Scanner Error</p>
+          <p className="text-sm text-slate-400 max-w-sm">{error || "Failed to start camera. Make sure no other app is using it."}</p>
+          <button onClick={() => start()} className="mt-8 px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">
+            Retry Camera
           </button>
         </div>
       )}
@@ -92,28 +92,32 @@ export function ScannerView({ isActive, onScan, isProcessing = false }: ScannerV
       {/* Viewfinder Overlay */}
       {status === "scanning" && (
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {/* Semi-transparent border overlay */}
-          <div className="absolute inset-0 border-[40px] sm:border-[60px] border-slate-900/60 transition-all duration-500" />
+          {/* Subtle vignette/border overlay */}
+          <div className="absolute inset-0 border-[20px] sm:border-[40px] border-slate-950/60 transition-all duration-500" />
           
           {/* Scanning Box Outline */}
-          <div className="absolute inset-[40px] sm:inset-[60px] border-2 border-white/20">
-            {/* Corners */}
-            <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-blue-500" />
-            <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-blue-500" />
-            <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-blue-500" />
-            <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-blue-500" />
+          <div className="absolute inset-[20px] sm:inset-[40px] border border-white/10 rounded-2xl overflow-hidden">
             
-            {/* Animated Scanning Line */}
+            {/* Focus Grid Overlay (Subtle) */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30" />
+
+            {/* Precision Corners */}
+            <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-indigo-500 rounded-tl-xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-indigo-500 rounded-tr-xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-indigo-500 rounded-bl-xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-indigo-500 rounded-br-xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            
+            {/* Animated Laser Line */}
             {!isProcessing && (
-              <div className="w-full h-1 bg-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.8)] absolute animate-[scan_2s_ease-in-out_infinite]" />
+              <div className="w-full h-[2px] bg-indigo-500 shadow-[0_0_20px_4px_rgba(99,102,241,0.8)] absolute animate-[scan_2.5s_ease-in-out_infinite]" />
             )}
 
             {/* Processing Overlay */}
             {isProcessing && (
-              <div className="absolute inset-0 bg-blue-500/20 backdrop-blur-sm flex items-center justify-center transition-all animate-in fade-in">
-                <div className="bg-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3">
-                  <span className="material-symbols-outlined animate-spin text-blue-600">sync</span>
-                  <span className="font-bold text-slate-800 text-sm">Processing...</span>
+              <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center transition-all animate-in fade-in zoom-in duration-300">
+                <div className="bg-white/95 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/20">
+                  <span className="material-symbols-outlined animate-spin text-indigo-600 text-[28px]">sync</span>
+                  <span className="font-black text-slate-900 tracking-tight text-lg">Processing Code...</span>
                 </div>
               </div>
             )}

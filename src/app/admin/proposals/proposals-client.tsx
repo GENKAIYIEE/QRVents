@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { ProposalDrawer } from "@/components/admin/proposal-drawer"
+import { ArchiveDrawer } from "@/components/admin/archive-drawer"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import { format } from "date-fns"
 import { toast } from "sonner"
 
-export function ProposalsClient() {
+export function ProposalsClient({ isArchived = false }: { isArchived?: boolean }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -27,26 +29,26 @@ export function ProposalsClient() {
     try {
       const query = new URLSearchParams()
       query.set("page", page.toString())
-      if (status === "ARCHIVED") {
+      if (isArchived) {
         query.set("archived", "true")
       } else if (status !== "ALL") {
         query.set("status", status)
       }
       if (search) query.set("search", search)
 
-      const res = await fetch(`/api/admin/proposals?${query.toString()}`)
+      const res = await fetch(`/api/admin/proposals?` + query.toString())
       const { data } = await res.json()
       
       setProposals(data.proposals || [])
       setTotalPages(data.pages || 1)
 
-      router.replace(`${pathname}?${query.toString()}`, { scroll: false })
+      router.replace(pathname + "?" + query.toString(), { scroll: false })
     } catch {
       toast.error("Failed to load proposals")
     } finally {
       setLoading(false)
     }
-  }, [page, status, search, pathname, router])
+  }, [page, status, search, pathname, router, isArchived])
 
   useEffect(() => {
     fetchProposals()
@@ -70,11 +72,27 @@ export function ProposalsClient() {
     APPROVED: { color: "text-emerald-700", bg: "bg-emerald-100" },
     ON_HOLD: { color: "text-purple-700", bg: "bg-purple-100" },
     REJECTED: { color: "text-rose-700", bg: "bg-rose-100" },
+    ARCHIVED: { color: "text-slate-600", bg: "bg-slate-200" },
   }
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
 
+      {/* Navigation Tabs */}
+      <div className="flex gap-4 border-b border-slate-200">
+        <Link 
+          href="/admin/proposals"
+          className={"px-4 py-3 text-sm font-bold border-b-2 transition-all " + (!isArchived ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")}
+        >
+          Active Proposals
+        </Link>
+        <Link 
+          href="/admin/proposals/archived"
+          className={"px-4 py-3 text-sm font-bold border-b-2 transition-all " + (isArchived ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")}
+        >
+          Archived Proposals
+        </Link>
+      </div>
 
       {/* Filter Bar */}
       <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col md:flex-row gap-4 items-center shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
@@ -88,17 +106,19 @@ export function ProposalsClient() {
             className="w-full py-3 pr-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
           />
         </div>
-        <div className="w-full md:w-[220px] shrink-0">
-          <select 
-            value={status}
-            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-            className="w-full py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-700 text-sm cursor-pointer focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
-          >
-            {tabs.map((tab) => (
-              <option key={tab.value} value={tab.value}>{tab.label}</option>
-            ))}
-          </select>
-        </div>
+        {!isArchived && (
+          <div className="w-full md:w-[220px] shrink-0">
+            <select 
+              value={status}
+              onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+              className="w-full py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-700 text-sm cursor-pointer focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.value} value={tab.value}>{tab.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Content Area */}
@@ -113,14 +133,14 @@ export function ProposalsClient() {
           </div>
           <h3 className="text-xl font-extrabold text-slate-900 mb-2">No proposals found</h3>
           <p className="text-slate-500 text-[15px] max-w-md text-center leading-relaxed font-medium">
-            {status !== "ALL" ? `There are no ${status.toLowerCase()} proposals at the moment.` : "Departments haven't submitted any proposals yet. New proposals will appear here."}
+            {isArchived ? "There are no archived proposals." : (status !== "ALL" ? "There are no " + status.toLowerCase() + " proposals at the moment." : "Departments haven't submitted any proposals yet.")}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {proposals.map((proposal) => {
-              const statusCfg = statusConfig[proposal.status] || { color: "text-slate-700", bg: "bg-slate-100" }
+              const statusCfg = proposal.isArchived ? statusConfig["ARCHIVED"] : (statusConfig[proposal.status] || { color: "text-slate-700", bg: "bg-slate-100" })
               
               return (
                 <div 
@@ -129,8 +149,8 @@ export function ProposalsClient() {
                   className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer flex flex-col group"
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${statusCfg.bg} ${statusCfg.color}`}>
-                      {proposal.status.replace("_", " ")}
+                    <span className={"px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider " + statusCfg.bg + " " + statusCfg.color}>
+                      {proposal.isArchived ? "ARCHIVED" : proposal.status.replace("_", " ")}
                     </span>
                     <span className="text-xs text-slate-400 font-semibold bg-slate-50 px-2 py-1 rounded-lg">
                       {format(new Date(proposal.submittedAt), "MMM d")}
@@ -141,65 +161,88 @@ export function ProposalsClient() {
                     {proposal.title}
                   </h3>
                   
-                  <div className="flex items-center gap-2 mb-5">
-                    <div 
-                      className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold text-white shadow-sm"
-                      style={{ backgroundColor: proposal.department.color }}
-                    >
-                      {proposal.department.code[0]}
-                    </div>
-                    <span className="text-sm font-semibold text-slate-600 truncate">
-                      {proposal.department.name}
-                    </span>
+                  <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                    <span className="material-symbols-outlined text-[16px]">location_on</span>
+                    <span className="line-clamp-1">{proposal.venue}</span>
                   </div>
-                  
-                  <div className="mt-auto pt-4 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs">
-                    <div className="flex items-center gap-1.5 text-slate-500 font-medium">
-                      <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                      <span className="truncate">{format(new Date(proposal.date), "MMM d, yyyy")}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-500 font-medium">
-                      <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span className="truncate">{proposal.venue}</span>
+
+                  <div className="mt-auto pt-4 border-t border-slate-50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[16px] text-slate-500">domain</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-700 line-clamp-1">
+                          {proposal.department?.name || "School-Wide"}
+                        </p>
+                        <p className="text-[11px] text-slate-500">
+                          by {proposal.submittedBy?.fullName || "Admin"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               )
             })}
           </div>
-          
+
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-3 mt-4">
-              <button 
-                disabled={page === 1}
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm text-sm flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-                Prev
-              </button>
-              <div className="px-4 py-2 font-bold text-slate-500 text-sm bg-white border border-slate-100 rounded-lg shadow-sm">
-                {page} <span className="text-slate-300 mx-1">/</span> {totalPages}
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <span className="text-sm text-slate-500 font-medium">
+                Page {page} of {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
               </div>
-              <button 
-                disabled={page === totalPages}
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm text-sm flex items-center gap-1"
-              >
-                Next
-                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-              </button>
             </div>
           )}
         </div>
       )}
 
-      <ProposalDrawer 
-        proposal={selectedProposal}
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSuccess={fetchProposals}
-      />
+      {/* Drawers */}
+      {selectedProposal?.isArchived ? (
+        <ArchiveDrawer 
+          proposal={selectedProposal}
+          isOpen={isDrawerOpen}
+          onClose={() => {
+            setIsDrawerOpen(false)
+            setSelectedProposal(null)
+          }}
+          onSuccess={() => {
+            setIsDrawerOpen(false)
+            setSelectedProposal(null)
+            fetchProposals()
+          }}
+        />
+      ) : (
+        <ProposalDrawer 
+          proposal={selectedProposal}
+          isOpen={isDrawerOpen}
+          onClose={() => {
+            setIsDrawerOpen(false)
+            setSelectedProposal(null)
+          }}
+          onSuccess={() => {
+            setIsDrawerOpen(false)
+            setSelectedProposal(null)
+            fetchProposals()
+          }}
+        />
+      )}
     </div>
   )
 }
