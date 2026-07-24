@@ -26,7 +26,7 @@ export async function GET(
       where = { studentId: session.userId }
     } else if (session.role === "DEPT_ADMIN") {
       where = {
-        event: { departmentId: session.departmentId }
+        student: { departmentId: session.departmentId }
       }
     } else if (session.role === "SUPER_ADMIN") {
       // Super Admin sees all penalties across all departments and event types

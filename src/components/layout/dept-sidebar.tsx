@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logoutAction } from "@/lib/auth-actions"
@@ -75,6 +76,7 @@ interface DeptSidebarProps {
 export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: DeptSidebarProps) {
   const pathname = usePathname()
   const deptColor = department?.color || "#3B82F6"
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const handleComingSoon = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -194,38 +196,8 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
       {/* Bottom actions */}
       <div className="p-3 pb-5 border-t border-white/5 shrink-0">
         <button
-          onClick={() => {
-            toast.custom((t) => (
-              <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 w-[320px] max-w-[calc(100vw-32px)]">
-                <div className="flex gap-3 mb-4">
-                  <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-xl">logout</span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 mb-1">Sign Out</h3>
-                    <p className="text-xs text-slate-500 font-medium">Are you sure you want to end your session?</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => toast.dismiss(t)}
-                    className="flex-1 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      toast.dismiss(t)
-                      await logoutAction()
-                    }}
-                    className="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            ), { duration: 5000 })
-          }}
+          type="button"
+          onClick={() => setShowLogoutModal(true)}
           className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
         >
           <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -259,6 +231,38 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
           <aside className="relative w-[260px] h-full z-51 animate-in slide-in-from-left duration-200">
             <SidebarContent />
           </aside>
+        </div>
+      )}
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLogoutModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                <span className="material-symbols-outlined text-red-500 text-3xl">logout</span>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Sign Out</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">Are you sure you want to end your session? You will need to log in again to access the portal.</p>
+            </div>
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+              <button 
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <form action={logoutAction} className="flex-1">
+                <button 
+                  type="submit"
+                  className="w-full px-4 py-2.5 bg-red-500 text-white rounded-xl font-bold text-sm hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 flex items-center justify-center gap-2"
+                >
+                  Yes, Sign Out
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </>

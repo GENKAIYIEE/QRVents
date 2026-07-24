@@ -138,7 +138,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
       </div>
 
       {selectedEventId && stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Checked In</div>
             <div className="text-3xl font-black text-slate-800">{stats.total}</div>
@@ -153,13 +153,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
               <span className="material-symbols-outlined text-8xl">check_circle</span>
             </div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-            <div className="text-amber-600 text-xs font-bold uppercase tracking-wider mb-1">Guests</div>
-            <div className="text-3xl font-black text-amber-700">{stats.guest}</div>
-            <div className="absolute -right-4 -bottom-4 opacity-5 text-amber-500">
-              <span className="material-symbols-outlined text-8xl">person_add</span>
-            </div>
-          </div>
+
           <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Checked Out</div>
             <div className="text-3xl font-black text-slate-600">{stats.checkedOut}</div>
@@ -227,7 +221,7 @@ export function AttendanceViewer({ events, departments }: AttendanceViewerProps)
               >
                 <option value="ALL">All Status</option>
                 <option value="PRESENT">Present</option>
-                <option value="GUEST">Guest</option>
+
                 <option value="CHECKED_OUT">Checked Out</option>
               </select>
             </div>

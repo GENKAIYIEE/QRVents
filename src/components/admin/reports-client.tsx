@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { format, subDays } from "date-fns"
 import { DeptBarChart } from "@/components/admin/dashboard-charts" // Reuse the dashboard chart
+import Link from "next/link"
 
 export function ReportsClient() {
   const [loading, setLoading] = useState(true)
@@ -206,6 +207,7 @@ export function ReportsClient() {
                       <th className="px-6 py-4">Date</th>
                       <th className="px-6 py-4 text-center">Type</th>
                       <th className="px-6 py-4 text-right">Attendees</th>
+                      <th className="px-6 py-4 text-right"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -225,6 +227,14 @@ export function ReportsClient() {
                           </td>
                           <td className="px-6 py-3 text-right font-black text-slate-800">
                             {event._count.attendanceLogs}
+                          </td>
+                          <td className="px-6 py-3 text-right">
+                            <Link 
+                              href={`/admin/reports/${event.id}`}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
+                            >
+                              View Details
+                            </Link>
                           </td>
                         </tr>
                       ))

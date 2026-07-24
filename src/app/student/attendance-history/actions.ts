@@ -22,13 +22,26 @@ export async function getStudentAttendanceHistory(
   const user = await prisma.user.findUnique({ where: { id: studentId } })
   const deptId = user?.departmentId
 
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
   const now = new Date()
 
   // Build the Where clause for Events
+  // Only show past events (date <= now).
   const where: Prisma.EventWhereInput = {
-    date: { lte: now }, // Only past/ongoing events
+    date: { lte: now },
     AND: []
   }
+
+  // Prevent "Fake Missed Events": Do not show ONGOING events from TODAY if the student hasn't attended yet.
+  ;(where.AND as any[]).push({
+    OR: [
+      { status: { not: "ONGOING" } },
+      { date: { lt: today } },
+      { attendanceLogs: { some: { userId: studentId } } }
+    ]
+  })
 
   if (search) {
     ;(where.AND as any[]).push({
@@ -108,6 +121,7 @@ export async function getStudentAttendanceHistory(
           startTime: event.startTime,
           endTime: event.endTime,
           eventType: event.eventType,
+          status: event.status,
           department: event.department
         }
       }
@@ -125,6 +139,7 @@ export async function getStudentAttendanceHistory(
           startTime: event.startTime,
           endTime: event.endTime,
           eventType: event.eventType,
+          status: event.status,
           department: event.department
         }
       }
