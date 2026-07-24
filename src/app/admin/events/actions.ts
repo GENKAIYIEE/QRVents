@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth"
 import { logActivity } from "@/lib/activity-logger"
 import { EventFormValues } from "@/lib/validations/event"
 import { revalidatePath } from "next/cache"
-import { EventStatus, EventType } from "@prisma/client"
+import { EventStatus, EventType, Prisma } from "@prisma/client"
 import { generatePenaltiesForEvent } from "@/lib/penalty"
 import { syncEventStatuses } from "@/lib/event-sync"
 import { createNotificationsForMany } from "@/lib/notifications"
@@ -72,7 +72,9 @@ export async function createEvent(data: EventFormValues) {
   
   // Notify Students
   try {
-    const studentsCondition = event.departmentId ? { role: "STUDENT", departmentId: event.departmentId } : { role: "STUDENT" };
+    const studentsCondition: Prisma.UserWhereInput = event.departmentId 
+      ? { role: "STUDENT", departmentId: event.departmentId } 
+      : { role: "STUDENT" };
     const students = await prisma.user.findMany({ where: studentsCondition, select: { id: true } })
     if (students.length > 0) {
       await createNotificationsForMany(
