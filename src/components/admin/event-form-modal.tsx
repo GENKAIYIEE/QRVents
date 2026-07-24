@@ -35,6 +35,7 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
       eventType: eventToEdit?.eventType || "SCHOOL_WIDE",
       departmentId: eventToEdit?.departmentId || "",
       expectedAttendees: eventToEdit?.expectedAttendees || undefined,
+      isMandatory: eventToEdit?.isMandatory || false,
     }
   })
 
@@ -162,6 +163,18 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
                 </div>
                 {errors.endTime && <p style={{ color: "#EF4444", fontSize: "12px", marginTop: "4px" }}>{errors.endTime.message}</p>}
               </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+              <input 
+                type="checkbox" 
+                id="isMandatory" 
+                {...register("isMandatory")} 
+                style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#2563EB" }}
+              />
+              <label htmlFor="isMandatory" style={{ fontSize: "14px", fontWeight: 600, color: "#334155", cursor: "pointer", userSelect: "none" }}>
+                Mandatory Event (Penalties will be applied for absences)
+              </label>
             </div>
 
 

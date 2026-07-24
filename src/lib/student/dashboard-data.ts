@@ -28,7 +28,8 @@ export async function getDashboardData() {
     prisma.event.findMany({
       where: {
         date: { gte: today },
-        eventType: "SCHOOL_WIDE"
+        eventType: "SCHOOL_WIDE",
+        status: { in: ["UPCOMING", "ONGOING"] }
       },
       orderBy: { date: "asc" },
       take: 6,
@@ -40,7 +41,8 @@ export async function getDashboardData() {
       where: {
         date: { gte: today },
         eventType: "DEPARTMENT",
-        departmentId: departmentId
+        departmentId: departmentId,
+        status: { in: ["UPCOMING", "ONGOING"] }
       },
       orderBy: { date: "asc" },
       take: 6,
@@ -51,7 +53,8 @@ export async function getDashboardData() {
     prisma.event.count({
       where: {
         date: { gte: today },
-        eventType: "SCHOOL_WIDE"
+        eventType: "SCHOOL_WIDE",
+        status: { in: ["UPCOMING", "ONGOING"] }
       }
     }),
 
@@ -60,7 +63,8 @@ export async function getDashboardData() {
       where: {
         date: { gte: today },
         eventType: "DEPARTMENT",
-        departmentId: departmentId
+        departmentId: departmentId,
+        status: { in: ["UPCOMING", "ONGOING"] }
       }
     }) : Promise.resolve(0),
 
