@@ -4,6 +4,7 @@ import { useState } from "react"
 import { format } from "date-fns"
 import { EventStatus } from "@prisma/client"
 import { formatTimeString } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface EventsTableProps {
   events: any[]
@@ -16,6 +17,8 @@ interface EventsTableProps {
 export function EventsTable({ events, onEdit, onStatusChange, onDelete, onGeneratePenalties }: EventsTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [eventToDelete, setEventToDelete] = useState<any | null>(null)
+  const [eventToArchive, setEventToArchive] = useState<any | null>(null)
+  const [isArchiving, setIsArchiving] = useState(false)
 
   const statusConfig: Record<EventStatus, { label: string, color: string, bg: string }> = {
     UPCOMING: { label: "Upcoming", color: "text-blue-700", bg: "bg-blue-100" },
@@ -116,19 +119,34 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete, onGenera
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
                       </button>
-                      
+                      {event.status === 'COMPLETED' && (
+                        <button 
+                          onClick={() => setEventToArchive(event)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                            event.isArchived 
+                              ? 'text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600'
+                              : 'text-amber-500 hover:bg-amber-50 hover:text-amber-600'
+                          }`}
+                          title={event.isArchived ? "Restore Event" : "Archive Event"}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                            {event.isArchived ? 'unarchive' : 'archive'}
+                          </span>
+                        </button>
+                      )}
+
                       <button 
                         onClick={() => {
-                          if (hasAttendance) return;
+                          if (hasAttendance && !event.isArchived) return;
                           setEventToDelete(event)
                         }}
-                        disabled={hasAttendance || deletingId === event.id}
+                        disabled={(hasAttendance && !event.isArchived) || deletingId === event.id}
                         className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                          hasAttendance 
+                          hasAttendance && !event.isArchived
                             ? 'text-slate-300 cursor-not-allowed' 
                             : 'text-slate-500 hover:bg-red-50 hover:text-red-600'
                         }`}
-                        title={hasAttendance ? "Cannot delete event with attendance records" : "Delete Event"}
+                        title={(hasAttendance && !event.isArchived) ? "Archive event first to delete it." : "Permanent Delete Event"}
                       >
                         {deletingId === event.id ? (
                           <span className="material-symbols-outlined animate-spin" style={{ fontSize: '18px' }}>progress_activity</span>
@@ -172,6 +190,65 @@ export function EventsTable({ events, onEdit, onStatusChange, onDelete, onGenera
                   className="flex-1 py-3.5 font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-md shadow-rose-200 hover:shadow-lg hover:-translate-y-0.5"
                 >
                   Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {eventToArchive && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-[400px] overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-100">
+            <div className="p-8 text-center flex flex-col items-center">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-sm border ${
+                eventToArchive.isArchived 
+                  ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                  : 'bg-amber-50 text-amber-600 border-amber-100'
+              }`}>
+                <span className="material-symbols-outlined text-[40px] [font-variation-settings:'FILL'_1]">
+                  {eventToArchive.isArchived ? 'unarchive' : 'archive'}
+                </span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
+                {eventToArchive.isArchived ? "Restore Event?" : "Archive Event?"}
+              </h3>
+              <p className="text-slate-500 text-[15px] mb-8 leading-relaxed font-medium">
+                {eventToArchive.isArchived 
+                  ? "This event will be moved back to your active list."
+                  : "This event will be hidden from the active list and moved to the archives."}
+              </p>
+              <div className="flex gap-3 w-full">
+                <button 
+                  onClick={() => setEventToArchive(null)}
+                  disabled={isArchiving}
+                  className="flex-1 py-3.5 font-bold text-slate-600 bg-white border-2 border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={async () => {
+                    setIsArchiving(true)
+                    try {
+                      const { toggleArchiveEvent } = await import('@/app/admin/events/actions')
+                      await toggleArchiveEvent(eventToArchive.id, !eventToArchive.isArchived)
+                      toast.success(`Event ${eventToArchive.isArchived ? 'restored' : 'archived'} successfully!`)
+                      window.location.reload()
+                    } catch (e) {
+                      toast.error("Failed to update event status.")
+                    } finally {
+                      setIsArchiving(false)
+                      setEventToArchive(null)
+                    }
+                  }}
+                  disabled={isArchiving}
+                  className={`flex-1 py-3.5 font-bold text-white rounded-xl transition-all shadow-md disabled:opacity-50 ${
+                    eventToArchive.isArchived 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' 
+                      : 'bg-amber-500 hover:bg-amber-600 shadow-amber-200'
+                  }`}
+                >
+                  {isArchiving ? "Updating..." : "Yes, Confirm"}
                 </button>
               </div>
             </div>

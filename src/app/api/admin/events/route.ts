@@ -16,8 +16,9 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || ""
     const status = searchParams.get("status") as EventStatus | undefined
     const eventType = searchParams.get("eventType") as EventType | undefined
+    const isArchived = searchParams.get("isArchived") === "true"
 
-    const data = await getEvents(page, 10, search, status, eventType)
+    const data = await getEvents(page, 10, search, status, eventType, isArchived)
     return NextResponse.json({ success: true, data })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })

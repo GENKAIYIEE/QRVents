@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { loginAction } from "@/app/(auth)/login/actions"
+import { toast } from "sonner"
 import {
   Mail,
   Lock,
@@ -41,6 +42,16 @@ export default function LoginForm() {
     defaultValues: { email: "", password: "" },
   })
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("registered") === "true") {
+      toast.success("Account has been successfully created!")
+      // Clean up URL without triggering a reload
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [])
+
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null)
     const result = await loginAction(values.email, values.password)
@@ -63,64 +74,16 @@ export default function LoginForm() {
           <div className="absolute -bottom-20 -left-10 w-80 h-80 rounded-full bg-blue-400/5" />
           <div className="absolute top-1/2 right-10 w-20 h-20 rounded-full bg-blue-500/10" />
 
-          {/* Branding */}
-          <div className="relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
-                <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
-              </div>
-              <div>
-                <p className="text-white font-bold text-2xl leading-none tracking-tight">QRVents</p>
-                <p className="text-blue-300/70 text-xs font-semibold tracking-widest uppercase mt-1.5">
-                  Polytechnic College of La Union
-                </p>
-              </div>
+          {/* Branding Centered */}
+          <div className="relative z-10 w-full h-full flex flex-col items-center justify-center -mt-10">
+            <div className="w-32 h-32 rounded-full overflow-hidden shrink-0 flex items-center justify-center mb-6 shadow-2xl ring-4 ring-white/10 bg-white">
+              <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
             </div>
-          </div>
-
-          {/* Hero Text */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center py-10">
-            <h1 className="text-white text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
-              Smart Events.<br />
-              <span className="text-blue-400">Instant Attendance.</span>
-            </h1>
-            <p className="text-blue-200/60 text-base leading-relaxed max-w-xs mt-5">
-              One permanent QR code per student. Used at every event, forever.
-            </p>
-            <div className="w-12 h-0.5 bg-blue-500/40 mt-8" />
-
-            {/* Feature List */}
-            <div className="mt-6 flex flex-col gap-3">
-              {[
-                { icon: <QrCode className="text-blue-400" size={14} />, text: "Permanent QR per student" },
-                { icon: <ScanLine className="text-blue-400" size={14} />, text: "Instant QR check-in & out" },
-                { icon: <BarChart2 className="text-blue-400" size={14} />, text: "Real-time attendance reports" },
-                { icon: <Shield className="text-blue-400" size={14} />, text: "Role-based secure access" },
-              ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    {feature.icon}
-                  </div>
-                  <span className="text-blue-100/70 text-sm">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="relative z-10">
-            <div className="w-full h-px bg-white/5 mb-6" />
-            <div className="flex gap-8">
-              {[
-                { number: "7", label: "Departments" },
-                { number: "3", label: "Portals" },
-                { number: "∞", label: "Events" },
-              ].map((stat, i) => (
-                <div key={i}>
-                  <p className="text-white font-bold text-2xl leading-none">{stat.number}</p>
-                  <p className="text-blue-300/50 text-xs mt-1">{stat.label}</p>
-                </div>
-              ))}
+            <div className="text-center">
+              <p className="text-white font-bold text-4xl leading-none tracking-tight">QRVents</p>
+              <p className="text-blue-300/80 text-sm font-semibold tracking-widest uppercase mt-3">
+                Polytechnic College of La Union
+              </p>
             </div>
           </div>
         </div>

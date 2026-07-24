@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { ProposalStatus } from "@prisma/client"
+import { getProposals } from "./actions"
 
 interface Proposal {
   id: string
@@ -14,9 +16,42 @@ interface Proposal {
   submittedAt: Date
 }
 
-export function ProposeEventClient({ initialProposals }: { initialProposals: Proposal[] }) {
-  const [proposals, setProposals] = useState<Proposal[]>(initialProposals)
+interface InitialData {
+  proposals: Proposal[]
+  total: number
+  pages: number
+}
+
+export function ProposeEventClient({ initialData }: { initialData: InitialData }) {
+  const [proposals, setProposals] = useState<Proposal[]>(initialData.proposals)
+  const [total, setTotal] = useState(initialData.total)
+  const [pages, setPages] = useState(initialData.pages)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [activeTab, setActiveTab] = useState<ProposalStatus | "ALL">("ALL")
+  const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const fetchProposals = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const data = await getProposals(currentPage, 10, activeTab)
+      setProposals(data.proposals)
+      setTotal(data.total)
+      setPages(data.pages)
+    } catch (err) {
+      toast.error("Failed to load proposals.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [currentPage, activeTab])
+
+  useEffect(() => {
+    // We skip fetching on initial mount for ALL/page 1 since it comes from server
+    if (activeTab === "ALL" && currentPage === 1 && !isLoading && proposals.length === initialData.proposals.length) {
+      return
+    }
+    fetchProposals()
+  }, [fetchProposals, activeTab, currentPage])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -47,8 +82,13 @@ export function ProposeEventClient({ initialProposals }: { initialProposals: Pro
 
       toast.success("Proposal submitted successfully!")
       
-      // Optimistically add to list
-      setProposals([{ ...result.proposal, date: new Date(result.proposal.date), submittedAt: new Date(result.proposal.submittedAt) }, ...proposals])
+      // Refresh the list
+      if (currentPage === 1 && activeTab !== "APPROVED" && activeTab !== "REJECTED") {
+        fetchProposals()
+      } else {
+        setActiveTab("ALL")
+        setCurrentPage(1)
+      }
       
       // Reset form
       ;(e.target as HTMLFormElement).reset()
@@ -149,10 +189,31 @@ export function ProposeEventClient({ initialProposals }: { initialProposals: Pro
       {/* List Column */}
       <div className="xl:col-span-2">
         <div className="bg-white rounded-3xl p-2 sm:p-6 shadow-sm border border-slate-100 h-full">
-          <div className="px-4 py-2 flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-900">Your Proposals</h2>
-            <div className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-              {proposals.length} Total
+          <div className="px-4 py-2 flex flex-col gap-4 mb-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900">Your Proposals</h2>
+              <div className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                {total} Total
+              </div>
+            </div>
+
+            <div className="flex gap-2 border-b border-slate-100 pb-2 overflow-x-auto no-scrollbar">
+              {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setActiveTab(tab as any)
+                    setCurrentPage(1)
+                  }}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                    activeTab === tab 
+                      ? 'bg-blue-50 text-blue-700' 
+                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                  }`}
+                >
+                  {tab.charAt(0) + tab.slice(1).toLowerCase()}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -201,6 +262,31 @@ export function ProposeEventClient({ initialProposals }: { initialProposals: Pro
                   </div>
                 </div>
               ))}
+              
+              {/* Pagination Controls */}
+              {pages > 1 && (
+                <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                  <span className="text-sm font-medium text-slate-500">
+                    Page <span className="font-bold text-slate-700">{currentPage}</span> of {pages}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1 || isLoading}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(pages, p + 1))}
+                      disabled={currentPage === pages || isLoading}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

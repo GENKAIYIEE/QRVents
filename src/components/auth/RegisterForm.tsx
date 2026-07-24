@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerAction } from "@/app/(auth)/register/actions"
 import { registerSchema, type RegisterFormValues } from "@/lib/validations/register"
+import { toast } from "sonner"
 import {
   Mail,
   Lock,
@@ -64,6 +65,8 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
     const result = await registerAction(values)
     if (result?.error) {
       setServerError(result.error)
+    } else {
+      toast.success("Account has been successfully created!")
     }
   }
 
@@ -107,64 +110,16 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
           <div className="absolute -bottom-20 -left-10 w-80 h-80 rounded-full bg-blue-400/5" />
           <div className="absolute top-1/2 right-10 w-20 h-20 rounded-full bg-blue-500/10" />
 
-          {/* Branding */}
-          <div className="relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
-                <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
-              </div>
-              <div>
-                <p className="text-white font-bold text-2xl leading-none tracking-tight">QRVents</p>
-                <p className="text-blue-300/70 text-xs font-semibold tracking-widest uppercase mt-1.5">
-                  Polytechnic College of La Union
-                </p>
-              </div>
+          {/* Branding Centered */}
+          <div className="relative z-10 w-full h-full flex flex-col items-center justify-center -mt-10">
+            <div className="w-32 h-32 rounded-full overflow-hidden shrink-0 flex items-center justify-center mb-6 shadow-2xl ring-4 ring-white/10 bg-white">
+              <img src="/Pclu-Logo.png" alt="PCLU Logo" className="w-[114%] h-[114%] max-w-none object-cover -translate-y-1" />
             </div>
-          </div>
-
-          {/* Hero Text */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center py-10">
-            <h1 className="text-white text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
-              Create your<br />
-              <span className="text-blue-400">Student Account.</span>
-            </h1>
-            <p className="text-blue-200/60 text-base leading-relaxed max-w-xs mt-5">
-              Register once to get your permanent QR code for all campus events.
-            </p>
-            <div className="w-12 h-0.5 bg-blue-500/40 mt-8" />
-
-            {/* Feature List */}
-            <div className="mt-6 flex flex-col gap-3">
-              {[
-                { icon: <QrCode className="text-blue-400" size={14} />, text: "Permanent QR per student" },
-                { icon: <ScanLine className="text-blue-400" size={14} />, text: "Instant QR check-in & out" },
-                { icon: <BarChart2 className="text-blue-400" size={14} />, text: "Track your attendance history" },
-                { icon: <Shield className="text-blue-400" size={14} />, text: "Secure role-based access" },
-              ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    {feature.icon}
-                  </div>
-                  <span className="text-blue-100/70 text-sm">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="relative z-10">
-            <div className="w-full h-px bg-white/5 mb-6" />
-            <div className="flex gap-8">
-              {[
-                { number: "7", label: "Departments" },
-                { number: "3", label: "Portals" },
-                { number: "∞", label: "Events" },
-              ].map((stat, i) => (
-                <div key={i}>
-                  <p className="text-white font-bold text-2xl leading-none">{stat.number}</p>
-                  <p className="text-blue-300/50 text-xs mt-1">{stat.label}</p>
-                </div>
-              ))}
+            <div className="text-center">
+              <p className="text-white font-bold text-4xl leading-none tracking-tight">QRVents</p>
+              <p className="text-blue-300/80 text-sm font-semibold tracking-widest uppercase mt-3">
+                Polytechnic College of La Union
+              </p>
             </div>
           </div>
         </div>
@@ -316,22 +271,13 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                   </label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
-                    <select
+                    <input
                       id="section"
-                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none"
+                      type="text"
+                      placeholder="e.g. A"
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
                       {...register("section")}
-                    >
-                      <option value="" disabled>Select Section</option>
-                      {(() => {
-                        const letters = ['A', 'B', 'C', 'D'];
-                        const years = yearLevelValue ? [yearLevelValue] : ['1', '2', '3', '4'];
-                        return years.flatMap(y => 
-                          letters.map(l => (
-                            <option key={`${y}${l}`} value={`${y}${l}`}>{y}{l}</option>
-                          ))
-                        );
-                      })()}
-                    </select>
+                    />
                   </div>
                   {errors.section && <p className="text-red-500 text-xs mt-1.5">{errors.section.message}</p>}
                 </div>
