@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Search, Filter, Trash2, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react"
-import { getStudents, deleteStudent, getDepartments } from "./actions"
+import { getStudents, deleteStudent, getDepartments, getAvailableSections } from "./actions"
 import { format } from "date-fns"
 
 interface Student {
@@ -28,6 +28,7 @@ export function StudentsClient() {
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
+  const [sections, setSections] = useState<string[]>([])
 
   // Filters
   const [search, setSearch] = useState("")
@@ -74,6 +75,22 @@ export function StudentsClient() {
   useEffect(() => {
     setCurrentPage(1)
   }, [search, deptFilter, yearFilter, sectionFilter])
+
+  // Fetch available sections dynamically when dept or year changes
+  useEffect(() => {
+    async function fetchSections() {
+      try {
+        const availableSections = await getAvailableSections(deptFilter, yearFilter)
+        setSections(availableSections)
+        if (sectionFilter !== "ALL" && !availableSections.includes(sectionFilter)) {
+          setSectionFilter("ALL")
+        }
+      } catch (err) {
+        console.error("Failed to load sections", err)
+      }
+    }
+    fetchSections()
+  }, [deptFilter, yearFilter, sectionFilter])
 
   const handleDelete = async () => {
     if (!studentToDelete) return
@@ -165,17 +182,11 @@ export function StudentsClient() {
             className="w-full px-4 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 appearance-none focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
           >
             <option value="ALL">All Sections</option>
-            {(() => {
-              const letters = ['A', 'B', 'C', 'D'];
-              const years = yearFilter === 'ALL' ? ['1', '2', '3', '4'] : [yearFilter];
-              return years.flatMap(y => 
-                letters.map(l => (
-                  <option key={`${y}${l}`} value={`${y}${l}`}>
-                    {y}{l}
-                  </option>
-                ))
-              );
-            })()}
+            {sections.map(section => (
+              <option key={section} value={section}>
+                {section}
+              </option>
+            ))}
           </select>
           <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">expand_more</span>
         </div>

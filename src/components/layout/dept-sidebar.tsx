@@ -193,29 +193,51 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
 
       {/* Bottom actions */}
       <div className="p-3 pb-5 border-t border-white/5 shrink-0">
-        <form 
-          action={logoutAction}
-          onSubmit={(e) => {
-            if (!window.confirm("Are you sure you want to sign out?")) {
-              e.preventDefault();
-            }
+        <button
+          onClick={() => {
+            toast.custom((t) => (
+              <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 w-[320px] max-w-[calc(100vw-32px)]">
+                <div className="flex gap-3 mb-4">
+                  <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-xl">logout</span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 mb-1">Sign Out</h3>
+                    <p className="text-xs text-slate-500 font-medium">Are you sure you want to end your session?</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => toast.dismiss(t)}
+                    className="flex-1 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      toast.dismiss(t)
+                      await logoutAction()
+                    }}
+                    className="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ), { duration: 5000 })
           }}
+          className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
         >
-          <button
-            type="submit"
-            className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
-          >
-            <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-red-500 text-[18px]">
-                logout
-              </span>
-            </div>
-            <div>
-              <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>
-              <div className="text-red-400 text-[10.5px] mt-0.5 font-medium group-hover:text-red-300 transition-colors">End your session</div>
-            </div>
-          </button>
-        </form>
+          <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <span className="material-symbols-outlined text-red-500 text-[18px]">
+              logout
+            </span>
+          </div>
+          <div>
+            <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>
+            <div className="text-red-400 text-[10.5px] mt-0.5 font-medium group-hover:text-red-300 transition-colors">End your session</div>
+          </div>
+        </button>
       </div>
     </div>
   )

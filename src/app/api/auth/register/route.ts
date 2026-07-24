@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { hashPassword } from "@/lib/auth"
 import { randomUUID } from "crypto"
 import { z } from "zod"
+import { createNotificationsForMany } from "@/lib/notifications"
 
 const schema = z.object({
   fullName: z.string().min(2),
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
         email,
         passwordHash,
         role: "STUDENT",
-        yearLevel,
+        yearLevel: parseInt(yearLevel),
         section,
         studentId: studentId || null,
         departmentId,
@@ -61,6 +62,26 @@ export async function POST(request: NextRequest) {
       },
       select: { id: true, fullName: true, email: true, role: true },
     })
+
+    // Notify Department Admins of the new registration
+    try {
+      const deptAdmins = await prisma.user.findMany({
+        where: { role: "DEPT_ADMIN", departmentId },
+        select: { id: true }
+      })
+      if (deptAdmins.length > 0) {
+        await createNotificationsForMany(
+          deptAdmins.map(admin => admin.id),
+          {
+            title: "New Student Registration 🎓",
+            message: `${fullName} has successfully registered in your department.`,
+            type: "SYSTEM"
+          }
+        )
+      }
+    } catch (e) {
+      console.error("Failed to notify Dept Admins:", e)
+    }
 
     return NextResponse.json({ success: true, user }, { status: 201 })
   } catch (error) {

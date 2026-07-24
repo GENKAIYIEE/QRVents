@@ -32,7 +32,7 @@ export function StudentLayoutWrapper({ children, session, department, studentUse
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex min-h-screen bg-slate-50">
       <StudentSidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
@@ -41,7 +41,7 @@ export function StudentLayoutWrapper({ children, session, department, studentUse
         studentUser={studentUser}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative md:ml-[260px]">
+      <div className="flex-1 md:pl-[260px] flex flex-col min-h-screen transition-all duration-300 relative z-10 w-full overflow-hidden">
         <StudentHeader
           session={session}
           department={department}
@@ -49,7 +49,7 @@ export function StudentLayoutWrapper({ children, session, department, studentUse
           onMenuClick={() => setMobileOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto w-full p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
           {children}
         </main>
       </div>

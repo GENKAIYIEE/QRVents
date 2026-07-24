@@ -7,8 +7,9 @@ import { CompleteEventModal } from "@/components/admin/complete-event-modal"
 import { EventStatus, EventType } from "@prisma/client"
 import { toast } from "sonner"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 
-export function EventsClient({ departments }: { departments: any[] }) {
+export function EventsClient({ departments, isArchived = false }: { departments: any[], isArchived?: boolean }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -34,6 +35,7 @@ export function EventsClient({ departments }: { departments: any[] }) {
       if (search) query.set("search", search)
       if (status !== "ALL") query.set("status", status)
       if (eventType !== "ALL") query.set("eventType", eventType)
+      query.set("isArchived", isArchived.toString())
 
       const res = await fetch(`/api/admin/events?${query.toString()}`)
       if (!res.ok) {
@@ -105,6 +107,31 @@ export function EventsClient({ departments }: { departments: any[] }) {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
+      
+      {/* Navigation Tabs */}
+      <div className="flex gap-4 border-b border-slate-200">
+        <Link 
+          href="/admin/events"
+          className={`px-4 py-3 text-sm font-bold border-b-2 transition-all ${
+            !isArchived 
+              ? "border-blue-600 text-blue-600" 
+              : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+          }`}
+        >
+          Active Events
+        </Link>
+        <Link 
+          href="/admin/events/archived"
+          className={`px-4 py-3 text-sm font-bold border-b-2 transition-all ${
+            isArchived 
+              ? "border-blue-600 text-blue-600" 
+              : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+          }`}
+        >
+          Archived Events
+        </Link>
+      </div>
+
       {/* Toolbar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-100 flex flex-col lg:flex-row gap-4 justify-between items-center shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="flex-1 w-full relative min-w-[250px] lg:max-w-md">

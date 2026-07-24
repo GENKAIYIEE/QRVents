@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth"
 import { logActivity } from "@/lib/activity-logger"
 import { ProposalStatus } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { notifyProposalStatusChange, createNotificationsForMany } from "@/lib/notifications"
 
 export async function getProposals(page = 1, pageSize = 10, status: string = "ALL", search?: string, archived: boolean = false) {
   const session = await getSession()
@@ -128,6 +129,33 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
       where: { id },
       data: { eventId: event.id, isPublished: true },
     })
+
+    // Notify Students of the new upcoming event
+    try {
+      const students = await prisma.user.findMany({ 
+        where: { role: "STUDENT", departmentId: proposal.departmentId }, 
+        select: { id: true } 
+      })
+      if (students.length > 0) {
+        await createNotificationsForMany(
+          students.map(s => s.id),
+          {
+            title: "New Upcoming Event 🎉",
+            message: `${event.title} has been scheduled for ${event.date.toLocaleDateString()}. Don't miss it!`,
+            type: "EVENT_CREATED"
+          }
+        )
+      }
+    } catch (e) {
+      console.error("Failed to notify students:", e)
+    }
+  }
+
+  // Notify the Department Admin who submitted the proposal
+  try {
+    await notifyProposalStatusChange(id, status as any, proposal.submittedById)
+  } catch (e) {
+    console.error("Failed to notify Dept Admin of proposal status change:", e)
   }
 
   await logActivity(session.userId, session.fullName, "Reviewed Proposal", `Proposal: ${proposal.title} -> ${status}`)

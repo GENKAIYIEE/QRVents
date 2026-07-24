@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { AdminSidebar } from "@/components/layout/admin-sidebar"
 import { TopNavbar } from "@/components/layout/top-navbar"
-import { Toaster } from "sonner"
 
 interface AdminLayoutClientProps {
   children: React.ReactNode
@@ -19,7 +18,6 @@ export function AdminLayoutClient({ children, session }: AdminLayoutClientProps)
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
-      <Toaster position="bottom-right" richColors theme="light" />
       {/* Sidebar */}
       <AdminSidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 

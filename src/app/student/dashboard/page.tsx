@@ -4,7 +4,6 @@ import { StatCards } from "@/components/student/dashboard/StatCards"
 import { UpcomingEventsList } from "@/components/student/dashboard/UpcomingEventsList"
 import { RecentAttendance } from "@/components/student/dashboard/RecentAttendance"
 import { CalendarDays, History } from "lucide-react"
-import { StudentLayoutWrapper } from "@/components/student/dashboard/StudentLayoutWrapper"
 
 function SectionCard({
   title,
@@ -40,20 +39,21 @@ function SectionCard({
   )
 }
 
-export default async function StudentDashboardPage() {
+export default async function StudentDashboard() {
   const data = await getDashboardData()
 
-  // Separate events into Department and School-Wide
-  const deptEvents = data.upcomingEvents.filter((e: any) => e.eventType === "DEPARTMENT")
-  const schoolWideEvents = data.upcomingEvents.filter((e: any) => e.eventType === "SCHOOL_WIDE")
+  // Format events to plain objects for client components
+  const formattedEvents = data.upcomingEvents.map((e: any) => ({
+    ...e,
+    date: e.date.toISOString(),
+  }))
+
+  const deptEvents = formattedEvents.filter((e: any) => e.eventType === "DEPARTMENT")
+  const schoolWideEvents = formattedEvents.filter((e: any) => e.eventType === "SCHOOL_WIDE")
 
   return (
-    <StudentLayoutWrapper 
-      session={data.session} 
-      department={data.department}
-      studentUser={data.studentUser}
-    >
-      <div className="flex flex-col gap-6 w-full max-w-full pb-10">
+    <>
+      <div className="max-w-[1200px] mx-auto space-y-6 pb-10">
         <StatCards data={{
           upcomingSchoolEventsCount: data.upcomingSchoolEventsCount,
           upcomingDeptEventsCount: data.upcomingDeptEventsCount,
@@ -104,6 +104,6 @@ export default async function StudentDashboardPage() {
           </div>
         </div>
       </div>
-    </StudentLayoutWrapper>
+    </>
   )
 }
