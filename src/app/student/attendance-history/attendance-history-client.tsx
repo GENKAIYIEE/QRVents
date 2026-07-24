@@ -124,6 +124,7 @@ export function AttendanceHistoryClient() {
                   <th className="px-6 py-4">Check In</th>
                   <th className="px-6 py-4">Check Out</th>
                   <th className="px-6 py-4">Duration</th>
+                  <th className="px-6 py-4">Certificate</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -200,6 +201,16 @@ export function AttendanceHistoryClient() {
                             <span className="material-symbols-outlined text-[14px]">timer</span>
                             {calculateDuration(log.checkIn, log.checkOut)}
                           </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {!isMissed && log.event.status === "COMPLETED" ? (
+                           <a href={`/student/certificates/${log.event.id}`} target="_blank" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-xs transition-colors shadow-sm shadow-amber-500/20">
+                             <span className="material-symbols-outlined text-[14px]">workspace_premium</span>
+                             Generate
+                           </a>
+                        ) : (
+                           <span className="text-slate-300 text-xs font-semibold italic">--</span>
                         )}
                       </td>
                     </tr>

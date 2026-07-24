@@ -148,6 +148,20 @@ export function StudentSidebar({ mobileOpen, onMobileClose, session, department,
                     {item.description}
                   </div>
                 </div>
+
+                {/* Badge Indicators */}
+                {item.label === "Inbox" && studentUser?._count?.notifications > 0 && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white shadow-sm ring-2 ring-[#0F1E45]">
+                    {studentUser._count.notifications}
+                  </div>
+                )}
+
+                {item.label === "Penalties" && studentUser?._count?.penalties > 0 && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white shadow-sm ring-2 ring-[#0F1E45]">
+                    {studentUser._count.penalties}
+                  </div>
+                )}
+                
                 {item.comingSoon && (
                   <div className="text-[9px] font-extrabold text-slate-400 bg-white/10 px-1.5 py-0.5 rounded-md uppercase tracking-wide">
                     Soon

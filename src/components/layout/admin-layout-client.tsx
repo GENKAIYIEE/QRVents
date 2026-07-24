@@ -12,16 +12,17 @@ interface AdminLayoutClientProps {
     email: string
     role: string
   } | null
+  pendingProposalsCount?: number
 }
 
-export function AdminLayoutClient({ children, session }: AdminLayoutClientProps) {
+export function AdminLayoutClient({ children, session, pendingProposalsCount = 0 }: AdminLayoutClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
       <Toaster position="bottom-right" richColors theme="light" />
       {/* Sidebar */}
-      <AdminSidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+      <AdminSidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} pendingProposalsCount={pendingProposalsCount} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative md:ml-[260px]">

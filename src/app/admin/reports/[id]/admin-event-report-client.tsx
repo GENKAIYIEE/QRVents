@@ -17,9 +17,10 @@ interface StatData {
   total: number
   byYear: { name: string; value: number }[]
   bySection: { name: string; value: number }[]
+  byDepartment: { name: string; value: number }[]
 }
 
-export function EventReportClient({ event }: { event: EventData }) {
+export function AdminEventReportClient({ event, departments }: { event: EventData, departments: any[] }) {
   const [stats, setStats] = useState<StatData | null>(null)
   const [logs, setLogs] = useState<any[]>([])
   
@@ -29,6 +30,7 @@ export function EventReportClient({ event }: { event: EventData }) {
   const [isLoading, setIsLoading] = useState(true)
   
   const [search, setSearch] = useState("")
+  const [departmentFilter, setDepartmentFilter] = useState("ALL")
   const [yearFilter, setYearFilter] = useState("ALL")
   const [sectionFilter, setSectionFilter] = useState("ALL")
 
@@ -44,7 +46,7 @@ export function EventReportClient({ event }: { event: EventData }) {
   const fetchLogs = useCallback(async () => {
     try {
       setIsLoading(true)
-      const data = await getEventAttendees(event.id, currentPage, 10, yearFilter, sectionFilter, search)
+      const data = await getEventAttendees(event.id, currentPage, 10, yearFilter, sectionFilter, departmentFilter, search)
       setLogs(data.logs)
       setTotal(data.total)
       setPages(data.pages)
@@ -53,7 +55,7 @@ export function EventReportClient({ event }: { event: EventData }) {
     } finally {
       setIsLoading(false)
     }
-  }, [event.id, currentPage, yearFilter, sectionFilter, search])
+  }, [event.id, currentPage, yearFilter, sectionFilter, departmentFilter, search])
 
   useEffect(() => {
     fetchStats()
@@ -65,7 +67,7 @@ export function EventReportClient({ event }: { event: EventData }) {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, yearFilter, sectionFilter])
+  }, [search, yearFilter, sectionFilter, departmentFilter])
 
   return (
     <div className="flex flex-col gap-8 w-full pb-10">
@@ -73,7 +75,7 @@ export function EventReportClient({ event }: { event: EventData }) {
       {/* Header & Title */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <Link href="/dept/reports" className="text-blue-500 font-bold text-sm mb-2 flex items-center gap-1 hover:text-blue-600 transition-colors">
+          <Link href="/admin/reports" className="text-blue-500 font-bold text-sm mb-2 flex items-center gap-1 hover:text-blue-600 transition-colors">
             <ChevronLeft className="w-4 h-4" /> Back to Reports
           </Link>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{event.title}</h1>
@@ -84,7 +86,7 @@ export function EventReportClient({ event }: { event: EventData }) {
         </div>
         
         <a 
-          href={`/api/reports/export?eventId=${event.id}`}
+          href={`/api/admin/attendance/export?eventId=${event.id}`}
           download
           className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-all shadow-blue-500/20"
         >
@@ -94,7 +96,7 @@ export function EventReportClient({ event }: { event: EventData }) {
 
       {/* Statistics Section */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center items-center text-center">
              <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-3">
                <span className="material-symbols-outlined text-[24px]">groups</span>
@@ -103,7 +105,7 @@ export function EventReportClient({ event }: { event: EventData }) {
              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Total Attendees</div>
           </div>
           
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-h-64 overflow-y-auto scrollbar-thin">
             <h3 className="text-sm font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">By Year Level</h3>
             <div className="space-y-3">
               {stats.byYear.length === 0 && <div className="text-xs text-slate-400">No data</div>}
@@ -116,7 +118,7 @@ export function EventReportClient({ event }: { event: EventData }) {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-64 overflow-y-auto scrollbar-thin">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-h-64 overflow-y-auto scrollbar-thin">
             <h3 className="text-sm font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">By Section</h3>
             <div className="space-y-3">
               {stats.bySection.length === 0 && <div className="text-xs text-slate-400">No data</div>}
@@ -124,6 +126,19 @@ export function EventReportClient({ event }: { event: EventData }) {
                 <div key={s.name} className="flex justify-between items-center text-sm">
                   <span className="font-medium text-slate-600">Section {s.name === "Unknown" ? "?" : s.name}</span>
                   <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{s.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-h-64 overflow-y-auto scrollbar-thin">
+            <h3 className="text-sm font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">By Department</h3>
+            <div className="space-y-3">
+              {stats.byDepartment.length === 0 && <div className="text-xs text-slate-400">No data</div>}
+              {stats.byDepartment.map(d => (
+                <div key={d.name} className="flex justify-between items-center text-sm">
+                  <span className="font-medium text-slate-600">{d.name}</span>
+                  <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">{d.value}</span>
                 </div>
               ))}
             </div>
@@ -147,6 +162,17 @@ export function EventReportClient({ event }: { event: EventData }) {
           </div>
           
           <div className="flex w-full md:w-auto gap-3">
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="flex-1 md:w-36 px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 bg-white"
+            >
+              <option value="ALL">All Depts</option>
+              {departments?.map(d => (
+                <option key={d.id} value={d.id}>{d.code}</option>
+              ))}
+            </select>
+            
             <select
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}

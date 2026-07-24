@@ -10,7 +10,8 @@ export async function getDashboardData() {
 
   const studentId = session.userId
   const departmentId = session.departmentId
-  const now = new Date()
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   const [
     upcomingSchoolWideEvents,
@@ -26,7 +27,7 @@ export async function getDashboardData() {
     // Upcoming school-wide events
     prisma.event.findMany({
       where: {
-        date: { gte: now },
+        date: { gte: today },
         eventType: "SCHOOL_WIDE"
       },
       orderBy: { date: "asc" },
@@ -37,7 +38,7 @@ export async function getDashboardData() {
     // Upcoming department events
     departmentId ? prisma.event.findMany({
       where: {
-        date: { gte: now },
+        date: { gte: today },
         eventType: "DEPARTMENT",
         departmentId: departmentId
       },
@@ -49,7 +50,7 @@ export async function getDashboardData() {
     // Count of upcoming school-wide events
     prisma.event.count({
       where: {
-        date: { gte: now },
+        date: { gte: today },
         eventType: "SCHOOL_WIDE"
       }
     }),
@@ -57,7 +58,7 @@ export async function getDashboardData() {
     // Count of upcoming department events
     departmentId ? prisma.event.count({
       where: {
-        date: { gte: now },
+        date: { gte: today },
         eventType: "DEPARTMENT",
         departmentId: departmentId
       }
@@ -86,8 +87,18 @@ export async function getDashboardData() {
     // Department info for color theming
     departmentId ? prisma.department.findUnique({ where: { id: departmentId } }) : null,
 
-    // Student user info
-    prisma.user.findUnique({ where: { id: studentId } })
+    // Student user info with unread notifications and unpaid penalties counts
+    prisma.user.findUnique({
+      where: { id: studentId },
+      include: {
+        _count: {
+          select: {
+            notifications: { where: { isRead: false } },
+            penalties: { where: { status: { in: ["PENDING", "OVERDUE"] } } }
+          }
+        }
+      }
+    })
   ])
 
   // Count distinct department IDs (filtering out own department or nulls)

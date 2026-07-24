@@ -187,10 +187,10 @@ export default async function AdminDashboardPage() {
         <StatCard
           icon="wifi_tethering"
           label="Live Attendance"
-          value={stats.attendanceCount}
+          value={stats.liveAttendanceCount}
           color="#8B5CF6"
           bgClass="bg-purple-50"
-          sub="Last 30 days"
+          sub="Currently present"
         />
       </div>
 

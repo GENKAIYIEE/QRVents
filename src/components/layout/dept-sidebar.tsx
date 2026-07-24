@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logoutAction } from "@/lib/auth-actions"
@@ -75,6 +76,7 @@ interface DeptSidebarProps {
 export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: DeptSidebarProps) {
   const pathname = usePathname()
   const deptColor = department?.color || "#3B82F6"
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const handleComingSoon = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -193,29 +195,21 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
 
       {/* Bottom actions */}
       <div className="p-3 pb-5 border-t border-white/5 shrink-0">
-        <form 
-          action={logoutAction}
-          onSubmit={(e) => {
-            if (!window.confirm("Are you sure you want to sign out?")) {
-              e.preventDefault();
-            }
-          }}
+        <button
+          type="button"
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
         >
-          <button
-            type="submit"
-            className="w-full flex items-center gap-2.5 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all duration-200 text-left group"
-          >
-            <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-red-500 text-[18px]">
-                logout
-              </span>
-            </div>
-            <div>
-              <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>
-              <div className="text-red-400 text-[10.5px] mt-0.5 font-medium group-hover:text-red-300 transition-colors">End your session</div>
-            </div>
-          </button>
-        </form>
+          <div className="w-[34px] h-[34px] bg-red-500/20 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <span className="material-symbols-outlined text-red-500 text-[18px]">
+              logout
+            </span>
+          </div>
+          <div>
+            <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>
+            <div className="text-red-400 text-[10.5px] mt-0.5 font-medium group-hover:text-red-300 transition-colors">End your session</div>
+          </div>
+        </button>
       </div>
     </div>
   )
@@ -237,6 +231,38 @@ export function DeptSidebar({ mobileOpen, onMobileClose, session, department }: 
           <aside className="relative w-[260px] h-full z-51 animate-in slide-in-from-left duration-200">
             <SidebarContent />
           </aside>
+        </div>
+      )}
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLogoutModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                <span className="material-symbols-outlined text-red-500 text-3xl">logout</span>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Sign Out</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">Are you sure you want to end your session? You will need to log in again to access the portal.</p>
+            </div>
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+              <button 
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <form action={logoutAction} className="flex-1">
+                <button 
+                  type="submit"
+                  className="w-full px-4 py-2.5 bg-red-500 text-white rounded-xl font-bold text-sm hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 flex items-center justify-center gap-2"
+                >
+                  Yes, Sign Out
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </>

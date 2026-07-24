@@ -70,12 +70,14 @@ export async function getDashboardStats() {
     where: { departmentId: { not: null } },
   })
 
-  // Attendance summary per department (last 30 days)
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-  const attendanceByDept = await prisma.attendanceLog.groupBy({
-    by: ["userId"],
-    _count: { _all: true },
-    where: { checkIn: { gte: thirtyDaysAgo } },
+  // Live Attendance: Students currently present in ONGOING events
+  const liveAttendanceCount = await prisma.attendanceLog.count({
+    where: {
+      checkOut: null,
+      event: {
+        status: "ONGOING"
+      }
+    }
   })
 
   // Monthly trend: events per month (last 6 months)
@@ -101,7 +103,7 @@ export async function getDashboardStats() {
     eventsPerDept,
     recentProposals,
     recentActivity,
-    attendanceCount: attendanceByDept.length,
+    liveAttendanceCount,
     eventsThisYear,
     upcomingEventsList,
   }
