@@ -86,6 +86,32 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
+      const now = new Date()
+
+      // 1. Cooldown Guard (Anti-Double Scan)
+      const timeInDiffMinutes = (now.getTime() - existingLog.createdAt.getTime()) / (1000 * 60)
+      if (timeInDiffMinutes < 5) {
+        return NextResponse.json({
+          error: "Too soon to check out. Scan ignored to prevent accidental double-scans.",
+          user: { fullName: user.fullName }
+        }, { status: 400 })
+      }
+
+      // 2. Strict End-Time Guard
+      if (event.endTime) {
+        const [endHours, endMinutes] = event.endTime.split(":").map(Number)
+        const eventEndDate = new Date() // Use today's date for ongoing events
+        eventEndDate.setHours(endHours, endMinutes, 0, 0)
+
+        if (now < eventEndDate) {
+          const formattedEndTime = eventEndDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          return NextResponse.json({
+            error: `Cannot check out yet. Event ends strictly at ${formattedEndTime}.`,
+            user: { fullName: user.fullName }
+          }, { status: 400 })
+        }
+      }
+
       // Perform Check-Out
       await prisma.attendanceLog.update({
         where: { id: existingLog.id },
