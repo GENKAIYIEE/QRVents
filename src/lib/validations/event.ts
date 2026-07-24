@@ -13,6 +13,7 @@ export const eventSchema = z.object({
     (val) => (val === "" || val == null) ? null : Number(val),
     z.number().min(1, "Must expect at least 1 attendee").optional().nullable()
   ),
+  isMandatory: z.boolean().default(false),
 }).refine(
   (data) => {
     // If it's a department event, departmentId must be provided

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { AlertTriangle, Calendar, Clock } from "lucide-react"
+import { toast } from "sonner"
 import { PenaltyStatusBadge } from "@/components/penalties/penalty-status-badge"
 import { ChoosePenaltyTypeModal } from "@/components/penalties/choose-penalty-type-modal"
 
@@ -11,11 +12,21 @@ export function PenaltiesClient() {
   const [selectedPenalty, setSelectedPenalty] = useState<any | null>(null)
 
   async function loadPenalties() {
-    setLoading(true)
-    const res = await fetch("/api/penalties")
-    const data = await res.json()
-    setPenalties(data.penalties || [])
-    setLoading(false)
+    try {
+      setLoading(true)
+      const res = await fetch("/api/penalties")
+      if (!res.ok) {
+        throw new Error("Failed to fetch penalties")
+      }
+      const data = await res.json()
+      setPenalties(data.penalties || [])
+    } catch (error) {
+      console.error(error)
+      toast.error("Failed to load penalties")
+      setPenalties([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -81,7 +92,7 @@ export function PenaltiesClient() {
                 </p>
                 <p className="font-semibold text-[#0F172A]">
                   {p.type === "FEE" 
-                    ? `Pay ₱${p.feeAmount}`
+                    ? `Pay ₱${Number(p.feeAmount || 0).toFixed(2)}`
                     : `${p.serviceHours} hours of community service`}
                 </p>
               </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Wallet, HeartHandshake, X } from "lucide-react"
+import { toast } from "sonner"
 
 interface ChoosePenaltyTypeModalProps {
   penaltyId: string
@@ -39,11 +40,16 @@ export function ChoosePenaltyTypeModal({
           body: JSON.stringify({ type }),
         }
       )
-      if (!res.ok) throw new Error("Failed to choose penalty type")
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null)
+        throw new Error(errorData?.error || "Failed to choose penalty type")
+      }
+      toast.success("Penalty resolution chosen successfully")
       onChosen()
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
+      toast.error(error.message || "Failed to choose penalty type")
     } finally {
       setLoading(null)
     }

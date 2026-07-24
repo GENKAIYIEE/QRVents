@@ -64,6 +64,7 @@ export async function createEvent(data: EventFormValues) {
       expectedAttendees: data.expectedAttendees,
       departmentId: data.departmentId,
       createdById: session.userId,
+      isMandatory: data.isMandatory,
       status: "UPCOMING",
     },
   })
@@ -113,6 +114,7 @@ export async function updateEvent(id: string, data: EventFormValues) {
       eventType: data.eventType,
       expectedAttendees: data.expectedAttendees,
       departmentId: data.departmentId,
+      isMandatory: data.isMandatory,
     },
   })
 
