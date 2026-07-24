@@ -96,7 +96,7 @@ export function EventsClient({ upcomingEvents, pastEvents = [] }: { upcomingEven
                     )}
                   </div>
 
-                  {event.status === "UPCOMING" && (
+                  {event.status === "UPCOMING" && event.eventType !== "SCHOOL_WIDE" && (
                     <button
                       onClick={() => handleStartEvent(event.id)}
                       disabled={startingEventId === event.id}

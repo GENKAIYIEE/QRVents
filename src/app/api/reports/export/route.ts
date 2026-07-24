@@ -35,22 +35,25 @@ export async function GET(request: NextRequest) {
       orderBy: { checkIn: "asc" },
       include: {
         user: {
-          select: { fullName: true, email: true, studentId: true, yearLevel: true, department: { select: { code: true } } }
+          select: { fullName: true, email: true, studentId: true, yearLevel: true, section: true, department: { select: { code: true } } }
         }
       }
     })
 
     // Generate CSV Content
-    const headers = ["Name", "Email", "Student ID", "Year Level", "Department", "Status", "Check In", "Check Out"]
+    const headers = ["Name", "Email", "Student ID", "Year Level", "Section", "Department", "Status", "Check-In Date", "Check-In Time", "Check-Out Date", "Check-Out Time"]
     const rows = logs.map(log => [
       `"${log.user.fullName}"`,
       `"${log.user.email}"`,
       `"${log.user.studentId || 'N/A'}"`,
       `"${log.user.yearLevel || 'N/A'}"`,
+      `"${log.user.section || 'N/A'}"`,
       `"${log.user.department?.code || 'N/A'}"`,
       `"${log.status}"`,
-      `"${format(new Date(log.checkIn), "yyyy-MM-dd HH:mm:ss")}"`,
-      `"${log.checkOut ? format(new Date(log.checkOut), "yyyy-MM-dd HH:mm:ss") : 'N/A'}"`
+      `"${format(new Date(log.checkIn), "MMM dd, yyyy")}"`,
+      `"${format(new Date(log.checkIn), "hh:mm:ss a")}"`,
+      `"${log.checkOut ? format(new Date(log.checkOut), "MMM dd, yyyy") : 'N/A'}"`,
+      `"${log.checkOut ? format(new Date(log.checkOut), "hh:mm:ss a") : 'N/A'}"`
     ])
 
     const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n")

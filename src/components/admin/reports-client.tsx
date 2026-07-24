@@ -34,48 +34,7 @@ export function ReportsClient() {
     fetchReports()
   }, [startDate, endDate])
 
-  const handleExportCSV = () => {
-    if (!data) return
 
-    const totalStudents = (data.departments || []).reduce((acc: number, d: any) => acc + (d._count?.users || 0), 0)
-
-    const headers = ["Department", "Code", "Total Students", "Total Events", "Attendance Records"]
-    const rows = (data.departments || []).map((d: any) => [
-      d.name,
-      d.code,
-      d._count?.users ?? 0,
-      d._count?.events ?? 0,
-      d.attendanceCount ?? 0,
-    ])
-
-    const csvContent = [
-      `# QRVents System Report`,
-      `# Date Range: ${startDate} to ${endDate}`,
-      `# Generated: ${format(new Date(), "yyyy-MM-dd HH:mm")}`,
-      "",
-      `Total Events,${data.summary?.totalEvents ?? 0}`,
-      `Total Students,${totalStudents}`,
-      `Total Attendance,${data.summary?.totalAttendance ?? 0}`,
-      "",
-      headers.join(","),
-      ...rows.map((r: any[]) => r.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
-    ].join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `qrvents-report-${startDate}-to-${endDate}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
-  const handleExportPDF = () => {
-    if (!data) return
-    window.print()
-  }
 
   const chartData = data?.departments.map((d: any) => ({
     code: d.code,
@@ -112,25 +71,6 @@ export function ReportsClient() {
             className="w-full sm:w-auto px-6 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold rounded-xl transition-colors"
           >
             Apply Filter
-          </button>
-        </div>
-
-        <div className="flex gap-2 w-full lg:w-auto pt-2 lg:pt-0 border-t border-slate-100 lg:border-t-0 mt-2 lg:mt-0">
-          <button 
-            onClick={handleExportCSV}
-            disabled={loading || !data}
-            className="flex-1 lg:flex-none flex justify-center items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 text-sm"
-          >
-            <span className="material-symbols-outlined text-[18px]">table_chart</span>
-            CSV
-          </button>
-          <button 
-            onClick={handleExportPDF}
-            disabled={loading || !data}
-            className="flex-1 lg:flex-none flex justify-center items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50 shadow-sm shadow-rose-600/20 text-sm"
-          >
-            <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-            PDF
           </button>
         </div>
       </div>

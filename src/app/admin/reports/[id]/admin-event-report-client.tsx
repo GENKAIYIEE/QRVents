@@ -86,11 +86,24 @@ export function AdminEventReportClient({ event, departments }: { event: EventDat
         </div>
         
         <a 
-          href={`/api/admin/attendance/export?eventId=${event.id}`}
-          download
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-all shadow-blue-500/20"
+          href={departmentFilter === "ALL" ? "#" : `/api/admin/attendance/export?eventId=${event.id}&departmentId=${departmentFilter}&yearLevel=${yearFilter}&section=${sectionFilter}`}
+          download={departmentFilter !== "ALL"}
+          className={`flex items-center gap-2 px-4 py-2.5 font-bold rounded-xl shadow-sm transition-all ${
+            departmentFilter === "ALL" 
+              ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+              : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+          }`}
+          onClick={(e) => {
+            if (departmentFilter === "ALL") {
+              e.preventDefault();
+              alert("Please select a specific department to export its attendance data.");
+            }
+          }}
         >
-          <Download className="w-4 h-4" /> Export Full CSV
+          <Download className="w-4 h-4" /> 
+          {departmentFilter === "ALL" 
+            ? "Select Dept to Export" 
+            : `Export ${departments.find(d => d.id === departmentFilter)?.code || ""} CSV`}
         </a>
       </div>
 

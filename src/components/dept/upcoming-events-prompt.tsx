@@ -61,18 +61,25 @@ export function UpcomingEventsPrompt({ events }: { events: any[] }) {
               </div>
             </div>
 
-            <button
-              onClick={() => handleStartEvent(event.id)}
-              disabled={startingId === event.id}
-              className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {startingId === event.id ? (
-                <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-              ) : (
-                <span className="material-symbols-outlined text-[18px]">play_circle</span>
-              )}
-              Start Event
-            </button>
+            {event.eventType === "SCHOOL_WIDE" ? (
+              <div className="w-full sm:w-auto px-6 py-2.5 bg-slate-100 text-slate-500 font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed">
+                <span className="material-symbols-outlined text-[18px]">lock</span>
+                Waiting for Admin to Start
+              </div>
+            ) : (
+              <button
+                onClick={() => handleStartEvent(event.id)}
+                disabled={startingId === event.id}
+                className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {startingId === event.id ? (
+                  <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                ) : (
+                  <span className="material-symbols-outlined text-[18px]">play_circle</span>
+                )}
+                Start Event
+              </button>
+            )}
           </div>
         ))}
       </div>

@@ -109,18 +109,6 @@ export default async function DeptReportsPage() {
                     <span className="material-symbols-outlined text-[18px]">visibility</span>
                     View Details
                   </Link>
-                  <a 
-                    href={`/api/reports/export?eventId=${event.id}`}
-                    download
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm border ${
-                      event._count.attendanceLogs === 0 
-                        ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed pointer-events-none'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:shadow-md'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">download</span>
-                    Export CSV
-                  </a>
                 </div>
               </div>
             ))}

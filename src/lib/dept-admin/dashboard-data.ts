@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"
+﻿import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { jwtVerify } from "jose"
@@ -7,7 +7,6 @@ import { COOKIE_NAME } from "@/lib/constants"
 const secretKey = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
 
 export async function getDeptLayoutData() {
-  // Read the actual cookie the login action sets
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE_NAME)?.value
 
@@ -23,7 +22,6 @@ export async function getDeptLayoutData() {
 
   if (payload!.role !== "DEPT_ADMIN") redirect("/login")
 
-  // Fetch the full user record to get departmentId and fullName
   const user = await prisma.user.findUnique({
     where: { id: payload!.userId },
     select: { id: true, fullName: true, email: true, role: true, departmentId: true },
@@ -53,71 +51,94 @@ export async function getDeptLayoutData() {
 }
 
 export async function getDashboardData() {
-  // We can reuse getDeptLayoutData to avoid duplicating auth logic
   const { session, department } = await getDeptLayoutData()
-
   const now = new Date()
-
-  const deptUsers = await prisma.user.findMany({
-    where: { departmentId: department.id },
-    select: { id: true },
-  })
-  const deptUserIds = deptUsers.map((u) => u.id)
 
   const [
     studentCount,
+    activeEventsCount,
+    completedEventsCount,
     upcomingEvents,
-    pendingCount,
-    approvedCount,
-    rejectedCount,
-    recentProposals,
-    recentStudents,
-    recentActivity,
+    recentCompletedEvents,
   ] = await Promise.all([
     prisma.user.count({ where: { role: "STUDENT", departmentId: department.id } }),
+    
+    // Active Events (Ongoing)
+    prisma.event.count({
+      where: {
+        OR: [
+          { eventType: "SCHOOL_WIDE" },
+          { departmentId: department.id }
+        ],
+        status: "ONGOING"
+      }
+    }),
+
+    // Completed Events
+    prisma.event.count({
+      where: {
+        OR: [
+          { eventType: "SCHOOL_WIDE" },
+          { departmentId: department.id }
+        ],
+        status: "COMPLETED"
+      }
+    }),
+
+    // Upcoming Events Feed
     prisma.event.findMany({
       where: {
         date: { gte: now },
+        status: "UPCOMING",
         OR: [
           { eventType: "SCHOOL_WIDE" },
-          { departmentId: department.id, status: "UPCOMING" },
+          { departmentId: department.id },
         ],
       },
       orderBy: { date: "asc" },
-      take: 5,
+      take: 4,
     }),
-    prisma.eventProposal.count({ where: { departmentId: department.id, status: "PENDING" } }),
-    prisma.eventProposal.count({ where: { departmentId: department.id, status: "APPROVED" } }),
-    prisma.eventProposal.count({ where: { departmentId: department.id, status: "REJECTED" } }),
-    prisma.eventProposal.findMany({
-      where: { departmentId: department.id },
-      orderBy: { submittedAt: "desc" },
+
+    // Top 3 Recent Completed Events with Attendance Logs
+    prisma.event.findMany({
+      where: {
+        status: "COMPLETED",
+        OR: [
+          { eventType: "SCHOOL_WIDE" },
+          { departmentId: department.id },
+        ],
+      },
+      orderBy: { date: "desc" },
       take: 3,
-    }),
-    prisma.user.findMany({
-      where: { role: "STUDENT", departmentId: department.id },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { fullName: true, yearLevel: true, email: true, createdAt: true },
-    }),
-    prisma.activityLog.findMany({
-      where: { userId: { in: deptUserIds } },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    }),
+      include: {
+        _count: {
+          select: { attendanceLogs: true }
+        }
+      }
+    })
   ])
+
+  // Calculate Average Attendance Rate across recent events
+  let totalExpected = 0
+  let totalAttended = 0
+  recentCompletedEvents.forEach(event => {
+    // If expectedAttendees is null, assume total students in dept
+    const expected = event.expectedAttendees || studentCount || 1 
+    totalExpected += expected
+    totalAttended += event._count.attendanceLogs
+  })
+  
+  const avgAttendanceRate = totalExpected > 0 ? Math.round((totalAttended / totalExpected) * 100) : 0
 
   return {
     session,
     department,
     deptName: department.name,
     studentCount,
+    activeEventsCount,
+    completedEventsCount,
+    avgAttendanceRate,
     upcomingEvents,
-    pendingCount,
-    approvedCount,
-    rejectedCount,
-    recentProposals,
-    recentStudents,
-    recentActivity,
+    recentCompletedEvents
   }
 }

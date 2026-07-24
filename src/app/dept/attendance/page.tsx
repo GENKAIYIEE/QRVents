@@ -51,7 +51,7 @@ export default async function DeptAttendancePage() {
           ]
         },
         select: {
-          id: true, title: true, date: true, startTime: true, endTime: true, venue: true
+          id: true, title: true, date: true, startTime: true, endTime: true, venue: true, eventType: true
         }
       })
     : []

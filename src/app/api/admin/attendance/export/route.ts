@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         // Send BOM and headers
-        const headers = "Name,Student ID,Year Level,Section,Department,Check-In Time,Check-Out Time,Status\n"
+        const headers = "Name,Student ID,Year Level,Section,Department,Check-In Date,Check-In Time,Check-Out Date,Check-Out Time,Status\n"
         controller.enqueue(new TextEncoder().encode("\uFEFF" + headers))
 
         let skip = 0
@@ -91,16 +91,21 @@ export async function GET(request: Request) {
 
           let chunk = ""
           for (const log of logs) {
-            const checkIn = format(new Date(log.checkIn), "yyyy-MM-dd HH:mm:ss")
-            const checkOut = log.checkOut ? format(new Date(log.checkOut), "yyyy-MM-dd HH:mm:ss") : "-"
+            const checkInDate = format(new Date(log.checkIn), "MMM dd, yyyy")
+            const checkInTime = format(new Date(log.checkIn), "hh:mm:ss a")
+            const checkOutDate = log.checkOut ? format(new Date(log.checkOut), "MMM dd, yyyy") : "-"
+            const checkOutTime = log.checkOut ? format(new Date(log.checkOut), "hh:mm:ss a") : "-"
+            
             const row = [
               log.user.fullName,
               log.user.studentId || "-",
               log.user.yearLevel || "-",
               log.user.section || "-",
               log.user.department?.code || "Unknown",
-              checkIn,
-              checkOut,
+              checkInDate,
+              checkInTime,
+              checkOutDate,
+              checkOutTime,
               log.status
             ]
             chunk += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",") + "\n"
