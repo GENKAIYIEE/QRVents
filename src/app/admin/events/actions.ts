@@ -154,7 +154,9 @@ export async function updateEventStatus(id: string, status: EventStatus) {
         where: {
           OR: [
             { role: "SUPER_ADMIN" },
-            ...(event.departmentId ? [{ role: "DEPT_ADMIN", departmentId: event.departmentId }] : [])
+            ...(event.departmentId 
+              ? [{ role: "DEPT_ADMIN", departmentId: event.departmentId } as Prisma.UserWhereInput] 
+              : [])
           ]
         },
         select: { id: true }
