@@ -104,3 +104,35 @@ export async function getDepartments() {
     orderBy: { code: 'asc' }
   })
 }
+
+export async function getAvailableSections(departmentId: string, yearLevel: string) {
+  const session = await getSession()
+  if (!session || session.role !== "SUPER_ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  const whereClause: any = {
+    role: "STUDENT",
+    section: { not: null }
+  }
+
+  if (departmentId && departmentId !== "ALL") {
+    whereClause.departmentId = departmentId
+  }
+  
+  if (yearLevel && yearLevel !== "ALL") {
+    whereClause.yearLevel = yearLevel
+  }
+
+  const distinctSections = await prisma.user.findMany({
+    where: whereClause,
+    select: { section: true },
+    distinct: ['section'],
+    orderBy: { section: 'asc' }
+  })
+
+  // Filter out any nulls just in case, though the whereClause should handle it
+  return distinctSections
+    .map(s => s.section)
+    .filter((s): s is string => s !== null && s.trim() !== '')
+}

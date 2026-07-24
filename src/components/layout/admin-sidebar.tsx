@@ -194,7 +194,7 @@ export function AdminSidebar({ mobileOpen, onMobileClose, pendingProposalsCount 
           </div>
           <div>
             <div className="text-red-200 text-[13px] font-bold group-hover:text-red-100 transition-colors">Sign Out</div>
-            <div className="text-red-400/70 text-[10px] mt-0.5 font-medium">End your session</div>
+            <div className="text-red-400 text-[10.5px] mt-0.5 font-medium group-hover:text-red-300 transition-colors">End your session</div>
           </div>
         </button>
       </div>

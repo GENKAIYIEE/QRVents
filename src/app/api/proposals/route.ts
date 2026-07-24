@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { createNotificationsForMany } from "@/lib/notifications"
 
 const proposalSchema = z.object({
   title: z.string().min(3, "Title is too short").max(100, "Title is too long"),
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     // Fetch user to get their departmentId
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
-      select: { departmentId: true },
+      select: { departmentId: true, department: true },
     })
 
     if (!user || !user.departmentId) {
@@ -58,21 +59,21 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Create a notification for SUPER_ADMINs
+    // Notify Super Admins
     const superAdmins = await prisma.user.findMany({
       where: { role: "SUPER_ADMIN" },
-      select: { id: true }
+      select: { id: true },
     })
-
+    
     if (superAdmins.length > 0) {
-      await prisma.notification.createMany({
-        data: superAdmins.map(admin => ({
-          userId: admin.id,
-          title: "New Event Proposal",
+      await createNotificationsForMany(
+        superAdmins.map(a => a.id),
+        {
+          title: "New Event Proposal 📋",
           message: `${session.fullName} submitted a new proposal: ${proposal.title}`,
-          type: "PROPOSAL",
-        }))
-      })
+          type: "PROPOSAL_SUBMITTED",
+        }
+      )
     }
 
     // Log Activity

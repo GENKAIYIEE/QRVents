@@ -6,10 +6,10 @@ import { format } from "date-fns"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Reports — QRVents Dept Admin",
+  title: "Archived Reports — QRVents Dept Admin",
 }
 
-export default async function DeptReportsPage() {
+export default async function DeptArchivedReportsPage() {
   const session = await getSession()
   if (!session || session.role !== "DEPT_ADMIN") redirect("/login")
 
@@ -21,7 +21,7 @@ export default async function DeptReportsPage() {
   // Fetch events with their attendance count
   const events = await prisma.event.findMany({
     where: { 
-      isArchived: false,
+      isArchived: true,
       OR: [
         { departmentId: user?.departmentId },
         { eventType: "SCHOOL_WIDE" }
@@ -39,22 +39,22 @@ export default async function DeptReportsPage() {
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-          <span className="material-symbols-outlined text-blue-500 text-[32px]">bar_chart</span>
-          Attendance Reports
+          <span className="material-symbols-outlined text-slate-500 text-[32px]">archive</span>
+          Archived Reports
         </h1>
-        <p className="text-slate-500 mt-1">Export attendance data for your events as CSV files.</p>
+        <p className="text-slate-500 mt-1">View and export attendance data for past, archived events.</p>
       </div>
 
       <div className="flex gap-4 border-b border-slate-200">
         <Link 
           href="/dept/reports"
-          className="px-4 py-3 text-sm font-bold border-b-2 border-blue-600 text-blue-600"
+          className="px-4 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all"
         >
           Active Reports
         </Link>
         <Link 
           href="/dept/reports/archived"
-          className="px-4 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all"
+          className="px-4 py-3 text-sm font-bold border-b-2 border-blue-600 text-blue-600"
         >
           Archived Reports
         </Link>
@@ -62,7 +62,7 @@ export default async function DeptReportsPage() {
 
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="font-bold text-slate-800">Available Exports</h2>
+          <h2 className="font-bold text-slate-800">Archived Exports</h2>
           <div className="text-xs font-bold text-slate-500">
             {events.length} Events Total
           </div>
@@ -71,8 +71,8 @@ export default async function DeptReportsPage() {
         {events.length === 0 ? (
            <div className="py-20 flex flex-col items-center justify-center text-center">
              <span className="material-symbols-outlined text-5xl text-slate-200 mb-4">folder_off</span>
-             <h3 className="text-lg font-bold text-slate-700">No Events Found</h3>
-             <p className="text-slate-500 text-sm mt-1">Attendance data will appear here once events are created.</p>
+             <h3 className="text-lg font-bold text-slate-700">No Archived Reports</h3>
+             <p className="text-slate-500 text-sm mt-1">Archived attendance data will appear here.</p>
            </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -81,12 +81,8 @@ export default async function DeptReportsPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1.5">
                     <h3 className="font-extrabold text-slate-900 text-lg">{event.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-widest ${
-                        event.status === 'COMPLETED' ? 'bg-slate-200 text-slate-700' :
-                        event.status === 'ONGOING' ? 'bg-emerald-100 text-emerald-700' :
-                        'bg-blue-100 text-blue-700'
-                    }`}>
-                      {event.status}
+                    <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-widest bg-amber-100 text-amber-700">
+                      Archived
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-medium text-slate-500">

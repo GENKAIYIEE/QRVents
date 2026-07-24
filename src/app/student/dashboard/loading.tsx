@@ -1,19 +1,6 @@
-import { StudentLayoutWrapper } from "@/components/student/dashboard/StudentLayoutWrapper"
-
 export default function DashboardLoading() {
-  const dummySession = {
-    userId: "loading",
-    email: "...",
-    role: "STUDENT",
-    fullName: "Loading...",
-  }
-
   return (
-    <StudentLayoutWrapper 
-      session={dummySession}
-      department={null}
-      studentUser={null}
-    >
+    <>
       <div className="flex flex-col gap-6 w-full max-w-full pb-10 animate-pulse">
         {/* StatCards Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -81,6 +68,7 @@ export default function DashboardLoading() {
           </div>
         </div>
       </div>
-    </StudentLayoutWrapper>
+    </>
   )
 }
+

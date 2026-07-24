@@ -1,5 +1,4 @@
 import { getDashboardData } from "@/lib/student/dashboard-data"
-import { StudentLayoutWrapper } from "@/components/student/dashboard/StudentLayoutWrapper"
 import { ProfileClient } from "./profile-client"
 
 export default async function StudentProfilePage() {
@@ -16,12 +15,6 @@ export default async function StudentProfilePage() {
   }
 
   return (
-    <StudentLayoutWrapper 
-      session={data.session} 
-      department={data.department}
-      studentUser={data.studentUser}
-    >
-      <ProfileClient user={enhancedUser} />
-    </StudentLayoutWrapper>
+    <ProfileClient user={enhancedUser} />
   )
 }

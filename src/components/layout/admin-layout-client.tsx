@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { AdminSidebar } from "@/components/layout/admin-sidebar"
 import { TopNavbar } from "@/components/layout/top-navbar"
-import { Toaster } from "sonner"
 
 interface AdminLayoutClientProps {
   children: React.ReactNode
@@ -20,7 +19,6 @@ export function AdminLayoutClient({ children, session, pendingProposalsCount = 0
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
-      <Toaster position="bottom-right" richColors theme="light" />
       {/* Sidebar */}
       <AdminSidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} pendingProposalsCount={pendingProposalsCount} />
 

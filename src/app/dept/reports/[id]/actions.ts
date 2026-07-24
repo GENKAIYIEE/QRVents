@@ -11,7 +11,7 @@ export async function getEventDetails(eventId: string) {
 
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    select: { id: true, title: true, date: true, status: true, departmentId: true, eventType: true }
+    select: { id: true, title: true, date: true, status: true, departmentId: true, eventType: true, isArchived: true }
   })
 
   if (!event) throw new Error("Event not found")
@@ -103,4 +103,33 @@ export async function getEventAttendees(eventId: string, page = 1, pageSize = 10
   ])
 
   return { logs, total, pages: Math.ceil(total / pageSize) }
+}
+
+export async function archiveEventAction(eventId: string, isArchived: boolean) {
+  const session = await getSession()
+  if (!session || (session.role !== "DEPT_ADMIN" && session.role !== "SUPER_ADMIN")) {
+    throw new Error("Unauthorized")
+  }
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { isArchived }
+  })
+}
+
+export async function deleteEventAction(eventId: string) {
+  const session = await getSession()
+  if (!session || (session.role !== "DEPT_ADMIN" && session.role !== "SUPER_ADMIN")) {
+    throw new Error("Unauthorized")
+  }
+
+  // Delete all attendance logs associated with this event first to avoid foreign key constraints
+  await prisma.attendanceLog.deleteMany({
+    where: { eventId }
+  })
+
+  // Delete the event
+  await prisma.event.delete({
+    where: { id: eventId }
+  })
 }

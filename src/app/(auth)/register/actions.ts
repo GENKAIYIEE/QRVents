@@ -18,12 +18,19 @@ export async function registerAction(data: RegisterFormValues): Promise<Register
     return { error: result.error.issues[0].message }
   }
 
-  const { fullName, email, password, departmentId, yearLevel } = result.data
+  const { fullName, email, password, departmentId, yearLevel, section, studentId } = result.data
 
   try {
-    const existing = await prisma.user.findUnique({ where: { email } })
-    if (existing) {
+    const existingEmail = await prisma.user.findUnique({ where: { email } })
+    if (existingEmail) {
       return { error: "An account with this email already exists." }
+    }
+
+    if (studentId) {
+      const existingStudentId = await prisma.user.findFirst({ where: { studentId } })
+      if (existingStudentId) {
+        return { error: "An account with this Student ID already exists." }
+      }
     }
 
     const hashedPassword = await hashPassword(password)
@@ -36,6 +43,8 @@ export async function registerAction(data: RegisterFormValues): Promise<Register
         passwordHash: hashedPassword,
         role: "STUDENT",
         yearLevel,
+        section,
+        studentId: studentId || null,
         departmentId,
         qrCode: generatedQrCode,
         isActive: true,
