@@ -223,6 +223,29 @@ export async function deleteEvent(id: string) {
   return event
 }
 
+export async function toggleArchiveEvent(id: string, isArchived: boolean) {
+  const session = await getSession()
+  if (!session || session.role !== "SUPER_ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  const event = await prisma.event.update({
+    where: { id },
+    data: { isArchived }
+  })
+
+  await logActivity(
+    session.userId, 
+    session.fullName, 
+    isArchived ? "Archived Event" : "Restored Event", 
+    `Event: ${event.title}`
+  )
+  
+  revalidatePath("/admin/events")
+  revalidatePath("/admin/dashboard")
+  return event
+}
+
 export async function getDepartments() {
   return await prisma.department.findMany({
     select: { id: true, name: true, code: true },
