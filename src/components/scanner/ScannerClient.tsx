@@ -6,6 +6,7 @@ import { ScannerView } from "@/components/scanner/ScannerView"
 import { EventSelector } from "@/components/scanner/EventSelector"
 import { ScanResult, ScanResultData } from "@/components/scanner/ScanResult"
 import { HardwareScannerView } from "@/components/scanner/HardwareScannerView"
+import { ChangePinModal } from "@/components/scanner/ChangePinModal"
 import { toast } from "sonner"
 
 interface Event {
@@ -29,6 +30,7 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResultData | null>(null)
+  const [isChangePinOpen, setIsChangePinOpen] = useState(false)
 
   const lockTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -129,13 +131,25 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
         </div>
         
         {!isLocked && (
-          <button 
-            onClick={() => setIsLocked(true)}
-            className="inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold shadow-sm transition-all"
-          >
-            <span className="material-symbols-outlined text-[18px]">lock</span>
-            Lock Scanner
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsChangePinOpen(true)}
+              className="p-2.5 bg-slate-50 text-slate-500 rounded-xl hover:bg-slate-100 hover:text-indigo-600 transition-colors tooltip-trigger"
+              title="Change Security PIN"
+            >
+              <span className="material-symbols-outlined text-[20px]">manage_accounts</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsLocked(true)
+                setScanResult(null)
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 rounded-xl font-bold text-sm hover:bg-rose-100 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">lock</span>
+              Lock Scanner
+            </button>
+          </div>
         )}
       </div>
 
@@ -229,6 +243,12 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
       )}
 
       <ScanResult result={scanResult} onClear={() => setScanResult(null)} />
+
+      <ChangePinModal 
+        isOpen={isChangePinOpen} 
+        onClose={() => setIsChangePinOpen(false)} 
+        onSuccess={() => setIsChangePinOpen(false)}
+      />
     </div>
   )
 }

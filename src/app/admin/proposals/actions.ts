@@ -166,3 +166,30 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
   
   return updatedProposal
 }
+export async function deleteArchivePermanent(id: string) {
+  const session = await getSession()
+  if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
+  
+  const proposal = await prisma.eventProposal.findUnique({ where: { id } })
+  if (!proposal) throw new Error("Not found")
+    
+  await prisma.eventProposal.delete({ where: { id } })
+  await logActivity(session.userId, session.fullName, "Deleted Archive", "Permanently deleted proposal: ")
+  revalidatePath("/admin/proposals")
+}
+
+export async function restoreArchive(id: string) {
+  const session = await getSession()
+  if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
+  
+  const proposal = await prisma.eventProposal.findUnique({ where: { id } })
+  if (!proposal) throw new Error("Not found")
+    
+  await prisma.eventProposal.update({
+    where: { id },
+    data: { isArchived: false, status: "PENDING" }
+  })
+  
+  await logActivity(session.userId, session.fullName, "Restored Archive", "Restored proposal:  back to active list")
+  revalidatePath("/admin/proposals")
+}
