@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         email,
         passwordHash,
         role: "STUDENT",
-        yearLevel: parseInt(yearLevel),
+        yearLevel,
         section,
         studentId: studentId || null,
         departmentId,
