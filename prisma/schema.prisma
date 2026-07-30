@@ -90,6 +90,7 @@ model User {
   penalties         Penalty[] @relation("StudentPenalties")
   resolvedPenalties Penalty[] @relation("PenaltyResolver")
 
+  @@index([departmentId])
   @@map("users")
 }
 
@@ -117,6 +118,8 @@ model Event {
   proposal       EventProposal?
   penalties      Penalty[]
 
+  @@index([departmentId])
+  @@index([createdById])
   @@map("events")
 }
 
@@ -142,6 +145,8 @@ model EventProposal {
   eventId         String?        @unique
   event           Event?         @relation(fields: [eventId], references: [id])
 
+  @@index([submittedById])
+  @@index([departmentId])
   @@map("event_proposals")
 }
 
@@ -157,6 +162,7 @@ model AttendanceLog {
   event     Event            @relation(fields: [eventId], references: [id])
 
   @@unique([userId, eventId])
+  @@index([eventId])
   @@map("attendance_logs")
 }
 
@@ -170,6 +176,7 @@ model Notification {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
 
+  @@index([userId])
   @@map("notifications")
 }
 
@@ -190,6 +197,7 @@ model ActivityLog {
   details   String?
   createdAt DateTime @default(now())
 
+  @@index([userId])
   @@map("activity_logs")
 }
 
@@ -220,6 +228,7 @@ model Penalty {
   updatedAt    DateTime      @updatedAt
 
   @@unique([studentId, eventId])
+  @@index([eventId])
   @@map("penalties")
 }
 
