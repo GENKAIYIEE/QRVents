@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import type { Html5Qrcode } from "html5-qrcode"
 
 type ScanStatus =
   | "idle"
@@ -51,7 +52,7 @@ export function useScanner({
   const [status, setStatus] = useState<ScanStatus>("idle")
   const [lastResult, setLastResult] = useState<ScanResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const scannerRef = useRef<any>(null)
+  const scannerRef = useRef<Html5Qrcode | null>(null)
   const isMountedRef = useRef(true)
 
   const stop = useCallback(async () => {
@@ -106,8 +107,8 @@ export function useScanner({
       try {
         // First try the environment (rear) camera
         await scanner.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
-      } catch (err: any) {
-        if (err?.name === "NotAllowedError") throw err
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "NotAllowedError") throw err
         
         // If environment camera fails (common on laptops), fetch available cameras and use the first one
         const cameras = await Html5Qrcode.getCameras()
@@ -125,14 +126,14 @@ export function useScanner({
       if (isMountedRef.current) {
         setStatus("scanning")
       }
-    } catch (err: any) {
-      const message =
-        err?.name === "NotAllowedError"
-          ? "Camera permission denied. Please allow camera access."
-          : err?.message || "Failed to start scanner."
+    } catch (err: unknown) {
+      const isPermissionDenied = err instanceof Error && err.name === "NotAllowedError"
+      const message = isPermissionDenied
+        ? "Camera permission denied. Please allow camera access."
+        : err instanceof Error ? err.message : "Failed to start scanner."
 
       if (isMountedRef.current) {
-        setStatus(err?.name === "NotAllowedError" ? "permission_denied" : "error")
+        setStatus(isPermissionDenied ? "permission_denied" : "error")
         setError(message)
         onError?.(message)
       }
