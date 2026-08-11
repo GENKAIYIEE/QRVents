@@ -44,6 +44,16 @@ export function useRealTime({
 }: UseRealTimeOptions) {
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null)
 
+  // Store callbacks in refs so they're always current without triggering re-subscriptions
+  const onInsertRef = useRef(onInsert)
+  const onUpdateRef = useRef(onUpdate)
+  const onDeleteRef = useRef(onDelete)
+  const onChangeRef = useRef(onChange)
+  useEffect(() => { onInsertRef.current = onInsert }, [onInsert])
+  useEffect(() => { onUpdateRef.current = onUpdate }, [onUpdate])
+  useEffect(() => { onDeleteRef.current = onDelete }, [onDelete])
+  useEffect(() => { onChangeRef.current = onChange }, [onChange])
+
   const cleanup = useCallback(() => {
     if (channelRef.current) {
       const supabase = createClient()
@@ -81,11 +91,11 @@ export function useRealTime({
             old: payload.old as Record<string, unknown>,
           }
 
-          onChange?.(typedPayload)
+          onChangeRef.current?.(typedPayload)
 
-          if (payload.eventType === "INSERT") onInsert?.(typedPayload)
-          if (payload.eventType === "UPDATE") onUpdate?.(typedPayload)
-          if (payload.eventType === "DELETE") onDelete?.(typedPayload)
+          if (payload.eventType === "INSERT") onInsertRef.current?.(typedPayload)
+          if (payload.eventType === "UPDATE") onUpdateRef.current?.(typedPayload)
+          if (payload.eventType === "DELETE") onDeleteRef.current?.(typedPayload)
         }
       )
       .subscribe()
