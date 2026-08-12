@@ -244,3 +244,17 @@ model PenaltySettings {
   @@map("penalty_settings")
 }
 
+model PasswordResetToken {
+  id          String   @id @default(uuid())
+  tokenHash   String   @unique           // SHA-256 hash of the session token returned to client
+  otpHash     String                     // SHA-256 hash of the 6-digit OTP sent to email
+  userId      String
+  expiresAt   DateTime                   // 10 minutes from creation
+  otpVerified Boolean  @default(false)   // true after user verifies the OTP
+  used        Boolean  @default(false)   // true after password has been reset
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
