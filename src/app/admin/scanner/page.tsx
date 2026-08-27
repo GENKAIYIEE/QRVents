@@ -4,6 +4,8 @@ import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { ScannerClient } from "@/components/scanner/ScannerClient"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Scanner — QRVents Admin",
 }
@@ -13,6 +15,7 @@ export default async function ScannerPage() {
   if (!session || session.role !== "SUPER_ADMIN") redirect("/login")
 
   // Fetch ONGOING events, or UPCOMING events starting today
+  // Super Admin can scan ALL event types (school-wide and department)
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
   
@@ -44,20 +47,9 @@ export default async function ScannerPage() {
     },
   })
 
-  const now = new Date()
-  
-  // Filter UPCOMING events to only those starting within 45 minutes
-  const events = rawEvents.filter(event => {
-    if (event.status === "ONGOING") return true;
-    if (event.status === "UPCOMING" && event.startTime) {
-      const [startHours, startMinutes] = event.startTime.split(":").map(Number);
-      const eventStartDate = new Date(event.date);
-      eventStartDate.setHours(startHours, startMinutes, 0, 0);
-      const timeDiffMinutes = (eventStartDate.getTime() - now.getTime()) / (1000 * 60);
-      return timeDiffMinutes <= 45;
-    }
-    return false;
-  })
+  // We pass rawEvents directly. The ScannerClient (client component) will 
+  // calculate the 45-minute window using the browser's local timezone.
+  const events = rawEvents
 
   // Fetch global settings for auto-lock timer
   const settings = await prisma.systemSettings.findUnique({

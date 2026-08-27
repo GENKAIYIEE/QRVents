@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { PinLockScreen } from "@/components/scanner/PinLockScreen"
 import { ScannerView } from "@/components/scanner/ScannerView"
 import { EventSelector } from "@/components/scanner/EventSelector"
@@ -14,6 +14,8 @@ interface Event {
   title: string
   date: string | Date
   venue: string
+  status?: string
+  startTime?: string | null
 }
 
 interface ScannerClientProps {
@@ -22,10 +24,29 @@ interface ScannerClientProps {
   basePath: string // "admin" or "dept" for the breadcrumb
 }
 
-export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClientProps) {
+export function ScannerClient({ events: initialEvents, autoLockSeconds, basePath }: ScannerClientProps) {
+  // Filter function using local browser time to avoid server UTC timezone mismatches
+  const filterEventsByTime = useCallback((rawEvents: Event[]) => {
+    const now = new Date()
+    return rawEvents.filter(event => {
+      if (event.status === "ONGOING") return true
+      if (event.status === "UPCOMING" && event.startTime) {
+        const [startHours, startMinutes] = event.startTime.split(":").map(Number)
+        const eventStartDate = new Date(event.date)
+        eventStartDate.setHours(startHours, startMinutes, 0, 0)
+        const timeDiffMinutes = (eventStartDate.getTime() - now.getTime()) / (1000 * 60)
+        return timeDiffMinutes <= 45
+      }
+      return false
+    })
+  }, [])
+
+  const initialActive = filterEventsByTime(initialEvents)
+  
   const [hasPin, setHasPin] = useState<boolean | null>(null)
   const [isLocked, setIsLocked] = useState(true)
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(events[0]?.id || null)
+  const [activeEvents, setActiveEvents] = useState<Event[]>(initialActive)
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(initialActive[0]?.id || null)
   const [scanMode, setScanMode] = useState<"camera" | "hardware">("camera")
   
   const [isProcessing, setIsProcessing] = useState(false)
@@ -47,6 +68,40 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
         setHasPin(false)
       })
   }, [])
+
+  // Auto-refresh event list every 30 seconds so events entering
+  // the 45-minute window appear automatically without page reload
+  const refreshEvents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/scanner/events")
+      if (res.ok) {
+        const data = await res.json()
+        const newEvents = filterEventsByTime(data.events || [])
+        setActiveEvents(newEvents)
+
+        // If no event is currently selected but events appeared, auto-select the first one
+        setSelectedEventId(prev => {
+          if (!prev && newEvents.length > 0) return newEvents[0].id
+          // If selected event no longer exists in list, reset
+          if (prev && !newEvents.find(e => e.id === prev)) {
+            return newEvents.length > 0 ? newEvents[0].id : null
+          }
+          return prev
+        })
+      }
+    } catch {
+      // Silently fail — the server-rendered events are still available
+    }
+  }, [])
+
+  useEffect(() => {
+    // Initial client-side refresh (in case server data was stale)
+    refreshEvents()
+
+    const interval = setInterval(refreshEvents, 30_000)
+    return () => clearInterval(interval)
+  }, [refreshEvents])
+
 
   // Auto-lock timer disabled by user request
   // The scanner will now only lock if the user clicks the manual 'Lock Scanner' button.
@@ -185,7 +240,7 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
           <div className="w-full lg:w-[350px] shrink-0 space-y-6">
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
               <EventSelector 
-                events={events} 
+                events={activeEvents} 
                 selectedEventId={selectedEventId} 
                 onSelect={setSelectedEventId} 
                 disabled={isProcessing}
