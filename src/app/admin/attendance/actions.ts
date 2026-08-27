@@ -10,10 +10,21 @@ export async function getEventsForAttendance() {
     throw new Error("Unauthorized")
   }
 
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
   return await prisma.event.findMany({
     where: { 
-      status: { in: ["ONGOING", "UPCOMING"] },
-      eventType: "SCHOOL_WIDE"
+      eventType: "SCHOOL_WIDE",
+      OR: [
+        { status: { in: ["ONGOING", "UPCOMING"] } },
+        { 
+          status: "COMPLETED",
+          date: { gte: todayStart, lte: todayEnd }
+        }
+      ]
     },
     orderBy: [
       { status: "asc" }, // ONGOING first

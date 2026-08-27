@@ -48,33 +48,8 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
       })
   }, [])
 
-  // Auto-lock timer logic
-  const resetLockTimer = () => {
-    if (lockTimerRef.current) clearTimeout(lockTimerRef.current)
-    if (!isLocked && hasPin) {
-      lockTimerRef.current = setTimeout(() => {
-        setIsLocked(true)
-        setScanResult(null)
-      }, autoLockSeconds * 1000)
-    }
-  }
-
-  // Reset timer on any interaction
-  useEffect(() => {
-    const handleActivity = () => resetLockTimer()
-    window.addEventListener("mousemove", handleActivity)
-    window.addEventListener("keydown", handleActivity)
-    window.addEventListener("touchstart", handleActivity)
-    
-    resetLockTimer() // Start initial timer when unlocked
-
-    return () => {
-      window.removeEventListener("mousemove", handleActivity)
-      window.removeEventListener("keydown", handleActivity)
-      window.removeEventListener("touchstart", handleActivity)
-      if (lockTimerRef.current) clearTimeout(lockTimerRef.current)
-    }
-  }, [isLocked, hasPin, autoLockSeconds])
+  // Auto-lock timer disabled by user request
+  // The scanner will now only lock if the user clicks the manual 'Lock Scanner' button.
 
   const handleScan = async (qrCode: string) => {
     if (!selectedEventId) {
@@ -83,7 +58,6 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
     }
 
     setIsProcessing(true)
-    resetLockTimer() // Reset timer on scan activity
 
     try {
       const res = await fetch("/api/scanner/scan", {
@@ -234,7 +208,7 @@ export function ScannerClient({ events, autoLockSeconds, basePath }: ScannerClie
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="material-symbols-outlined text-[16px] text-slate-400 mt-0.5">check_circle</span>
-                  Scanner auto-locks after {autoLockSeconds}s of inactivity.
+                  Scanner stays active until manually locked.
                 </li>
               </ul>
             </div>

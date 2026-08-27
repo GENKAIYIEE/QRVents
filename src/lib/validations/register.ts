@@ -19,7 +19,7 @@ export const registerSchema = z
       message: "Year level is required",
     }),
     section: z.string().min(1, "Section is required").max(10, "Section is too long"),
-    studentId: z.string().optional(),
+    studentId: z.string().min(3, "Student ID is required").max(30, "Student ID is too long"),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {

@@ -87,7 +87,7 @@ export function ScannerView({ isActive, onScan, isProcessing = false }: ScannerV
       )}
 
       {/* The actual video element container */}
-      <div id={containerId} className="w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full" />
+      <div id={containerId} className="w-full h-full flex items-center justify-center bg-black overflow-hidden [&>video]:max-w-full [&>video]:max-h-full" />
 
       {/* Viewfinder Overlay */}
       {status === "scanning" && (
@@ -136,6 +136,7 @@ export function ScannerView({ isActive, onScan, isProcessing = false }: ScannerV
         #qr-scanner-container img[alt="Info icon"] { display: none !important; }
         #qr-scanner-container select { display: none !important; }
         #qr-scanner-container a { display: none !important; }
+        #qr-shaded-region { display: none !important; }
       `}</style>
     </div>
   )

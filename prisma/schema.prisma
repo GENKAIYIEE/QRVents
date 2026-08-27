@@ -74,7 +74,7 @@ model User {
   email        String      @unique
   passwordHash String
   role         Role        @default(STUDENT)
-  studentId    String?
+  studentId    String?     @unique
   yearLevel    String?
   section      String?
   qrCode       String?     @unique
@@ -105,6 +105,7 @@ model Event {
   eventType         EventType   @default(SCHOOL_WIDE)
   status            EventStatus @default(UPCOMING)
   isMandatory       Boolean     @default(false)
+  hasCertificate    Boolean     @default(false)
   penaltiesGenerated Boolean    @default(false)
   isArchived        Boolean     @default(false)
   expectedAttendees Int?
@@ -134,6 +135,7 @@ model EventProposal {
   status          ProposalStatus @default(PENDING)
   rejectionReason String?
   isPublished     Boolean        @default(false)
+  hasCertificate  Boolean        @default(false)
   isArchived      Boolean        @default(false)
   submittedAt     DateTime       @default(now())
   reviewedAt      DateTime?
@@ -155,6 +157,7 @@ model AttendanceLog {
   checkIn   DateTime         @default(now())
   checkOut  DateTime?
   status    AttendanceStatus @default(PRESENT)
+  isLate    Boolean          @default(false)
   createdAt DateTime         @default(now())
   userId    String
   user      User             @relation(fields: [userId], references: [id])
@@ -217,6 +220,7 @@ model Penalty {
   eventId      String
   event        Event         @relation(fields: [eventId], references: [id])
   type         PenaltyType?
+  reason       String?       // ABSENT | LATE | NO_CHECKOUT | LATE_AND_NO_CHECKOUT
   status       PenaltyStatus @default(PENDING)
   feeAmount    Float
   serviceHours Int

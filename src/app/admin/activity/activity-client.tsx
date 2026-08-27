@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { TableSkeleton } from "@/components/ui/skeleton"
 
 export function ActivityClient() {
   const router = useRouter()
@@ -75,9 +76,7 @@ export function ActivityClient() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
-        </div>
+        <TableSkeleton columns={4} />
       ) : logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm">
           <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">history_toggle_off</span>

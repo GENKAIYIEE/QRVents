@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getDeptAdmins, registerDeptAdmin } from "@/app/admin/dept-admins/actions"
 import { getSession } from "@/lib/auth"
-import { registerDeptAdminSchema } from "@/lib/validations/dept-admin"
+import { registerAdminSchema } from "@/lib/validations/dept-admin"
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const validatedData = registerDeptAdminSchema.parse(body)
+    const validatedData = registerAdminSchema.parse(body)
     const admin = await registerDeptAdmin(validatedData)
     
     return NextResponse.json({ success: true, data: admin })

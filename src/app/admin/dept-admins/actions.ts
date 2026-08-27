@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma"
 import { getSession, hashPassword } from "@/lib/auth"
 import { logActivity } from "@/lib/activity-logger"
-import { RegisterDeptAdminFormValues } from "@/lib/validations/dept-admin"
+import { RegisterAdminFormValues } from "@/lib/validations/dept-admin"
 import { revalidatePath } from "next/cache"
 
 export async function getDeptAdmins(page = 1, pageSize = 10, search = "", departmentId = "ALL") {
@@ -13,7 +13,7 @@ export async function getDeptAdmins(page = 1, pageSize = 10, search = "", depart
   }
 
   const whereClause: any = {
-    role: "DEPT_ADMIN",
+    role: { in: ["DEPT_ADMIN", "SUPER_ADMIN"] },
     OR: [
       { fullName: { contains: search, mode: "insensitive" } },
       { email: { contains: search, mode: "insensitive" } },
@@ -38,7 +38,7 @@ export async function getDeptAdmins(page = 1, pageSize = 10, search = "", depart
   return { admins, total, pages: Math.ceil(total / pageSize) }
 }
 
-export async function registerDeptAdmin(data: RegisterDeptAdminFormValues) {
+export async function registerDeptAdmin(data: RegisterAdminFormValues) {
   const session = await getSession()
   if (!session || session.role !== "SUPER_ADMIN") {
     throw new Error("Unauthorized")
@@ -56,8 +56,8 @@ export async function registerDeptAdmin(data: RegisterDeptAdminFormValues) {
       fullName: data.fullName,
       email: data.email,
       passwordHash,
-      role: "DEPT_ADMIN",
-      departmentId: data.departmentId,
+      role: data.role || "DEPT_ADMIN",
+      departmentId: data.role === "SUPER_ADMIN" ? null : data.departmentId,
       isActive: true,
     },
     include: {
@@ -65,7 +65,7 @@ export async function registerDeptAdmin(data: RegisterDeptAdminFormValues) {
     },
   })
 
-  await logActivity(session.userId, session.fullName, "Registered Dept Admin", `Admin: ${newAdmin.fullName} (${newAdmin.department?.code})`)
+  await logActivity(session.userId, session.fullName, `Registered ${data.role === "SUPER_ADMIN" ? "Super" : "Dept"} Admin`, `Admin: ${newAdmin.fullName} ${newAdmin.department ? `(${newAdmin.department.code})` : ""}`)
   
   revalidatePath("/admin/dept-admins")
   revalidatePath("/admin/dashboard")
@@ -107,4 +107,27 @@ export async function resetDeptAdminPassword(id: string, newPasswordRaw: string)
   
   revalidatePath("/admin/dept-admins")
   return admin
+}
+
+export async function deleteAdmin(id: string) {
+  const session = await getSession()
+  if (!session || session.role !== "SUPER_ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  try {
+    const admin = await prisma.user.delete({
+      where: { id },
+    })
+
+    await logActivity(session.userId, session.fullName, "Deleted Admin", `Admin: ${admin.fullName}`)
+    
+    revalidatePath("/admin/dept-admins")
+    return { success: true }
+  } catch (error: any) {
+    if (error.code === "P2003") {
+      throw new Error("Cannot delete this admin because they have created events or proposals. Please keep them deactivated instead.")
+    }
+    throw error
+  }
 }

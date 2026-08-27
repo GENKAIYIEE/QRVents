@@ -78,9 +78,17 @@ export function UpcomingEventsList({ events, department, emptyMessage = "No upco
               </div>
             </div>
 
-            <div className="mt-auto pt-3 border-t border-dashed border-slate-200 flex items-center gap-2 text-slate-500">
-              <QrCode size={14} />
-              <span className="text-[11px] font-medium">Scan your QR code at the venue to check in</span>
+            <div className="mt-auto pt-3 border-t border-dashed border-slate-200 flex flex-col gap-2">
+              {event.hasCertificate && (
+                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-2 py-1.5 rounded-lg border border-amber-100/50">
+                  <span className="material-symbols-outlined text-[14px]">workspace_premium</span>
+                  <span className="text-[11px] font-bold">Certificate Provided</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-slate-500">
+                <QrCode size={14} />
+                <span className="text-[11px] font-medium">Scan your QR code at the venue to check in</span>
+              </div>
             </div>
           </motion.div>
         )

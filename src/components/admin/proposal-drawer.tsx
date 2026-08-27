@@ -145,6 +145,13 @@ export function ProposalDrawer({ proposal, isOpen, onClose, onSuccess }: Proposa
               </div>
             </div>
 
+            {proposal.hasCertificate && (
+              <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl flex items-center gap-2">
+                <span className="material-symbols-outlined text-blue-500">workspace_premium</span>
+                <span className="text-sm font-semibold text-blue-800">Certificates will be provided for this event</span>
+              </div>
+            )}
+
             <div>
               <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Description</div>
               <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">

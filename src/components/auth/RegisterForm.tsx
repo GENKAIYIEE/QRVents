@@ -204,7 +204,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                 {/* Student ID Field */}
                 <div>
                   <label htmlFor="studentId" className="block text-sm font-semibold text-[#0F172A] mb-2">
-                    Student ID <span className="text-slate-400 font-normal">(Optional)</span>
+                    Student ID
                   </label>
                   <div className="relative">
                     <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
