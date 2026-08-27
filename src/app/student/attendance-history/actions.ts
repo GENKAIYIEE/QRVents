@@ -112,7 +112,10 @@ export async function getStudentAttendanceHistory(
           where: { userId: studentId }
         }
       },
-      orderBy: { date: "desc" },
+      orderBy: [
+        { date: "desc" },
+        { endTime: "desc" }
+      ],
       skip,
       take: limit,
     }),

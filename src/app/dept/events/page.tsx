@@ -25,12 +25,12 @@ export default async function DeptEventsPage() {
   // Fetch approved events (upcoming/ongoing) that the dept admin can manage/see
   const events = await prisma.event.findMany({
     where: { 
-      OR: [
-        { departmentId: user?.departmentId },
-        { eventType: "SCHOOL_WIDE" }
-      ]
+      departmentId: user?.departmentId
     },
-    orderBy: { date: "desc" },
+    orderBy: [
+      { date: "desc" },
+      { endTime: "desc" }
+    ],
     include: {
       _count: {
         select: { attendanceLogs: true }

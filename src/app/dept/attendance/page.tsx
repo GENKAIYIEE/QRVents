@@ -35,12 +35,7 @@ export default async function DeptAttendancePage() {
         }
       ],
       AND: [
-        {
-          OR: [
-            { departmentId: user?.departmentId },
-            { eventType: "SCHOOL_WIDE" }
-          ]
-        }
+        { departmentId: user?.departmentId }
       ]
     },
     orderBy: [
@@ -61,10 +56,7 @@ export default async function DeptAttendancePage() {
         where: {
           status: "UPCOMING",
           date: { gte: todayStart, lte: todayEnd },
-          OR: [
-            { departmentId: user?.departmentId },
-            { eventType: "SCHOOL_WIDE" }
-          ]
+          departmentId: user?.departmentId
         },
         select: {
           id: true, title: true, date: true, startTime: true, endTime: true, venue: true, eventType: true

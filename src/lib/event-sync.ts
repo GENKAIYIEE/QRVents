@@ -8,7 +8,8 @@ import { parse, isBefore, isAfter } from "date-fns"
  */
 export async function syncEventStatuses() {
   try {
-    const now = new Date()
+    const { getManilaWallClock, getManilaCalendarToday } = await import("@/lib/time")
+    const now = getManilaWallClock()
     
     // Find events that might need transitioning
     const events = await prisma.event.findMany({
