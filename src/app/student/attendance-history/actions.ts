@@ -22,14 +22,18 @@ export async function getStudentAttendanceHistory(
   const user = await prisma.user.findUnique({ where: { id: studentId } })
   const deptId = user?.departmentId
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const now = new Date()
-
+  const { getManilaCalendarToday, getManilaCalendarDateFromTimestamp } = await import("@/lib/time")
+  
+  const today = getManilaCalendarToday()
+  const now = new Date() // Absolute UTC time for comparing with event.date ?
+  
+  // Wait, `now` is used in `date: { lte: now }`.
+  // But `event.date` is a Calendar Date (midnight UTC).
+  // If we query `date: { lte: now }`, and now is `2026-08-27T01:00:00Z` and event.date is `2026-08-27T00:00:00Z`, it includes today's events!
+  // This is correct.
+  
   const userCreatedAt = user?.createdAt || new Date()
-  const userCreationStartOfDay = new Date(userCreatedAt)
-  userCreationStartOfDay.setHours(0, 0, 0, 0)
+  const userCreationStartOfDay = getManilaCalendarDateFromTimestamp(userCreatedAt)
 
   // Build the Where clause for Events
   // Only show past events (date <= now).

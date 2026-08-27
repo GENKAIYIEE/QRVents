@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { jwtVerify } from "jose"
@@ -52,7 +52,8 @@ export async function getDeptLayoutData() {
 
 export async function getDashboardData() {
   const { session, department } = await getDeptLayoutData()
-  const now = new Date()
+  const { getManilaCalendarToday } = await import("@/lib/time")
+  const todayCalendar = getManilaCalendarToday()
 
   const [
     studentCount,
@@ -88,7 +89,7 @@ export async function getDashboardData() {
     // Upcoming Events Feed
     prisma.event.findMany({
       where: {
-        date: { gte: now },
+        date: { gte: todayCalendar },
         status: "UPCOMING",
         OR: [
           { eventType: "SCHOOL_WIDE" },

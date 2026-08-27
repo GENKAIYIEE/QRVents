@@ -10,8 +10,8 @@ export async function getDashboardData() {
 
   const studentId = session.userId
   const departmentId = session.departmentId
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const { getManilaCalendarToday } = await import("@/lib/time")
+  const today = getManilaCalendarToday()
 
   const [
     upcomingSchoolWideEvents,

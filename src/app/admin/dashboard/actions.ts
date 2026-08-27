@@ -81,10 +81,10 @@ export async function getDashboardStats() {
   })
 
   // Monthly trend: events per month (last 6 months)
-  const sixMonthsAgo = new Date()
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
-  sixMonthsAgo.setDate(1)
-  sixMonthsAgo.setHours(0, 0, 0, 0)
+  const { getManilaCalendarToday } = await import("@/lib/time")
+  const sixMonthsAgo = getManilaCalendarToday()
+  sixMonthsAgo.setUTCMonth(sixMonthsAgo.getUTCMonth() - 5)
+  sixMonthsAgo.setUTCDate(1)
 
   const eventsThisYear = await prisma.event.findMany({
     where: { date: { gte: sixMonthsAgo } },

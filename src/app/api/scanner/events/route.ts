@@ -9,10 +9,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+    const { getManilaCalendarToday } = await import("@/lib/time")
+    
+    // Get the exact UTC Midnight representing today in Manila
+    const todayStart = getManilaCalendarToday()
+    
+    // The end of the calendar day (for querying events) is exactly 23:59:59.999 of that UTC day
+    const todayEnd = new Date(todayStart)
+    todayEnd.setUTCHours(23, 59, 59, 999)
 
     let whereClause: any = {
       OR: [

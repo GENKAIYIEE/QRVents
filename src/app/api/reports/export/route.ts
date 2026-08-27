@@ -58,11 +58,13 @@ export async function GET(request: NextRequest) {
 
     const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n")
 
+    const { getManilaWallClock } = await import("@/lib/time")
+    
     // Return as downloadable file
     return new NextResponse(csvContent, {
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="attendance-${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${format(new Date(), "yyyyMMdd")}.csv"`,
+        "Content-Disposition": `attachment; filename="attendance-${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${format(getManilaWallClock(), "yyyyMMdd")}.csv"`,
       }
     })
 

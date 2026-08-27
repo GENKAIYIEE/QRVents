@@ -16,11 +16,11 @@ export default async function ScannerPage() {
 
   // Fetch ONGOING events, or UPCOMING events starting today
   // Super Admin can scan ALL event types (school-wide and department)
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  const { getManilaCalendarToday } = await import("@/lib/time")
+  const todayStart = getManilaCalendarToday()
   
-  const todayEnd = new Date()
-  todayEnd.setHours(23, 59, 59, 999)
+  const todayEnd = new Date(todayStart)
+  todayEnd.setUTCHours(23, 59, 59, 999)
 
   const rawEvents = await prisma.event.findMany({
     where: { 
