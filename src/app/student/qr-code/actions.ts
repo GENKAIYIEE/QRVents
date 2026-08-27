@@ -57,11 +57,11 @@ export async function getStudentActiveEvents() {
     throw new Error("User not found")
   }
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  const { getManilaCalendarToday } = await import("@/lib/time")
+  const todayStart = getManilaCalendarToday()
   
-  const todayEnd = new Date()
-  todayEnd.setHours(23, 59, 59, 999)
+  const todayEnd = new Date(todayStart)
+  todayEnd.setUTCHours(23, 59, 59, 999)
 
   const events = await prisma.event.findMany({
     where: {
