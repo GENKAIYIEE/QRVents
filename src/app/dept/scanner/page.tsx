@@ -19,14 +19,27 @@ export default async function DeptScannerPage() {
     select: { departmentId: true }
   })
 
-  // Fetch only ONGOING events for scanning
-  // Dept Admins can scan events in their department OR school-wide events
-  const events = await prisma.event.findMany({
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
+  const rawEvents = await prisma.event.findMany({
     where: { 
-      status: "ONGOING",
       OR: [
-        { departmentId: user?.departmentId },
-        { eventType: "SCHOOL_WIDE" }
+        { status: "ONGOING" },
+        { 
+          status: "UPCOMING",
+          date: { gte: todayStart, lte: todayEnd }
+        }
+      ],
+      AND: [
+        {
+          OR: [
+            { departmentId: user?.departmentId },
+            { eventType: "SCHOOL_WIDE" }
+          ]
+        }
       ]
     },
     orderBy: { date: "desc" },
@@ -35,29 +48,33 @@ export default async function DeptScannerPage() {
       title: true,
       date: true,
       venue: true,
+      startTime: true,
+      endTime: true,
+      status: true,
+      eventType: true
     },
   })
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-  const todayEnd = new Date()
-  todayEnd.setHours(23, 59, 59, 999)
+  const now = new Date()
+  const events: typeof rawEvents = []
+  const upcomingEventsToday: typeof rawEvents = []
 
-  const upcomingEventsToday = events.length === 0 
-    ? await prisma.event.findMany({
-        where: {
-          status: "UPCOMING",
-          date: { gte: todayStart, lte: todayEnd },
-          OR: [
-            { departmentId: user?.departmentId },
-            { eventType: "SCHOOL_WIDE" }
-          ]
-        },
-        select: {
-          id: true, title: true, date: true, startTime: true, endTime: true, venue: true, eventType: true
-        }
-      })
-    : []
+  rawEvents.forEach(event => {
+    if (event.status === "ONGOING") {
+      events.push(event)
+    } else if (event.status === "UPCOMING" && event.startTime) {
+      const [startHours, startMinutes] = event.startTime.split(":").map(Number);
+      const eventStartDate = new Date(event.date);
+      eventStartDate.setHours(startHours, startMinutes, 0, 0);
+      const timeDiffMinutes = (eventStartDate.getTime() - now.getTime()) / (1000 * 60);
+      
+      if (timeDiffMinutes <= 45) {
+        events.push(event)
+      } else {
+        upcomingEventsToday.push(event)
+      }
+    }
+  })
 
   // Fetch global settings for auto-lock timer
   const settings = await prisma.systemSettings.findUnique({

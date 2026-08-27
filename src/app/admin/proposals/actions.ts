@@ -120,6 +120,7 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
         eventType: "DEPARTMENT",
         departmentId: proposal.departmentId,
         createdById: proposal.submittedById,
+        hasCertificate: proposal.hasCertificate,
         status: "UPCOMING",
       },
     })

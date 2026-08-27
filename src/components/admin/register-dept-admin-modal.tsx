@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { registerDeptAdminSchema, RegisterDeptAdminFormValues } from "@/lib/validations/dept-admin"
+import { registerAdminSchema, RegisterAdminFormValues } from "@/lib/validations/dept-admin"
 
 interface RegisterDeptAdminModalProps {
   isOpen: boolean
@@ -16,13 +16,16 @@ export function RegisterDeptAdminModal({ isOpen, onClose, onSuccess, departments
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<RegisterDeptAdminFormValues>({
-    resolver: zodResolver(registerDeptAdminSchema),
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<RegisterAdminFormValues>({
+    resolver: zodResolver(registerAdminSchema),
+    defaultValues: { role: "DEPT_ADMIN" }
   })
+
+  const selectedRole = watch("role")
 
   if (!isOpen) return null
 
-  const onSubmit = async (data: RegisterDeptAdminFormValues) => {
+  const onSubmit = async (data: RegisterAdminFormValues) => {
     setIsSubmitting(true)
     setError(null)
     
@@ -52,7 +55,7 @@ export function RegisterDeptAdminModal({ isOpen, onClose, onSuccess, departments
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-xl font-bold text-slate-800">Register Dept Admin</h2>
+          <h2 className="text-xl font-bold text-slate-800">Register Admin</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-lg text-slate-500">
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -89,18 +92,32 @@ export function RegisterDeptAdminModal({ isOpen, onClose, onSuccess, departments
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Department</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Role</label>
               <select 
-                {...register("departmentId")}
+                {...register("role")}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
-                <option value="">Select Department...</option>
-                {departments.map(d => (
-                  <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
-                ))}
+                <option value="DEPT_ADMIN">Department Admin</option>
+                <option value="SUPER_ADMIN">Super Admin</option>
               </select>
-              {errors.departmentId && <p className="text-red-500 text-xs mt-1">{errors.departmentId.message}</p>}
+              {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role?.message}</p>}
             </div>
+
+            {selectedRole === "DEPT_ADMIN" && (
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Department</label>
+                <select 
+                  {...register("departmentId")}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="">Select Department...</option>
+                  {departments.map(d => (
+                    <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
+                  ))}
+                </select>
+                {errors.departmentId && <p className="text-red-500 text-xs mt-1">{errors.departmentId.message}</p>}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>

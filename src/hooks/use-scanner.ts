@@ -54,6 +54,15 @@ export function useScanner({
   const [error, setError] = useState<string | null>(null)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const isMountedRef = useRef(true)
+  
+  // Keep track of the latest callbacks without causing re-renders or recreating `start`
+  const onScanRef = useRef(onScan)
+  const onErrorRef = useRef(onError)
+  
+  useEffect(() => {
+    onScanRef.current = onScan
+    onErrorRef.current = onError
+  }, [onScan, onError])
 
   const stop = useCallback(async () => {
     if (scannerRef.current) {
@@ -81,7 +90,7 @@ export function useScanner({
 
     try {
       // Dynamically import to avoid SSR issues
-      const { Html5Qrcode } = await import("html5-qrcode")
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode")
 
       // Stop any existing scanner
       if (scannerRef.current) {
@@ -92,15 +101,16 @@ export function useScanner({
       scannerRef.current = scanner
 
       const config = {
-        fps,
+        fps: 10,
         disableFlip: false,
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
       }
 
       const onScanSuccess = (decodedText: string) => {
         if (!isMountedRef.current) return
         const result = { text: decodedText, timestamp: new Date() }
         setLastResult(result)
-        onScan(decodedText)
+        if (onScanRef.current) onScanRef.current(decodedText)
       }
       const onScanFailure = () => {}
 
@@ -135,10 +145,10 @@ export function useScanner({
       if (isMountedRef.current) {
         setStatus(isPermissionDenied ? "permission_denied" : "error")
         setError(message)
-        onError?.(message)
+        if (onErrorRef.current) onErrorRef.current(message)
       }
     }
-  }, [elementId, fps, onScan, onError, stop])
+  }, [elementId, fps, stop])
 
   useEffect(() => {
     isMountedRef.current = true

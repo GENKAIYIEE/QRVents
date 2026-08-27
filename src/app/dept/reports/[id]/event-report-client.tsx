@@ -7,6 +7,7 @@ import { format } from "date-fns"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { PdfExportButton } from "@/components/reports/pdf-export-button"
 
 interface EventData {
   id: string
@@ -144,13 +145,11 @@ export function EventReportClient({ event }: { event: EventData }) {
             {event.isArchived ? "Restore Report" : "Archive Report"}
           </button>
           
-          <a 
-            href={`/api/reports/export?eventId=${event.id}`}
-            download
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-all shadow-blue-500/20"
-          >
-            <Download className="w-4 h-4" /> Export Full CSV
-          </a>
+          <PdfExportButton 
+            eventId={event.id}
+            departmentId=""
+            eventName={event.title}
+          />
         </div>
       </div>
 

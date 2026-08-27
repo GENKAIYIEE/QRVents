@@ -19,15 +19,34 @@ export default async function DeptAttendancePage() {
     select: { departmentId: true }
   })
 
-  // Fetch ONGOING events that the dept admin can view
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
+  // Fetch ONGOING, UPCOMING, and today's COMPLETED events that the dept admin can view
   const activeEvents = await prisma.event.findMany({
     where: { 
-      status: "ONGOING",
       OR: [
-        { departmentId: user?.departmentId },
-        { eventType: "SCHOOL_WIDE" }
+        { status: { in: ["ONGOING", "UPCOMING"] } },
+        { 
+          status: "COMPLETED",
+          date: { gte: todayStart, lte: todayEnd }
+        }
+      ],
+      AND: [
+        {
+          OR: [
+            { departmentId: user?.departmentId },
+            { eventType: "SCHOOL_WIDE" }
+          ]
+        }
       ]
     },
+    orderBy: [
+      { status: "asc" },
+      { date: "desc" }
+    ],
     select: {
       id: true,
       title: true,
@@ -35,10 +54,7 @@ export default async function DeptAttendancePage() {
     }
   })
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-  const todayEnd = new Date()
-  todayEnd.setHours(23, 59, 59, 999)
+
 
   const upcomingEventsToday = activeEvents.length === 0 
     ? await prisma.event.findMany({

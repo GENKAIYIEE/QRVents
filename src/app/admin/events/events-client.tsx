@@ -8,6 +8,7 @@ import { EventStatus, EventType } from "@prisma/client"
 import { toast } from "sonner"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
+import { CardSkeleton } from "@/components/ui/skeleton"
 
 export function EventsClient({ departments, isArchived = false }: { departments: any[], isArchived?: boolean }) {
   const router = useRouter()
@@ -177,9 +178,7 @@ export function EventsClient({ departments, isArchived = false }: { departments:
 
       {/* Content Area */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500 [font-variation-settings:'FILL'_1]">progress_activity</span>
-        </div>
+        <CardSkeleton count={6} />
       ) : (
         <div className="flex flex-col gap-6">
           <EventsTable 

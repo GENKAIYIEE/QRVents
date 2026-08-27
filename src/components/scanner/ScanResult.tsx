@@ -5,6 +5,7 @@ import { useEffect } from "react"
 export interface ScanResultData {
   type: "success" | "error"
   action?: "check-in" | "check-out"
+  isLate?: boolean
   user?: { fullName: string; isGuest?: boolean }
   message: string
 }
@@ -15,10 +16,11 @@ interface ScanResultProps {
 }
 
 export function ScanResult({ result, onClear }: ScanResultProps) {
-  // Auto-clear result after 3 seconds
+  // Auto-clear result after 4 seconds (extra time for late warning to be read)
   useEffect(() => {
     if (result) {
-      const timer = setTimeout(onClear, 3000)
+      const delay = result.isLate ? 5000 : 3000
+      const timer = setTimeout(onClear, delay)
       return () => clearTimeout(timer)
     }
   }, [result, onClear])
@@ -27,22 +29,40 @@ export function ScanResult({ result, onClear }: ScanResultProps) {
 
   const isSuccess = result.type === "success"
   const isGuest = result.user?.isGuest
-  
-  const bgClass = isSuccess 
-    ? (isGuest ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200") 
-    : "bg-rose-50 border-rose-200"
-    
-  const textClass = isSuccess
-    ? (isGuest ? "text-amber-800" : "text-emerald-800")
-    : "text-rose-800"
-    
-  const icon = isSuccess 
-    ? (result.action === "check-out" ? "logout" : "check_circle") 
-    : "error"
+  const isLate = result.isLate
 
-  const iconColor = isSuccess
-    ? (isGuest ? "text-amber-500" : "text-emerald-500")
-    : "text-rose-500"
+  // Priority: Late > Guest > Error > Success
+  const bgClass = !isSuccess
+    ? "bg-rose-50 border-rose-200"
+    : isLate
+    ? "bg-amber-50 border-amber-300"
+    : isGuest
+    ? "bg-sky-50 border-sky-200"
+    : "bg-emerald-50 border-emerald-200"
+
+  const textClass = !isSuccess
+    ? "text-rose-800"
+    : isLate
+    ? "text-amber-900"
+    : isGuest
+    ? "text-sky-800"
+    : "text-emerald-800"
+
+  const iconColor = !isSuccess
+    ? "text-rose-500"
+    : isLate
+    ? "text-amber-500"
+    : isGuest
+    ? "text-sky-500"
+    : "text-emerald-500"
+
+  const icon = !isSuccess
+    ? "error"
+    : isLate
+    ? "schedule"
+    : result.action === "check-out"
+    ? "logout"
+    : "check_circle"
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
@@ -59,9 +79,16 @@ export function ScanResult({ result, onClear }: ScanResultProps) {
             {result.message}
           </p>
           
-          {isGuest && isSuccess && (
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-md">
+          {isLate && isSuccess && (
+            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-200 text-amber-900 text-xs font-bold uppercase tracking-wider rounded-md">
               <span className="material-symbols-outlined text-[14px]">warning</span>
+              Late — Penalty Issued
+            </div>
+          )}
+
+          {isGuest && isSuccess && !isLate && (
+            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-md">
+              <span className="material-symbols-outlined text-[14px]">badge</span>
               Guest Attendee
             </div>
           )}

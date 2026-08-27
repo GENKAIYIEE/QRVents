@@ -12,7 +12,7 @@ const schema = z.object({
   departmentId: z.string().min(1),
   yearLevel: z.enum(["1", "2", "3", "4"]),
   section: z.string().min(1),
-  studentId: z.string().optional(),
+  studentId: z.string().min(3, "Student ID is required"),
 })
 
 export async function POST(request: NextRequest) {
@@ -38,6 +38,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check for duplicate Student ID
+    if (studentId) {
+      const existingStudentId = await prisma.user.findUnique({ where: { studentId } })
+      if (existingStudentId) {
+        return NextResponse.json(
+          { error: "An account with this Student ID already exists. If this is your ID, please contact your administrator." },
+          { status: 409 }
+        )
+      }
+    }
+
     // Validate department exists
     const department = await prisma.department.findUnique({ where: { id: departmentId } })
     if (!department) {
@@ -55,7 +66,7 @@ export async function POST(request: NextRequest) {
         role: "STUDENT",
         yearLevel,
         section,
-        studentId: studentId || null,
+        studentId: studentId ?? null,
         departmentId,
         qrCode,
         isActive: true,

@@ -5,6 +5,7 @@ import { RegisterDeptAdminModal } from "@/components/admin/register-dept-admin-m
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { TableSkeleton } from "@/components/ui/skeleton"
 
 interface ResetPasswordModalProps {
   adminId: string
@@ -90,6 +91,145 @@ function ResetPasswordModal({ adminId, adminName, onClose, onSuccess }: ResetPas
   )
 }
 
+interface ToggleStatusModalProps {
+  adminId: string
+  adminName: string
+  currentStatus: boolean
+  onClose: () => void
+  onSuccess: () => void
+}
+
+function ToggleStatusModal({ adminId, adminName, currentStatus, onClose, onSuccess }: ToggleStatusModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const action = currentStatus ? "deactivate" : "reactivate"
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true)
+    try {
+      const res = await fetch(`/api/admin/dept-admins/${adminId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggle_status", isActive: !currentStatus })
+      })
+      if (res.ok) {
+        toast.success(`Admin ${currentStatus ? "deactivated" : "reactivated"} successfully`)
+        onSuccess()
+        onClose()
+      } else {
+        toast.error("Failed to update admin status")
+      }
+    } catch {
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in fade-in zoom-in-95">
+        <div className="flex items-start gap-4 mb-5">
+          <div className={`w-12 h-12 rounded-full flex shrink-0 items-center justify-center ${currentStatus ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
+            <span className="material-symbols-outlined text-2xl">{currentStatus ? 'warning' : 'check_circle'}</span>
+          </div>
+          <div className="pt-1">
+            <h3 className="text-lg font-bold text-slate-800 capitalize">{action} Admin</h3>
+            <p className="text-slate-500 text-sm mt-1 leading-relaxed">Are you sure you want to {action} <span className="font-semibold text-slate-700">{adminName}</span>?</p>
+          </div>
+        </div>
+        
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 py-2.5 font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            className={`flex-1 py-2.5 font-semibold text-white rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2 ${
+              currentStatus ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
+            }`}
+          >
+            {isSubmitting && <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>}
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface DeleteAdminModalProps {
+  adminId: string
+  adminName: string
+  onClose: () => void
+  onSuccess: () => void
+}
+
+function DeleteAdminModal({ adminId, adminName, onClose, onSuccess }: DeleteAdminModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true)
+    try {
+      const res = await fetch(`/api/admin/dept-admins/${adminId}`, {
+        method: "DELETE",
+      })
+      if (res.ok) {
+        toast.success(`Admin ${adminName} deleted successfully`)
+        onSuccess()
+        onClose()
+      } else {
+        const err = await res.json()
+        toast.error(err.error || "Failed to delete admin")
+      }
+    } catch {
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in fade-in zoom-in-95">
+        <div className="flex items-start gap-4 mb-5">
+          <div className="w-12 h-12 rounded-full flex shrink-0 items-center justify-center bg-red-100 text-red-600">
+            <span className="material-symbols-outlined text-2xl">delete_forever</span>
+          </div>
+          <div className="pt-1">
+            <h3 className="text-lg font-bold text-slate-800">Delete Admin</h3>
+            <p className="text-slate-500 text-sm mt-1 leading-relaxed">Are you sure you want to permanently delete <span className="font-semibold text-slate-700">{adminName}</span>? This action cannot be undone.</p>
+          </div>
+        </div>
+        
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 py-2.5 font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            className="flex-1 py-2.5 font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {isSubmitting && <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>}
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function DeptAdminsClient({ departments }: { departments: any[] }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -99,6 +239,8 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string } | null>(null)
+  const [toggleTarget, setToggleTarget] = useState<{ id: string; name: string; currentStatus: boolean } | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   
   // Filters
   const [search, setSearch] = useState(searchParams.get("search") || "")
@@ -132,26 +274,8 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
     fetchAdmins()
   }, [page, search, departmentId])
 
-  const handleToggleStatus = async (id: string, name: string, currentStatus: boolean) => {
-    const action = currentStatus ? "deactivate" : "reactivate"
-    const confirmed = window.confirm(`Are you sure you want to ${action} ${name}?`)
-    if (!confirmed) return
-
-    try {
-      const res = await fetch(`/api/admin/dept-admins/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "toggle_status", isActive: !currentStatus })
-      })
-      if (res.ok) {
-        toast.success(`Admin ${currentStatus ? "deactivated" : "reactivated"} successfully`)
-        fetchAdmins()
-      } else {
-        toast.error("Failed to update admin status")
-      }
-    } catch {
-      toast.error("An unexpected error occurred")
-    }
+  const handleToggleStatus = (id: string, name: string, currentStatus: boolean) => {
+    setToggleTarget({ id, name, currentStatus })
   }
 
   return (
@@ -190,9 +314,7 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500">progress_activity</span>
-        </div>
+        <TableSkeleton columns={5} />
       ) : admins.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm">
           <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">group_off</span>
@@ -236,7 +358,10 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
                           <span className="font-medium text-slate-700">{admin.department.code}</span>
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic">None</span>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider">
+                          <span className="material-symbols-outlined text-[14px]">shield</span>
+                          Super Admin
+                        </span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -275,6 +400,16 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
                             {admin.isActive ? 'block' : 'check_circle'}
                           </span>
                         </button>
+                        
+                        {!admin.isActive && (
+                          <button 
+                            onClick={() => setDeleteTarget({ id: admin.id, name: admin.fullName })}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            title="Delete Permanently"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -324,6 +459,25 @@ export function DeptAdminsClient({ departments }: { departments: any[] }) {
           adminId={resetTarget.id}
           adminName={resetTarget.name}
           onClose={() => setResetTarget(null)}
+          onSuccess={fetchAdmins}
+        />
+      )}
+
+      {toggleTarget && (
+        <ToggleStatusModal
+          adminId={toggleTarget.id}
+          adminName={toggleTarget.name}
+          currentStatus={toggleTarget.currentStatus}
+          onClose={() => setToggleTarget(null)}
+          onSuccess={fetchAdmins}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteAdminModal
+          adminId={deleteTarget.id}
+          adminName={deleteTarget.name}
+          onClose={() => setDeleteTarget(null)}
           onSuccess={fetchAdmins}
         />
       )}

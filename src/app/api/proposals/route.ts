@@ -11,6 +11,7 @@ const proposalSchema = z.object({
   startTime: z.string(), // HH:MM
   endTime: z.string(), // HH:MM
   venue: z.string().min(2, "Venue is required"),
+  hasCertificate: z.boolean().default(false),
 })
 
 export async function POST(request: NextRequest) {
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
         startTime: data.startTime,
         endTime: data.endTime,
         venue: data.venue,
+        hasCertificate: data.hasCertificate,
         status: "PENDING",
         submittedById: session.userId,
         departmentId: user.departmentId,

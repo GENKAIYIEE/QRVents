@@ -27,11 +27,22 @@ export async function getStudentAttendanceHistory(
 
   const now = new Date()
 
+  const userCreatedAt = user?.createdAt || new Date()
+  const userCreationStartOfDay = new Date(userCreatedAt)
+  userCreationStartOfDay.setHours(0, 0, 0, 0)
+
   // Build the Where clause for Events
   // Only show past events (date <= now).
   const where: Prisma.EventWhereInput = {
     date: { lte: now },
-    AND: []
+    AND: [
+      {
+        OR: [
+          { date: { gte: userCreationStartOfDay } },
+          { attendanceLogs: { some: { userId: studentId } } }
+        ]
+      }
+    ]
   }
 
   // Prevent "Fake Missed Events": Do not show ONGOING events from TODAY if the student hasn't attended yet.
@@ -122,6 +133,7 @@ export async function getStudentAttendanceHistory(
           endTime: event.endTime,
           eventType: event.eventType,
           status: event.status,
+          hasCertificate: event.hasCertificate,
           department: event.department
         }
       }
@@ -140,6 +152,7 @@ export async function getStudentAttendanceHistory(
           endTime: event.endTime,
           eventType: event.eventType,
           status: event.status,
+          hasCertificate: event.hasCertificate,
           department: event.department
         }
       }

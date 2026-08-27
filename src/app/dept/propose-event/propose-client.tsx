@@ -65,6 +65,7 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
       startTime: formData.get("startTime"),
       endTime: formData.get("endTime"),
       venue: formData.get("venue"),
+      hasCertificate: formData.get("hasCertificate") === "true",
     }
 
     try {
@@ -168,6 +169,22 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
                 placeholder="Brief details about the event..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
               />
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+              <input
+                type="checkbox"
+                id="hasCertificate"
+                name="hasCertificate"
+                value="true"
+                className="w-5 h-5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
+              />
+              <div>
+                <label htmlFor="hasCertificate" className="block text-sm font-bold text-slate-700 cursor-pointer">
+                  With Certificate
+                </label>
+                <p className="text-xs text-slate-500">Provide certificates for students who complete this event.</p>
+              </div>
             </div>
 
             <button 

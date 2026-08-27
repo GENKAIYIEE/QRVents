@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { format } from "date-fns"
 import { getStudentAttendanceHistory } from "./actions"
 import { formatTimeString, calculateDuration } from "@/lib/utils"
+import { TableSkeleton } from "@/components/ui/skeleton"
 
 export function AttendanceHistoryClient() {
   const router = useRouter()
@@ -99,9 +100,7 @@ export function AttendanceHistoryClient() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500 [font-variation-settings:'FILL'_1]">progress_activity</span>
-        </div>
+        <TableSkeleton columns={7} />
       ) : logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-inner">
@@ -133,6 +132,8 @@ export function AttendanceHistoryClient() {
                   const isSchoolWide = log.event.eventType === "SCHOOL_WIDE"
                   const isGuest = log.status === "GUEST"
                   const isMissed = log.status === "MISSED"
+                  const isCompletedEvent = log.event.status === "COMPLETED"
+                  const isIncomplete = !isMissed && !isGuest && isCompletedEvent && !log.checkOut
 
                   return (
                     <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
@@ -162,6 +163,10 @@ export function AttendanceHistoryClient() {
                         {isMissed ? (
                           <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100">
                             Missed
+                          </span>
+                        ) : isIncomplete ? (
+                          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100">
+                            Incomplete
                           </span>
                         ) : isGuest ? (
                           <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-100">
@@ -204,7 +209,7 @@ export function AttendanceHistoryClient() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        {!isMissed && log.event.status === "COMPLETED" ? (
+                        {!isMissed && !isIncomplete && isCompletedEvent && log.event.hasCertificate ? (
                            <a href={`/student/certificates/${log.event.id}`} target="_blank" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-xs transition-colors shadow-sm shadow-amber-500/20">
                              <span className="material-symbols-outlined text-[14px]">workspace_premium</span>
                              Generate

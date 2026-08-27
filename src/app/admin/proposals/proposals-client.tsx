@@ -7,6 +7,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { CardSkeleton } from "@/components/ui/skeleton"
 
 export function ProposalsClient({ isArchived = false }: { isArchived?: boolean }) {
   const router = useRouter()
@@ -123,9 +124,7 @@ export function ProposalsClient({ isArchived = false }: { isArchived?: boolean }
 
       {/* Content Area */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <span className="material-symbols-outlined animate-spin text-4xl text-blue-500 [font-variation-settings:'FILL'_1]">progress_activity</span>
-        </div>
+        <CardSkeleton count={6} />
       ) : proposals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-inner">

@@ -65,6 +65,7 @@ export async function createEvent(data: EventFormValues) {
       departmentId: data.departmentId,
       createdById: session.userId,
       isMandatory: data.isMandatory,
+      hasCertificate: data.hasCertificate,
       status: "UPCOMING",
     },
   })
@@ -115,6 +116,7 @@ export async function updateEvent(id: string, data: EventFormValues) {
       expectedAttendees: data.expectedAttendees,
       departmentId: data.departmentId,
       isMandatory: data.isMandatory,
+      hasCertificate: data.hasCertificate,
     },
   })
 

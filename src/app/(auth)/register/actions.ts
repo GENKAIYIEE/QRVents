@@ -27,9 +27,9 @@ export async function registerAction(data: RegisterFormValues): Promise<Register
     }
 
     if (studentId) {
-      const existingStudentId = await prisma.user.findFirst({ where: { studentId } })
+      const existingStudentId = await prisma.user.findUnique({ where: { studentId } })
       if (existingStudentId) {
-        return { error: "An account with this Student ID already exists." }
+        return { error: "An account with this Student ID already exists. If this is your ID, please contact your administrator." }
       }
     }
 
@@ -44,7 +44,7 @@ export async function registerAction(data: RegisterFormValues): Promise<Register
         role: "STUDENT",
         yearLevel,
         section,
-        studentId: studentId || null,
+        studentId: studentId ?? null,
         departmentId,
         qrCode: generatedQrCode,
         isActive: true,

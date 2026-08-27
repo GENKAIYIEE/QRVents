@@ -36,6 +36,7 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
       departmentId: eventToEdit?.departmentId || "",
       expectedAttendees: eventToEdit?.expectedAttendees || undefined,
       isMandatory: eventToEdit?.isMandatory || false,
+      hasCertificate: eventToEdit?.hasCertificate || false,
     }
   })
 
@@ -174,6 +175,18 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
               />
               <label htmlFor="isMandatory" style={{ fontSize: "14px", fontWeight: 600, color: "#334155", cursor: "pointer", userSelect: "none" }}>
                 Mandatory Event (Penalties will be applied for absences)
+              </label>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+              <input 
+                type="checkbox" 
+                id="hasCertificate" 
+                {...register("hasCertificate")} 
+                style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#2563EB" }}
+              />
+              <label htmlFor="hasCertificate" style={{ fontSize: "14px", fontWeight: 600, color: "#334155", cursor: "pointer", userSelect: "none" }}>
+                With Certificate (Provide certificates for completion)
               </label>
             </div>
 

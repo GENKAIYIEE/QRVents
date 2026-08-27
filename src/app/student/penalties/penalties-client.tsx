@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { AlertTriangle, Calendar, Clock } from "lucide-react"
 import { toast } from "sonner"
+import { TableSkeleton } from "@/components/ui/skeleton"
 import { PenaltyStatusBadge } from "@/components/penalties/penalty-status-badge"
 import { ChoosePenaltyTypeModal } from "@/components/penalties/choose-penalty-type-modal"
 
@@ -35,8 +36,8 @@ export function PenaltiesClient() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <span className="material-symbols-outlined animate-spin text-4xl text-blue-500 [font-variation-settings:'FILL'_1]">progress_activity</span>
+      <div className="w-full">
+        <TableSkeleton columns={3} />
       </div>
     )
   }
@@ -80,7 +81,15 @@ export function PenaltiesClient() {
                 <AlertTriangle className="w-4 h-4 text-rose-400" />
                 Reason:{" "}
                 <span className="font-medium text-rose-600">
-                  Missed mandatory event
+                  {p.reason === "ABSENT" || !p.reason
+                    ? "Absent (Missed mandatory event)"
+                    : p.reason === "LATE"
+                    ? "Late check-in (Arrived >30 mins late)"
+                    : p.reason === "NO_CHECKOUT"
+                    ? "Did not check out"
+                    : p.reason === "LATE_AND_NO_CHECKOUT"
+                    ? "Late check-in & did not check out"
+                    : p.reason.replace(/_/g, " ")}
                 </span>
               </div>
             </div>

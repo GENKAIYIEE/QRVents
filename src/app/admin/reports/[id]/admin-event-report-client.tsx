@@ -5,6 +5,7 @@ import { Search, ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { getEventStatistics, getEventAttendees } from "./actions"
 import { format } from "date-fns"
 import Link from "next/link"
+import { PdfExportButton } from "@/components/reports/pdf-export-button"
 
 interface EventData {
   id: string
@@ -85,26 +86,11 @@ export function AdminEventReportClient({ event, departments }: { event: EventDat
           </p>
         </div>
         
-        <a 
-          href={departmentFilter === "ALL" ? "#" : `/api/admin/attendance/export?eventId=${event.id}&departmentId=${departmentFilter}&yearLevel=${yearFilter}&section=${sectionFilter}`}
-          download={departmentFilter !== "ALL"}
-          className={`flex items-center gap-2 px-4 py-2.5 font-bold rounded-xl shadow-sm transition-all ${
-            departmentFilter === "ALL" 
-              ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
-              : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
-          }`}
-          onClick={(e) => {
-            if (departmentFilter === "ALL") {
-              e.preventDefault();
-              alert("Please select a specific department to export its attendance data.");
-            }
-          }}
-        >
-          <Download className="w-4 h-4" /> 
-          {departmentFilter === "ALL" 
-            ? "Select Dept to Export" 
-            : `Export ${departments.find(d => d.id === departmentFilter)?.code || ""} CSV`}
-        </a>
+        <PdfExportButton 
+          eventId={event.id}
+          departmentId={departmentFilter}
+          eventName={event.title}
+        />
       </div>
 
       {/* Statistics Section */}
