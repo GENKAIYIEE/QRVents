@@ -6,6 +6,8 @@ import { ScannerClient } from "@/components/scanner/ScannerClient"
 
 import { UpcomingEventsPrompt } from "@/components/dept/upcoming-events-prompt"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Scanner — QRVents Dept Admin",
 }
