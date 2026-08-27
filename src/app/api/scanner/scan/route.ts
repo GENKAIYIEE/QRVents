@@ -26,7 +26,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 })
     }
 
-    const now = new Date()
+    const realNow = new Date() // Absolute UTC time for database writes and cooldowns
+    // Vercel runs in UTC. We must ensure 'localNow' reflects Philippine time (UTC+8)
+    // so it aligns with the hours/minutes stored in the database for schedule checks.
+    const manilaTimeStr = realNow.toLocaleString("en-US", { timeZone: "Asia/Manila" })
+    const localNow = new Date(manilaTimeStr)
 
     let isAllowed = false;
     
@@ -34,10 +38,10 @@ export async function POST(request: NextRequest) {
       isAllowed = true;
     } else if (event.status === "UPCOMING" && event.startTime) {
       const [startHours, startMinutes] = event.startTime.split(":").map(Number);
-      const eventStartDate = new Date(event.date);
+      const eventStartDate = new Date(manilaTimeStr); // Start with today's date in Manila
       eventStartDate.setHours(startHours, startMinutes, 0, 0);
       
-      const timeDiffMinutes = (eventStartDate.getTime() - now.getTime()) / (1000 * 60);
+      const timeDiffMinutes = (eventStartDate.getTime() - localNow.getTime()) / (1000 * 60);
       
       // Allow if starting within 45 minutes (or if start time has passed)
       if (timeDiffMinutes <= 45) {
@@ -107,8 +111,8 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
-      // 1. Cooldown Guard (Anti-Double Scan)
-      const timeInDiffMinutes = (now.getTime() - existingLog.createdAt.getTime()) / (1000 * 60)
+      // 1. Cooldown Guard (Anti-Double Scan) uses absolute UTC time
+      const timeInDiffMinutes = (realNow.getTime() - existingLog.createdAt.getTime()) / (1000 * 60)
       if (timeInDiffMinutes < 5) {
         return NextResponse.json({
           error: "Too soon to check out. Scan ignored to prevent accidental double-scans.",
@@ -116,13 +120,13 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
-      // 2. Strict End-Time Guard
+      // 2. Strict End-Time Guard uses local wall-clock time
       if (event.endTime) {
         const [endHours, endMinutes] = event.endTime.split(":").map(Number)
-        const eventEndDate = new Date() // Use today's date for ongoing events
+        const eventEndDate = new Date(manilaTimeStr) // Use today's date in Manila
         eventEndDate.setHours(endHours, endMinutes, 0, 0)
 
-        if (now < eventEndDate) {
+        if (localNow < eventEndDate) {
           const formattedEndTime = eventEndDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           return NextResponse.json({
             error: `Cannot check out yet. Event ends strictly at ${formattedEndTime}.`,
@@ -131,11 +135,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Perform Check-Out
+      // Perform Check-Out using absolute UTC time
       await prisma.attendanceLog.update({
         where: { id: existingLog.id },
         data: {
-          checkOut: new Date(),
+          checkOut: realNow,
           status: "CHECKED_OUT"
         },
       })
@@ -175,7 +179,7 @@ export async function POST(request: NextRequest) {
 
     // ── Late Detection (only for non-guests on mandatory events) ──
     if (!isGuest && event.isMandatory && event.startTime) {
-      isLate = isCheckInLate(now, event.startTime, event.date)
+      isLate = isCheckInLate(localNow, event.startTime, event.date)
 
       if (isLate) {
         // Mark attendance log as late
@@ -194,7 +198,7 @@ export async function POST(request: NextRequest) {
               reason: "LATE",
               feeAmount: settings.defaultFee,
               serviceHours: settings.defaultServiceHours,
-              deadline: addDays(now, settings.defaultDeadlineDays),
+              deadline: addDays(realNow, settings.defaultDeadlineDays),
               status: "PENDING",
             },
           })

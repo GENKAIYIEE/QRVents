@@ -63,9 +63,9 @@ export async function getMissingAttendees(eventId: string) {
     throw new Error("Event not found")
   }
 
-  // Define the end of the event day to ensure students who registered on the day of the event are included
-  const eventEndOfDay = new Date(event.date)
-  eventEndOfDay.setHours(23, 59, 59, 999)
+  // Define the absolute UTC end of the event day in Manila to ensure students who registered on the day are included
+  const { getManilaTimestampEndForDate } = await import("@/lib/time")
+  const eventEndOfDay = getManilaTimestampEndForDate(event.date)
 
   const expectedStudents = 
   event.eventType === "SCHOOL_WIDE"
