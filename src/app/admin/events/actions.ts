@@ -32,7 +32,10 @@ export async function getEvents(page = 1, pageSize = 10, search = "", status?: E
 
   const events = await prisma.event.findMany({
     where: whereClause,
-    orderBy: { date: "desc" },
+    orderBy: [
+      { date: "desc" },
+      { endTime: "desc" }
+    ],
     skip: (page - 1) * pageSize,
     take: pageSize,
     include: {

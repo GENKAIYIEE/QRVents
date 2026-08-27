@@ -29,7 +29,10 @@ export async function getReportsData(startDateParam?: string, endDateParam?: str
     prisma.event.count({ where: { date: dateFilter } }),
     prisma.event.findMany({
       where: { date: dateFilter },
-      orderBy: { date: "desc" },
+      orderBy: [
+        { date: "desc" },
+        { endTime: "desc" }
+      ],
       select: {
         id: true,
         title: true,

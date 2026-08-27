@@ -36,7 +36,10 @@ export default async function ScannerPage() {
         }
       ]
     },
-    orderBy: { date: "desc" },
+    orderBy: [
+      { date: "desc" },
+      { endTime: "desc" }
+    ],
     select: {
       id: true,
       title: true,

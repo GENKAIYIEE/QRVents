@@ -40,18 +40,16 @@ export async function GET(request: NextRequest) {
         select: { departmentId: true }
       })
       whereClause.AND = [
-        {
-          OR: [
-            { departmentId: user?.departmentId },
-            { eventType: "SCHOOL_WIDE" }
-          ]
-        }
+        { departmentId: user?.departmentId }
       ]
     }
 
     const rawEvents = await prisma.event.findMany({
       where: whereClause,
-      orderBy: { date: "desc" },
+      orderBy: [
+        { date: "desc" },
+        { endTime: "desc" }
+      ],
       select: {
         id: true,
         title: true,

@@ -22,12 +22,12 @@ export default async function DeptArchivedReportsPage() {
   const events = await prisma.event.findMany({
     where: { 
       isArchived: true,
-      OR: [
-        { departmentId: user?.departmentId },
-        { eventType: "SCHOOL_WIDE" }
-      ]
+      departmentId: user?.departmentId
     },
-    orderBy: { date: "desc" },
+    orderBy: [
+      { date: "desc" },
+      { endTime: "desc" }
+    ],
     include: {
       _count: {
         select: { attendanceLogs: true }

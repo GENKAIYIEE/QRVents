@@ -67,10 +67,7 @@ export async function getDashboardData() {
     // Active Events (Ongoing)
     prisma.event.count({
       where: {
-        OR: [
-          { eventType: "SCHOOL_WIDE" },
-          { departmentId: department.id }
-        ],
+        departmentId: department.id,
         status: "ONGOING"
       }
     }),
@@ -78,10 +75,7 @@ export async function getDashboardData() {
     // Completed Events
     prisma.event.count({
       where: {
-        OR: [
-          { eventType: "SCHOOL_WIDE" },
-          { departmentId: department.id }
-        ],
+        departmentId: department.id,
         status: "COMPLETED"
       }
     }),
@@ -91,10 +85,7 @@ export async function getDashboardData() {
       where: {
         date: { gte: todayCalendar },
         status: "UPCOMING",
-        OR: [
-          { eventType: "SCHOOL_WIDE" },
-          { departmentId: department.id },
-        ],
+        departmentId: department.id,
       },
       orderBy: { date: "asc" },
       take: 4,
@@ -104,12 +95,12 @@ export async function getDashboardData() {
     prisma.event.findMany({
       where: {
         status: "COMPLETED",
-        OR: [
-          { eventType: "SCHOOL_WIDE" },
-          { departmentId: department.id },
-        ],
+        departmentId: department.id,
       },
-      orderBy: { date: "desc" },
+      orderBy: [
+        { date: "desc" },
+        { endTime: "desc" }
+      ],
       take: 3,
       include: {
         _count: {

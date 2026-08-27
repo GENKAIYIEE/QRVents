@@ -36,15 +36,13 @@ export default async function DeptScannerPage() {
         }
       ],
       AND: [
-        {
-          OR: [
-            { departmentId: user?.departmentId },
-            { eventType: "SCHOOL_WIDE" }
-          ]
-        }
+        { departmentId: user?.departmentId }
       ]
     },
-    orderBy: { date: "desc" },
+    orderBy: [
+      { date: "desc" },
+      { endTime: "desc" }
+    ],
     select: {
       id: true,
       title: true,
