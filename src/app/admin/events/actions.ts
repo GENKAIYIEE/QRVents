@@ -78,9 +78,10 @@ export async function createEvent(data: EventFormValues) {
   await logActivity(session.userId, session.fullName, "Created Event", `Event: ${event.title}`)
   
     // Build notification filters based on targets
-    const targetYearFilter = event.targetYearLevels && event.targetYearLevels.length > 0 
-      ? { in: event.targetYearLevels } 
-      : undefined;
+    try {
+      const targetYearFilter = event.targetYearLevels && event.targetYearLevels.length > 0 
+        ? { in: event.targetYearLevels } 
+        : undefined;
 
     const targetDeptFilter = event.eventType === "DEPARTMENT"
       ? event.departmentId
