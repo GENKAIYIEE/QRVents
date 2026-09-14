@@ -37,6 +37,8 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
       expectedAttendees: eventToEdit?.expectedAttendees || undefined,
       isMandatory: eventToEdit?.isMandatory || false,
       hasCertificate: eventToEdit?.hasCertificate || false,
+      targetDepartments: eventToEdit?.targetDepartments || [],
+      targetYearLevels: eventToEdit?.targetYearLevels || [],
     }
   })
 
@@ -163,6 +165,81 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
                   />
                 </div>
                 {errors.endTime && <p style={{ color: "#EF4444", fontSize: "12px", marginTop: "4px" }}>{errors.endTime.message}</p>}
+              </div>
+            </div>
+            
+            <div style={{ padding: "16px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1E293B", marginBottom: "12px" }}>Target Participants</h3>
+              <p style={{ fontSize: "12px", color: "#64748B", marginBottom: "16px" }}>Leave blank to target ALL students.</p>
+              
+              {eventType === "SCHOOL_WIDE" && (
+                <div style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155" }}>Target Departments</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = watch("targetDepartments") || [];
+                        const all = departments.map(d => d.id);
+                        if (current.length === all.length) {
+                          setValue("targetDepartments", []);
+                        } else {
+                          setValue("targetDepartments", all);
+                        }
+                      }}
+                      style={{ fontSize: "11px", fontWeight: "bold", color: "#2563EB", cursor: "pointer", background: "#EFF6FF", border: "none", padding: "4px 8px", borderRadius: "4px" }}
+                    >
+                      Select All / None
+                    </button>
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                    {departments.map((dept) => (
+                      <label key={dept.id} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#475569", cursor: "pointer" }}>
+                        <input 
+                          type="checkbox"
+                          value={dept.id}
+                          {...register("targetDepartments")}
+                          style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#2563EB" }}
+                        />
+                        {dept.code}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155" }}>Target Year Levels</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = watch("targetYearLevels") || [];
+                      const all = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+                      if (current.length === all.length) {
+                        setValue("targetYearLevels", []);
+                      } else {
+                        setValue("targetYearLevels", all);
+                      }
+                    }}
+                    style={{ fontSize: "11px", fontWeight: "bold", color: "#2563EB", cursor: "pointer", background: "#EFF6FF", border: "none", padding: "4px 8px", borderRadius: "4px" }}
+                  >
+                    Select All / None
+                  </button>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                  {["1st Year", "2nd Year", "3rd Year", "4th Year"].map((year) => (
+                    <label key={year} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#475569", cursor: "pointer" }}>
+                      <input 
+                        type="checkbox"
+                        value={year}
+                        {...register("targetYearLevels")}
+                        style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#2563EB" }}
+                      />
+                      {year}
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 

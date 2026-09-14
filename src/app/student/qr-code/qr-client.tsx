@@ -184,6 +184,13 @@ export function QrClient() {
                           {event.venue}
                         </div>
                       </div>
+                      
+                      {event.isMandatory && (
+                        <div className="mt-3 flex items-center gap-1.5 text-rose-600">
+                          <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+                          <span className="text-[11px] font-bold">Mandatory Event (Penalty Applies)</span>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 sm:border-l sm:pl-5">

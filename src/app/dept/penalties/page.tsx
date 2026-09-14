@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { AlertTriangle, Search, Filter } from "lucide-react"
+import { AlertTriangle, Search, Filter, Download } from "lucide-react"
 import { PenaltyStatusBadge } from "@/components/penalties/penalty-status-badge"
 import { ResolvePenaltyModal } from "@/components/penalties/resolve-penalty-modal"
+import { generatePenaltiesReportPDF } from "@/lib/pdf-export"
 
 export default function DeptAdminPenaltiesPage() {
   const [penalties, setPenalties] = useState<any[]>([])
@@ -12,6 +13,19 @@ export default function DeptAdminPenaltiesPage() {
   const [statusFilter, setStatusFilter] = useState("ALL")
   const [eventFilter, setEventFilter] = useState("ALL")
   const [selectedPenalty, setSelectedPenalty] = useState<any | null>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  async function handleDownloadPDF() {
+    setDownloading(true)
+    const deptCode = penalties.length > 0 ? penalties[0].student.department?.code || "Department" : "Department"
+    await generatePenaltiesReportPDF({
+      penalties: dropdownFilteredPenalties,
+      departmentFilter: deptCode,
+      eventFilter,
+      statusFilter,
+    })
+    setDownloading(false)
+  }
 
   async function loadPenalties() {
     setLoading(true)
@@ -28,27 +42,42 @@ export default function DeptAdminPenaltiesPage() {
     loadPenalties()
   }, [statusFilter])
 
-  const filtered = penalties.filter(
+  const dropdownFilteredPenalties = penalties.filter(
+    (p) => eventFilter === "ALL" || p.event.id === eventFilter
+  )
+
+  const filtered = dropdownFilteredPenalties.filter(
     (p) =>
-      (eventFilter === "ALL" || p.event.id === eventFilter) &&
-      (p.student.fullName.toLowerCase().includes(search.toLowerCase()) ||
-       p.event.title.toLowerCase().includes(search.toLowerCase()))
+      p.student.fullName.toLowerCase().includes(search.toLowerCase()) ||
+       p.event.title.toLowerCase().includes(search.toLowerCase())
   )
 
   const uniqueEvents = Array.from(new Set(penalties.map(p => p.event.id))).map(id => {
     return penalties.find(p => p.event.id === id).event
   })
 
-  const pendingCount = penalties.filter((p) => p.status === "PENDING").length
-  const overdueCount = penalties.filter((p) => p.status === "OVERDUE").length
+  const pendingCount = dropdownFilteredPenalties.filter((p) => p.status === "PENDING").length
+  const overdueCount = dropdownFilteredPenalties.filter((p) => p.status === "OVERDUE").length
+  const totalCount = dropdownFilteredPenalties.length
 
   return (
     <div className="p-6 lg:p-8">
-      <div className="flex items-center gap-3 mb-1">
-        <AlertTriangle className="w-6 h-6 text-amber-500" />
-        <h1 className="text-2xl font-bold text-[#0F172A]">
-          Attendance Penalties
-        </h1>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-3">
+          <AlertTriangle className="w-6 h-6 text-amber-500" />
+          <h1 className="text-2xl font-bold text-[#0F172A]">
+            Attendance Penalties
+          </h1>
+        </div>
+        <button
+          id="download-penalties-pdf"
+          onClick={handleDownloadPDF}
+          disabled={downloading || loading || dropdownFilteredPenalties.length === 0}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A8F] hover:bg-[#15307a] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
+        >
+          <Download className="w-4 h-4" />
+          {downloading ? "Generating..." : "Download PDF"}
+        </button>
       </div>
       <p className="text-sm text-[#64748B] mb-6">
         Penalty tracking for your department
@@ -58,7 +87,7 @@ export default function DeptAdminPenaltiesPage() {
         <div className="bg-white border border-[#E2E8F0] rounded-xl p-4">
           <p className="text-xs text-[#94A3B8] font-medium mb-1">Total Penalties</p>
           <p className="text-2xl font-bold text-[#0F172A]">
-            {penalties.length}
+            {totalCount}
           </p>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -166,9 +195,6 @@ export default function DeptAdminPenaltiesPage() {
                 <td className="px-4 py-3">
                   <p className="font-medium text-[#0F172A]">
                     {p.student.fullName}
-                  </p>
-                  <p className="text-xs text-[#94A3B8]">
-                    {p.student.email}
                   </p>
                 </td>
                  <td className="px-4 py-3 text-[#475569]">

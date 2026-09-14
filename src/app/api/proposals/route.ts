@@ -12,6 +12,8 @@ const proposalSchema = z.object({
   endTime: z.string(), // HH:MM
   venue: z.string().min(2, "Venue is required"),
   hasCertificate: z.boolean().default(false),
+  isMandatory: z.boolean().default(false),
+  targetYearLevels: z.array(z.string()).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -55,6 +57,8 @@ export async function POST(request: NextRequest) {
         endTime: data.endTime,
         venue: data.venue,
         hasCertificate: data.hasCertificate,
+        isMandatory: data.isMandatory,
+        targetYearLevels: data.targetYearLevels,
         status: "PENDING",
         submittedById: session.userId,
         departmentId: user.departmentId,

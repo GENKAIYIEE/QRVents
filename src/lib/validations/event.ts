@@ -15,6 +15,8 @@ export const eventSchema = z.object({
   ),
   isMandatory: z.boolean().default(false),
   hasCertificate: z.boolean().default(false),
+  targetDepartments: z.array(z.string()).default([]),
+  targetYearLevels: z.array(z.string()).default([]),
 }).refine(
   (data) => {
     // If it's a department event, departmentId must be provided

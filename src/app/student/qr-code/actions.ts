@@ -50,7 +50,7 @@ export async function getStudentActiveEvents() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, departmentId: true }
+    select: { id: true, departmentId: true, yearLevel: true }
   })
 
   if (!user) {
@@ -62,6 +62,14 @@ export async function getStudentActiveEvents() {
   
   const todayEnd = new Date(todayStart)
   todayEnd.setUTCHours(23, 59, 59, 999)
+
+  const yearLevel = user.yearLevel;
+  const targetYearLevelsFilter = yearLevel ? {
+    OR: [
+      { targetYearLevels: { isEmpty: true } },
+      { targetYearLevels: { has: yearLevel } }
+    ]
+  } : { targetYearLevels: { isEmpty: true } };
 
   const events = await prisma.event.findMany({
     where: {
@@ -75,10 +83,20 @@ export async function getStudentActiveEvents() {
       AND: [
         {
           OR: [
-            { eventType: "SCHOOL_WIDE" },
-            { departmentId: user.departmentId }
+            { 
+              eventType: "SCHOOL_WIDE",
+              OR: [
+                { targetDepartments: { isEmpty: true } },
+                { targetDepartments: { has: user.departmentId || "" } }
+              ]
+            },
+            { 
+              eventType: "DEPARTMENT",
+              departmentId: user.departmentId 
+            }
           ]
-        }
+        },
+        targetYearLevelsFilter
       ]
     },
     orderBy: { date: "asc" },
@@ -90,6 +108,7 @@ export async function getStudentActiveEvents() {
       endTime: true,
       venue: true,
       status: true,
+      isMandatory: true,
       attendanceLogs: {
         where: { userId: user.id },
         select: { checkOut: true, status: true, checkIn: true }

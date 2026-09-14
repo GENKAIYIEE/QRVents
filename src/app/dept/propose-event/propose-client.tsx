@@ -66,6 +66,8 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
       endTime: formData.get("endTime"),
       venue: formData.get("venue"),
       hasCertificate: formData.get("hasCertificate") === "true",
+      isMandatory: formData.get("isMandatory") === "true",
+      targetYearLevels: formData.getAll("targetYearLevels"),
     }
 
     try {
@@ -162,6 +164,37 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
             </div>
 
             <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-bold text-slate-700">Target Year Levels</label>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const checkboxes = document.querySelectorAll('input[name="targetYearLevels"]') as NodeListOf<HTMLInputElement>;
+                    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                    checkboxes.forEach(cb => cb.checked = !allChecked);
+                  }}
+                  className="text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors"
+                >
+                  Select All / None
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 mb-2">You can specify year levels, or leave all unchecked to target everyone.</p>
+              <div className="flex flex-wrap gap-3">
+                {["1st Year", "2nd Year", "3rd Year", "4th Year"].map((year) => (
+                  <label key={year} className="flex items-center gap-1.5 text-sm font-medium text-slate-700 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                    <input 
+                      type="checkbox"
+                      name="targetYearLevels"
+                      value={year}
+                      className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    {year}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Description (Optional)</label>
               <textarea 
                 name="description" 
@@ -171,19 +204,37 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
               />
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-              <input
-                type="checkbox"
-                id="hasCertificate"
-                name="hasCertificate"
-                value="true"
-                className="w-5 h-5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
-              />
-              <div>
-                <label htmlFor="hasCertificate" className="block text-sm font-bold text-slate-700 cursor-pointer">
-                  With Certificate
-                </label>
-                <p className="text-xs text-slate-500">Provide certificates for students who complete this event.</p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="isMandatory"
+                  name="isMandatory"
+                  value="true"
+                  className="w-5 h-5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
+                />
+                <div>
+                  <label htmlFor="isMandatory" className="block text-sm font-bold text-slate-700 cursor-pointer">
+                    Mandatory Event
+                  </label>
+                  <p className="text-xs text-slate-500">Students who fail to attend will receive penalties.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="hasCertificate"
+                  name="hasCertificate"
+                  value="true"
+                  className="w-5 h-5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
+                />
+                <div>
+                  <label htmlFor="hasCertificate" className="block text-sm font-bold text-slate-700 cursor-pointer">
+                    With Certificate
+                  </label>
+                  <p className="text-xs text-slate-500">Provide certificates for students who complete this event.</p>
+                </div>
               </div>
             </div>
 
@@ -241,41 +292,41 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
               <p className="text-slate-500 text-sm mt-1 max-w-sm">When you submit an event proposal, it will appear here so you can track its approval status.</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
               {proposals.map((prop) => (
-                <div key={prop.id} className="p-4 rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all bg-white group flex flex-col sm:flex-row sm:items-center gap-4">
+                <div key={prop.id} className="px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors flex flex-col sm:flex-row sm:items-center gap-3 last:border-b-0">
                   <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className="font-extrabold text-slate-900 text-lg truncate">{prop.title}</h3>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-widest ${
-                        prop.status === 'PENDING' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                        prop.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                        prop.status === 'REJECTED' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
-                        'bg-slate-100 text-slate-700 border border-slate-200'
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-bold text-slate-900 text-sm truncate">{prop.title}</h3>
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${
+                        prop.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                        prop.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' :
+                        prop.status === 'REJECTED' ? 'bg-rose-100 text-rose-700' :
+                        'bg-slate-100 text-slate-700'
                       }`}>
                         {prop.status}
                       </span>
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mt-2">
-                      <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[14px]">event</span> {format(new Date(prop.date), "MMM d, yyyy")}</span>
-                      <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[14px]">location_on</span> {prop.venue}</span>
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">event</span> {format(new Date(prop.date), "MMM d, yyyy")}</span>
+                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">location_on</span> {prop.venue}</span>
                     </div>
 
                     {prop.status === 'REJECTED' && prop.rejectionReason && (
-                      <div className="mt-3 p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-100 flex gap-2">
-                        <span className="material-symbols-outlined text-[16px] shrink-0 text-rose-500">info</span>
+                      <div className="mt-2 p-2 rounded-lg bg-rose-50 text-rose-800 text-[11px] font-medium border border-rose-100 flex gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] shrink-0 text-rose-500">info</span>
                         <div>
-                          <strong className="block mb-0.5 font-bold">Reason for Rejection:</strong>
-                          {prop.rejectionReason}
+                          <strong className="font-bold">Rejected:</strong> {prop.rejectionReason}
                         </div>
                       </div>
                     )}
                   </div>
 
                   <div className="sm:text-right shrink-0">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Submitted</div>
-                    <div className="text-sm font-semibold text-slate-700">{format(new Date(prop.submittedAt), "MMM d, h:mm a")}</div>
+                    <div className="text-[11px] text-slate-500">
+                      Submitted on <span className="font-medium text-slate-700">{format(new Date(prop.submittedAt), "MMM d")}</span>
+                    </div>
                   </div>
                 </div>
               ))}

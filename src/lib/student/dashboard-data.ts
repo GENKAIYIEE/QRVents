@@ -13,6 +13,28 @@ export async function getDashboardData() {
   const { getManilaCalendarToday } = await import("@/lib/time")
   const today = getManilaCalendarToday()
 
+  // Fetch student info first to get yearLevel
+  const studentUser = await prisma.user.findUnique({
+    where: { id: studentId },
+    include: {
+      _count: {
+        select: {
+          notifications: { where: { isRead: false } },
+          penalties: { where: { status: { in: ["PENDING", "OVERDUE"] } } }
+        }
+      }
+    }
+  })
+
+  const yearLevel = studentUser?.yearLevel;
+  
+  const targetYearLevelsFilter = yearLevel ? {
+    OR: [
+      { targetYearLevels: { isEmpty: true } },
+      { targetYearLevels: { has: yearLevel } }
+    ]
+  } : { targetYearLevels: { isEmpty: true } };
+
   const [
     upcomingSchoolWideEvents,
     upcomingDeptEvents,
@@ -22,14 +44,22 @@ export async function getDashboardData() {
     recentAttendance,
     distinctDeptsResult,
     department,
-    studentUser
   ] = await Promise.all([
     // Upcoming school-wide events
     prisma.event.findMany({
       where: {
         date: { gte: today },
         eventType: "SCHOOL_WIDE",
-        status: { in: ["UPCOMING", "ONGOING"] }
+        status: { in: ["UPCOMING", "ONGOING"] },
+        AND: [
+          {
+            OR: [
+              { targetDepartments: { isEmpty: true } },
+              { targetDepartments: { has: departmentId || "" } }
+            ]
+          },
+          targetYearLevelsFilter
+        ]
       },
       orderBy: { date: "asc" },
       take: 6,
@@ -42,7 +72,8 @@ export async function getDashboardData() {
         date: { gte: today },
         eventType: "DEPARTMENT",
         departmentId: departmentId,
-        status: { in: ["UPCOMING", "ONGOING"] }
+        status: { in: ["UPCOMING", "ONGOING"] },
+        ...targetYearLevelsFilter
       },
       orderBy: { date: "asc" },
       take: 6,
@@ -54,7 +85,16 @@ export async function getDashboardData() {
       where: {
         date: { gte: today },
         eventType: "SCHOOL_WIDE",
-        status: { in: ["UPCOMING", "ONGOING"] }
+        status: { in: ["UPCOMING", "ONGOING"] },
+        AND: [
+          {
+            OR: [
+              { targetDepartments: { isEmpty: true } },
+              { targetDepartments: { has: departmentId || "" } }
+            ]
+          },
+          targetYearLevelsFilter
+        ]
       }
     }),
 
@@ -64,7 +104,8 @@ export async function getDashboardData() {
         date: { gte: today },
         eventType: "DEPARTMENT",
         departmentId: departmentId,
-        status: { in: ["UPCOMING", "ONGOING"] }
+        status: { in: ["UPCOMING", "ONGOING"] },
+        ...targetYearLevelsFilter
       }
     }) : Promise.resolve(0),
 
@@ -90,19 +131,6 @@ export async function getDashboardData() {
 
     // Department info for color theming
     departmentId ? prisma.department.findUnique({ where: { id: departmentId } }) : null,
-
-    // Student user info with unread notifications and unpaid penalties counts
-    prisma.user.findUnique({
-      where: { id: studentId },
-      include: {
-        _count: {
-          select: {
-            notifications: { where: { isRead: false } },
-            penalties: { where: { status: { in: ["PENDING", "OVERDUE"] } } }
-          }
-        }
-      }
-    })
   ])
 
   // Count distinct department IDs (filtering out own department or nulls)
