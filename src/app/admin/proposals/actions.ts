@@ -123,6 +123,7 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
         hasCertificate: proposal.hasCertificate,
         isMandatory: proposal.isMandatory,
         targetYearLevels: proposal.targetYearLevels,
+        penaltyFee: proposal.penaltyFee,
         status: "UPCOMING",
       },
     })

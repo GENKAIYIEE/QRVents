@@ -39,10 +39,12 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
       hasCertificate: eventToEdit?.hasCertificate || false,
       targetDepartments: eventToEdit?.targetDepartments || [],
       targetYearLevels: eventToEdit?.targetYearLevels || [],
+      penaltyFee: eventToEdit?.penaltyFee || undefined,
     }
   })
 
   const eventType = watch("eventType")
+  const isMandatory = watch("isMandatory")
 
   if (!isOpen) return null
 
@@ -254,6 +256,27 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
                 Mandatory Event (Penalties will be applied for absences)
               </label>
             </div>
+
+            {isMandatory && (
+              <div style={{ paddingLeft: "26px", marginTop: "4px", marginBottom: "8px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "4px" }}>
+                  Custom Penalty Fee (₱)
+                </label>
+                <input 
+                  type="number"
+                  {...register("penaltyFee")} 
+                  style={{ width: "100%", maxWidth: "200px", padding: "8px 12px", backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "8px", outline: "none", fontSize: "14px" }}
+                  className="focus:ring-2 focus:ring-blue-500"
+                  placeholder="Leave blank for default"
+                  min="0"
+                  step="0.01"
+                />
+                <p style={{ fontSize: "11px", color: "#64748B", marginTop: "4px" }}>
+                  Leave blank to use the global default penalty fee.
+                </p>
+                {errors.penaltyFee && <p style={{ color: "#EF4444", fontSize: "12px", marginTop: "4px" }}>{errors.penaltyFee.message}</p>}
+              </div>
+            )}
 
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
               <input 

@@ -30,6 +30,7 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
   const [activeTab, setActiveTab] = useState<ProposalStatus | "ALL">("ALL")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isMandatory, setIsMandatory] = useState(false)
 
   const fetchProposals = useCallback(async () => {
     setIsLoading(true)
@@ -67,6 +68,7 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
       venue: formData.get("venue"),
       hasCertificate: formData.get("hasCertificate") === "true",
       isMandatory: formData.get("isMandatory") === "true",
+      penaltyFee: formData.get("penaltyFee") ? Number(formData.get("penaltyFee")) : undefined,
       targetYearLevels: formData.getAll("targetYearLevels"),
     }
 
@@ -211,7 +213,9 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
                   id="isMandatory"
                   name="isMandatory"
                   value="true"
-                  className="w-5 h-5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
+                  checked={isMandatory}
+                  onChange={(e) => setIsMandatory(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
                 />
                 <div>
                   <label htmlFor="isMandatory" className="block text-sm font-bold text-slate-700 cursor-pointer">
@@ -220,6 +224,21 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
                   <p className="text-xs text-slate-500">Students who fail to attend will receive penalties.</p>
                 </div>
               </div>
+
+              {isMandatory && (
+                <div className="flex flex-col gap-1.5 pl-[3rem]">
+                  <label className="block text-sm font-bold text-slate-700">Custom Penalty Fee (₱)</label>
+                  <input 
+                    type="number"
+                    name="penaltyFee" 
+                    min="0"
+                    step="0.01"
+                    placeholder="Leave blank for default"
+                    className="w-full max-w-[200px] bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  />
+                  <p className="text-xs text-slate-500">Leave blank to use the global default penalty fee.</p>
+                </div>
+              )}
 
               <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <input

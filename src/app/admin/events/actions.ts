@@ -71,6 +71,7 @@ export async function createEvent(data: EventFormValues) {
       hasCertificate: data.hasCertificate,
       targetDepartments: data.targetDepartments,
       targetYearLevels: data.targetYearLevels,
+      penaltyFee: data.penaltyFee,
       status: "UPCOMING",
     },
   })
@@ -137,6 +138,7 @@ export async function updateEvent(id: string, data: EventFormValues) {
       hasCertificate: data.hasCertificate,
       targetDepartments: data.targetDepartments,
       targetYearLevels: data.targetYearLevels,
+      penaltyFee: data.penaltyFee,
     },
   })
 

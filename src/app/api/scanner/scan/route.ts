@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
               studentId: user.id,
               eventId: event.id,
               reason: "LATE",
-              feeAmount: settings.defaultFee,
+              feeAmount: event.penaltyFee ?? settings.defaultFee,
               serviceHours: settings.defaultServiceHours,
               deadline: addDays(realNow, settings.defaultDeadlineDays),
               status: "PENDING",
