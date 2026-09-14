@@ -67,25 +67,27 @@ export async function getMissingAttendees(eventId: string) {
   const { getManilaTimestampEndForDate } = await import("@/lib/time")
   const eventEndOfDay = getManilaTimestampEndForDate(event.date)
 
-  const expectedStudents = 
-  event.eventType === "SCHOOL_WIDE"
-    ? await prisma.user.findMany({
-        where: { 
-          role: "STUDENT", 
-          isActive: true,
-          createdAt: { lte: eventEndOfDay }
-        },
-        select: { id: true },
-      })
-    : await prisma.user.findMany({
-        where: {
-          role: "STUDENT",
-          isActive: true,
-          departmentId: event.departmentId,
-          createdAt: { lte: eventEndOfDay }
-        },
-        select: { id: true },
-      })
+  // Build query filters based on targets
+  const targetYearFilter = event.targetYearLevels && event.targetYearLevels.length > 0 
+    ? { in: event.targetYearLevels } 
+    : undefined;
+
+  const targetDeptFilter = event.eventType === "DEPARTMENT"
+    ? event.departmentId
+    : (event.targetDepartments && event.targetDepartments.length > 0 
+        ? { in: event.targetDepartments } 
+        : undefined);
+
+  const expectedStudents = await prisma.user.findMany({
+    where: {
+      role: "STUDENT",
+      isActive: true,
+      createdAt: { lte: eventEndOfDay },
+      ...(targetDeptFilter ? { departmentId: targetDeptFilter } : {}),
+      ...(targetYearFilter ? { yearLevel: targetYearFilter } : {}),
+    },
+    select: { id: true },
+  })
 
   // Students who checked in with 
   // status PRESENT (guests are 

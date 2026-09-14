@@ -69,17 +69,31 @@ export async function createEvent(data: EventFormValues) {
       createdById: session.userId,
       isMandatory: data.isMandatory,
       hasCertificate: data.hasCertificate,
+      targetDepartments: data.targetDepartments,
+      targetYearLevels: data.targetYearLevels,
       status: "UPCOMING",
     },
   })
 
   await logActivity(session.userId, session.fullName, "Created Event", `Event: ${event.title}`)
   
-  // Notify Students
-  try {
-    const studentsCondition: Prisma.UserWhereInput = event.departmentId 
-      ? { role: "STUDENT", departmentId: event.departmentId } 
-      : { role: "STUDENT" };
+    // Build notification filters based on targets
+    const targetYearFilter = event.targetYearLevels && event.targetYearLevels.length > 0 
+      ? { in: event.targetYearLevels } 
+      : undefined;
+
+    const targetDeptFilter = event.eventType === "DEPARTMENT"
+      ? event.departmentId
+      : (event.targetDepartments && event.targetDepartments.length > 0 
+          ? { in: event.targetDepartments } 
+          : undefined);
+
+    const studentsCondition: Prisma.UserWhereInput = {
+      role: "STUDENT",
+      isActive: true,
+      ...(targetDeptFilter ? { departmentId: targetDeptFilter } : {}),
+      ...(targetYearFilter ? { yearLevel: targetYearFilter } : {}),
+    };
     const students = await prisma.user.findMany({ where: studentsCondition, select: { id: true } })
     if (students.length > 0) {
       await createNotificationsForMany(
@@ -120,6 +134,8 @@ export async function updateEvent(id: string, data: EventFormValues) {
       departmentId: data.departmentId,
       isMandatory: data.isMandatory,
       hasCertificate: data.hasCertificate,
+      targetDepartments: data.targetDepartments,
+      targetYearLevels: data.targetYearLevels,
     },
   })
 

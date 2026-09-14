@@ -121,6 +121,8 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
         departmentId: proposal.departmentId,
         createdById: proposal.submittedById,
         hasCertificate: proposal.hasCertificate,
+        isMandatory: proposal.isMandatory,
+        targetYearLevels: proposal.targetYearLevels,
         status: "UPCOMING",
       },
     })
@@ -133,8 +135,17 @@ export async function reviewProposal(id: string, status: ProposalStatus, rejecti
 
     // Notify Students of the new upcoming event
     try {
+      const targetYearFilter = proposal.targetYearLevels && proposal.targetYearLevels.length > 0 
+        ? { in: proposal.targetYearLevels } 
+        : undefined;
+
       const students = await prisma.user.findMany({ 
-        where: { role: "STUDENT", departmentId: proposal.departmentId }, 
+        where: { 
+          role: "STUDENT", 
+          departmentId: proposal.departmentId,
+          isActive: true,
+          ...(targetYearFilter ? { yearLevel: targetYearFilter } : {})
+        }, 
         select: { id: true } 
       })
       if (students.length > 0) {

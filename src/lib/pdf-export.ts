@@ -142,3 +142,147 @@ export const generateEventReportPDF = async (data: ReportData) => {
   const fileName = `attendance-${data.eventName.replace(/\s+/g, "-").toLowerCase()}-${data.reportType.replace(/\s+/g, "-").toLowerCase()}.pdf`;
   doc.save(fileName);
 };
+
+// ─── Penalties Report ────────────────────────────────────────────────────────
+
+export interface PenaltiesReportData {
+  penalties: any[];
+  departmentFilter: string;
+  eventFilter: string;
+  statusFilter: string;
+}
+
+export const generatePenaltiesReportPDF = async (data: PenaltiesReportData) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const centerX = pageWidth / 2;
+  const margin = 14;
+
+  // ── PCLU Logo ──
+  try {
+    const img = document.createElement("img");
+    img.src = "/Pclu-Logo.png";
+    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width; canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    if (ctx) { 
+      ctx.drawImage(img, 0, 0); 
+      doc.addImage(canvas.toDataURL("image/png"), "PNG", margin, 10, 24, 24); 
+    }
+  } catch { /* logo optional */ }
+
+  // ── ISO Logo ──
+  try {
+    const img = document.createElement("img");
+    img.src = "/ISO-LOGO.png";
+    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width; canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    if (ctx) { 
+      ctx.drawImage(img, 0, 0); 
+      const h = 24;
+      const w = (img.width / img.height) * h;
+      doc.addImage(canvas.toDataURL("image/png"), "PNG", pageWidth - margin - w, 10, w, h); 
+    }
+  } catch { /* logo optional */ }
+
+  // ── Letterhead ──
+  let y = 16;
+  doc.setFontSize(13); doc.setFont("times", "bold");
+  doc.text("POLYTECHNIC COLLEGE OF LA UNION (PCLU), INC.", centerX, y, { align: "center" });
+  y += 5; doc.setFontSize(10); doc.setFont("times", "italic");
+  doc.text("(Formerly PAMETS COLLEGES)", centerX, y, { align: "center" });
+  y += 5; doc.setFont("times", "normal");
+  doc.text("Don Pastor L. Panay Sr. Street, San Nicolas Sur, Agoo, La Union 2504", centerX, y, { align: "center" });
+  y += 5; doc.text("Tel. No. (072) 2061761  Mobile No. 09171623141 / 09260953781", centerX, y, { align: "center" });
+  y += 5; doc.text("Email: pclucollege@pclu.com.ph / https://www.facebook.com/PCLUOfficialpage", centerX, y, { align: "center" });
+  y += 5; doc.setFont("times", "bolditalic");
+  doc.text("Member: Philippine Association of Colleges & Universities", centerX, y, { align: "center" });
+  y += 6; doc.setLineWidth(0.5); doc.line(margin, y, pageWidth - margin, y);
+
+  // ── Report Title ──
+  y += 9; doc.setFontSize(13); doc.setFont("helvetica", "bold");
+  doc.text("ATTENDANCE PENALTIES REPORT", centerX, y, { align: "center" });
+
+  // ── Filters / Meta ──
+  y += 7; doc.setFontSize(9); doc.setFont("helvetica", "normal");
+  const dept = data.departmentFilter === "ALL" ? "All Departments" : data.departmentFilter;
+  const eventLabel = data.eventFilter === "ALL" ? "All Events" : data.eventFilter;
+  const statusLabel = data.statusFilter === "ALL" ? "All Statuses" : data.statusFilter;
+  doc.text(`Department: ${dept}   |   Event: ${eventLabel}   |   Status: ${statusLabel}`, margin, y);
+  y += 5; doc.text(`Generated on: ${format(new Date(), "MMMM d, yyyy h:mm a")}`, margin, y);
+
+  // ── Summary counts ──
+  const total   = data.penalties.length;
+  const pending = data.penalties.filter(p => p.status === "PENDING").length;
+  const overdue = data.penalties.filter(p => p.status === "OVERDUE").length;
+  const resolved = data.penalties.filter(p => p.status === "RESOLVED").length;
+  const waived   = data.penalties.filter(p => p.status === "WAIVED").length;
+
+  y += 7;
+  doc.setFontSize(9); doc.setFont("helvetica", "bold");
+  doc.text(`Total: ${total}   Pending: ${pending}   Overdue: ${overdue}   Resolved: ${resolved}   Waived: ${waived}`, margin, y);
+
+  // ── Separator ──
+  y += 4; doc.setLineWidth(0.3); doc.line(margin, y, pageWidth - margin, y);
+
+  // ── Table ──
+  const columns = ["Student", "Dept", "Event", "Reason", "Type", "Amount/Hours", "Deadline", "Status"];
+  const formatTitleCase = (str: string) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase().replace(/_/g, " ");
+  };
+
+  const rows = data.penalties.map(p => [
+    p.student.fullName,
+    p.student.department?.code ?? "—",
+    p.event.title,
+    p.reason ? formatTitleCase(p.reason) : "Absent",
+    p.type ? formatTitleCase(p.type) : "Not chosen",
+    p.type === "FEE"
+      ? `PHP ${p.feeAmount}`
+      : p.type === "COMMUNITY_SERVICE"
+      ? `${p.serviceHours} hrs`
+      : `PHP ${p.feeAmount} / ${p.serviceHours} hrs`,
+    format(new Date(p.deadline), "MM/dd/yyyy"),
+    formatTitleCase(p.status),
+  ]);
+
+  autoTable(doc, {
+    head: [columns],
+    body: rows,
+    startY: y + 2,
+    theme: "grid",
+    styles: { fontSize: 7, cellPadding: 2 },
+    headStyles: { fillColor: [26, 58, 143], textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: {
+      0: { cellWidth: 44 }, // Student
+      1: { cellWidth: 23 }, // Dept
+      2: { cellWidth: 22 }, // Event
+      3: { cellWidth: 16 }, // Reason
+      4: { cellWidth: 18 }, // Type
+      5: { cellWidth: 28 }, // Amount/Hours
+      6: { cellWidth: 16 }, // Deadline
+      7: { cellWidth: 15 }, // Status
+    },
+    didDrawPage: (hookData) => {
+      // page footer
+      const pageCount = (doc as any).internal.getNumberOfPages();
+      doc.setFontSize(8); doc.setFont("helvetica", "normal");
+      doc.text(
+        `Page ${hookData.pageNumber} of ${pageCount}`,
+        pageWidth - margin,
+        doc.internal.pageSize.getHeight() - 8,
+        { align: "right" }
+      );
+    },
+  });
+
+  // ── Save ──
+  const deptSlug = data.departmentFilter === "ALL" ? "all-depts" : data.departmentFilter.toLowerCase();
+  const dateSlug = format(new Date(), "yyyyMMdd-HHmm");
+  doc.save(`penalties-report-${deptSlug}-${dateSlug}.pdf`);
+};

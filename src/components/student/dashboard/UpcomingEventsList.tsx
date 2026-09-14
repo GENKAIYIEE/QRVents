@@ -79,9 +79,15 @@ export function UpcomingEventsList({ events, department, emptyMessage = "No upco
             </div>
 
             <div className="mt-auto pt-3 border-t border-dashed border-slate-200 flex flex-col gap-2">
+              {event.isMandatory && (
+                <div className="flex items-center gap-2 text-rose-600 bg-rose-50 px-2 py-1.5 rounded-lg border border-rose-100/50">
+                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+                  <span className="text-[11px] font-bold">Mandatory Event (Penalty Applies)</span>
+                </div>
+              )}
               {event.hasCertificate && (
                 <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-2 py-1.5 rounded-lg border border-amber-100/50">
-                  <span className="material-symbols-outlined text-[14px]">workspace_premium</span>
+                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
                   <span className="text-[11px] font-bold">Certificate Provided</span>
                 </div>
               )}
