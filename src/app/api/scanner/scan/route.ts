@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
     
     if (event.status === "ONGOING") {
       isAllowed = true;
+    } else if (event.status === "COMPLETED" && !event.penaltiesGenerated) {
+      isAllowed = true;
     } else if (event.status === "UPCOMING" && event.startTime) {
       const [startHours, startMinutes] = event.startTime.split(":").map(Number);
       const eventStartDate = new Date(manilaTimeStr); // Start with today's date in Manila
@@ -153,6 +155,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Perform Check-In
+    if (event.status === "COMPLETED") {
+      return NextResponse.json({ error: "Event has ended. Check-ins are no longer allowed." }, { status: 400 })
+    }
+
     let isLate = false
 
     try {

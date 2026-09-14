@@ -33,6 +33,11 @@ export default async function DeptScannerPage() {
         { 
           status: "UPCOMING",
           date: { gte: todayStart, lte: todayEnd }
+        },
+        {
+          status: "COMPLETED",
+          penaltiesGenerated: false,
+          date: { gte: todayStart, lte: todayEnd }
         }
       ],
       AND: [
@@ -60,7 +65,7 @@ export default async function DeptScannerPage() {
   const upcomingEventsToday: typeof rawEvents = []
 
   rawEvents.forEach(event => {
-    if (event.status === "ONGOING") {
+    if (event.status === "ONGOING" || event.status === "COMPLETED") {
       events.push(event)
     } else if (event.status === "UPCOMING" && event.startTime) {
       const [startHours, startMinutes] = event.startTime.split(":").map(Number);
