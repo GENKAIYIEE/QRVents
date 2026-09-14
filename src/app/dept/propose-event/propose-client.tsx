@@ -180,15 +180,15 @@ export function ProposeEventClient({ initialData }: { initialData: InitialData }
               </div>
               <p className="text-xs text-slate-500 mb-2">You can specify year levels, or leave all unchecked to target everyone.</p>
               <div className="flex flex-wrap gap-3">
-                {["1st Year", "2nd Year", "3rd Year", "4th Year"].map((year) => (
-                  <label key={year} className="flex items-center gap-1.5 text-sm font-medium text-slate-700 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                {[{value: "1", label: "1st Year"}, {value: "2", label: "2nd Year"}, {value: "3", label: "3rd Year"}, {value: "4", label: "4th Year"}].map((year) => (
+                  <label key={year.value} className="flex items-center gap-1.5 text-sm font-medium text-slate-700 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
                     <input 
                       type="checkbox"
                       name="targetYearLevels"
-                      value={year}
+                      value={year.value}
                       className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
                     />
-                    {year}
+                    {year.label}
                   </label>
                 ))}
               </div>

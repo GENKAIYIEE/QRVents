@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const student = await prisma.user.findFirst({ where: { role: 'STUDENT', departmentId: '0bbf07be-f9d6-43b4-87d9-6bfd6368abdb' }, select: { fullName: true, yearLevel: true, departmentId: true } }); console.log(student); } main().then(()=>prisma.$disconnect());

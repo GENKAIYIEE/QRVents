@@ -215,7 +215,7 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
                     type="button"
                     onClick={() => {
                       const current = watch("targetYearLevels") || [];
-                      const all = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+                      const all = ["1", "2", "3", "4"];
                       if (current.length === all.length) {
                         setValue("targetYearLevels", []);
                       } else {
@@ -228,15 +228,15 @@ export function EventFormModal({ isOpen, onClose, onSuccess, departments, eventT
                   </button>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                  {["1st Year", "2nd Year", "3rd Year", "4th Year"].map((year) => (
-                    <label key={year} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#475569", cursor: "pointer" }}>
+                  {[{value: "1", label: "1st Year"}, {value: "2", label: "2nd Year"}, {value: "3", label: "3rd Year"}, {value: "4", label: "4th Year"}].map((year) => (
+                    <label key={year.value} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#475569", cursor: "pointer" }}>
                       <input 
                         type="checkbox"
-                        value={year}
+                        value={year.value}
                         {...register("targetYearLevels")}
                         style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#2563EB" }}
                       />
-                      {year}
+                      {year.label}
                     </label>
                   ))}
                 </div>
