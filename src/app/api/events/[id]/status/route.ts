@@ -116,6 +116,7 @@ export async function GET(
 
     const event = await prisma.event.findUnique({
       where: { id: resolvedParams.id },
+      include: { attendanceLogs: true },
     })
 
     if (!event) {
@@ -134,9 +135,17 @@ export async function GET(
 
     const missingStudentIds = await getMissingAttendees(resolvedParams.id)
 
+    // Count students who checked in but did not check out
+    const noCheckoutLogs = event.attendanceLogs
+      ? event.attendanceLogs.filter(
+          (log) => log.status === "PRESENT" && !log.checkOut
+        )
+      : []
+
     return NextResponse.json({
       isMandatory: true,
       missingCount: missingStudentIds.length,
+      noCheckoutCount: noCheckoutLogs.length,
     })
 
   } catch (error) {

@@ -23,6 +23,7 @@ export function CompleteEventModal({
   const [preview, setPreview] = useState<{
     isMandatory: boolean
     missingCount: number
+    noCheckoutCount: number
   } | null>(null)
 
   useEffect(() => {
@@ -99,16 +100,16 @@ export function CompleteEventModal({
         {!loading && preview && preview.isMandatory && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
             <p className="text-sm text-amber-800">
-              This is a{" "}
-              <strong>mandatory</strong>{" "}
-              event.{" "}
-              <strong>
-                {preview.missingCount}
-              </strong>{" "}
-              student
-              {preview.missingCount !== 1 ? "s" : ""} did not 
-              attend and will receive 
-              an attendance penalty.
+              This is a <strong>mandatory</strong> event. 
+              <strong> {preview.missingCount}</strong> student{preview.missingCount !== 1 ? "s" : ""} did not attend
+              {preview.noCheckoutCount > 0 && (
+                <>
+                  , and <strong>{preview.noCheckoutCount}</strong> student{preview.noCheckoutCount !== 1 ? "s" : ""} did not check out.
+                </>
+              )}
+              {preview.noCheckoutCount === 0 && "."}
+              <br/><br/>
+              A total of <strong>{preview.missingCount + (preview.noCheckoutCount || 0)}</strong> penalties will be issued.
             </p>
           </div>
         )}

@@ -164,15 +164,8 @@ export async function updateEventStatus(id: string, status: EventStatus) {
     data: { status },
   })
 
-  // Trigger penalties if transitioning to COMPLETED
+  // Notify Admins and Dept Admins of Successful Event
   if (status === "COMPLETED" && existingEvent.status !== "COMPLETED") {
-    try {
-      await generatePenaltiesForEvent(id)
-    } catch (e) {
-      console.error("Failed to process penalties:", e)
-    }
-
-    // Notify Admins and Dept Admins of Successful Event
     try {
       const admins = await prisma.user.findMany({
         where: {
@@ -186,6 +179,7 @@ export async function updateEventStatus(id: string, status: EventStatus) {
         select: { id: true }
       })
       if (admins.length > 0) {
+        const { createNotificationsForMany } = await import("@/lib/notifications")
         await createNotificationsForMany(
           admins.map(a => a.id),
           {
