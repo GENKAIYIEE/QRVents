@@ -63,12 +63,6 @@ export function EventsClient({ departments, isArchived = false }: { departments:
   }, [page, search, status, eventType])
 
   const handleStatusChange = async (id: string, newStatus: EventStatus) => {
-    if (newStatus === "COMPLETED") {
-      const evt = events.find(e => e.id === id)
-      if (evt) setEventToComplete(evt)
-      return
-    }
-
     try {
       const res = await fetch(`/api/admin/events/${id}`, {
         method: "PATCH",
