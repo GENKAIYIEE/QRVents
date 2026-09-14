@@ -17,6 +17,10 @@ export const eventSchema = z.object({
   hasCertificate: z.boolean().default(false),
   targetDepartments: z.array(z.string()).default([]),
   targetYearLevels: z.array(z.string()).default([]),
+  penaltyFee: z.preprocess(
+    (val) => (val === "" || val == null) ? null : Number(val),
+    z.number().min(0, "Penalty fee cannot be negative").optional().nullable()
+  ),
 }).refine(
   (data) => {
     // If it's a department event, departmentId must be provided

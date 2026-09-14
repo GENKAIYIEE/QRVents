@@ -111,6 +111,7 @@ model Event {
   expectedAttendees Int?
   targetDepartments String[]    @default([])
   targetYearLevels  String[]    @default([])
+  penaltyFee        Float?      // Custom penalty fee (overrides global default)
   createdById       String
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
@@ -142,6 +143,7 @@ model EventProposal {
   isArchived      Boolean        @default(false)
   targetDepartments String[]     @default([])
   targetYearLevels  String[]     @default([])
+  penaltyFee        Float?       // Custom penalty fee (overrides global default)
   submittedAt     DateTime       @default(now())
   reviewedAt      DateTime?
   updatedAt       DateTime       @updatedAt

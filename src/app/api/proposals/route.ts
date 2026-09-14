@@ -14,6 +14,10 @@ const proposalSchema = z.object({
   hasCertificate: z.boolean().default(false),
   isMandatory: z.boolean().default(false),
   targetYearLevels: z.array(z.string()).default([]),
+  penaltyFee: z.preprocess(
+    (val) => (val === "" || val == null) ? null : Number(val),
+    z.number().min(0).optional().nullable()
+  ),
 })
 
 export async function POST(request: NextRequest) {
@@ -59,6 +63,7 @@ export async function POST(request: NextRequest) {
         hasCertificate: data.hasCertificate,
         isMandatory: data.isMandatory,
         targetYearLevels: data.targetYearLevels,
+        penaltyFee: data.penaltyFee,
         status: "PENDING",
         submittedById: session.userId,
         departmentId: user.departmentId,
