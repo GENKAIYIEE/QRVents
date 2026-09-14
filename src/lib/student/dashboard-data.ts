@@ -35,6 +35,8 @@ export async function getDashboardData() {
     ]
   } : { targetYearLevels: { isEmpty: true } };
 
+  const deptId = studentUser?.departmentId || departmentId;
+
   const [
     upcomingSchoolWideEvents,
     upcomingDeptEvents,
@@ -48,14 +50,16 @@ export async function getDashboardData() {
     // Upcoming school-wide events
     prisma.event.findMany({
       where: {
-        date: { gte: today },
+        OR: [
+          { status: "ONGOING" },
+          { status: "UPCOMING", date: { gte: today } }
+        ],
         eventType: "SCHOOL_WIDE",
-        status: { in: ["UPCOMING", "ONGOING"] },
         AND: [
           {
             OR: [
               { targetDepartments: { isEmpty: true } },
-              { targetDepartments: { has: departmentId || "" } }
+              { targetDepartments: { has: deptId || "" } }
             ]
           },
           targetYearLevelsFilter
@@ -67,13 +71,19 @@ export async function getDashboardData() {
     }),
 
     // Upcoming department events
-    departmentId ? prisma.event.findMany({
+    deptId ? prisma.event.findMany({
       where: {
-        date: { gte: today },
         eventType: "DEPARTMENT",
-        departmentId: departmentId,
-        status: { in: ["UPCOMING", "ONGOING"] },
-        ...targetYearLevelsFilter
+        departmentId: deptId,
+        AND: [
+          {
+            OR: [
+              { status: "ONGOING" },
+              { status: "UPCOMING", date: { gte: today } }
+            ]
+          },
+          targetYearLevelsFilter
+        ]
       },
       orderBy: { date: "asc" },
       take: 6,
@@ -83,14 +93,16 @@ export async function getDashboardData() {
     // Count of upcoming school-wide events
     prisma.event.count({
       where: {
-        date: { gte: today },
+        OR: [
+          { status: "ONGOING" },
+          { status: "UPCOMING", date: { gte: today } }
+        ],
         eventType: "SCHOOL_WIDE",
-        status: { in: ["UPCOMING", "ONGOING"] },
         AND: [
           {
             OR: [
               { targetDepartments: { isEmpty: true } },
-              { targetDepartments: { has: departmentId || "" } }
+              { targetDepartments: { has: deptId || "" } }
             ]
           },
           targetYearLevelsFilter
@@ -99,13 +111,19 @@ export async function getDashboardData() {
     }),
 
     // Count of upcoming department events
-    departmentId ? prisma.event.count({
+    deptId ? prisma.event.count({
       where: {
-        date: { gte: today },
         eventType: "DEPARTMENT",
-        departmentId: departmentId,
-        status: { in: ["UPCOMING", "ONGOING"] },
-        ...targetYearLevelsFilter
+        departmentId: deptId,
+        AND: [
+          {
+            OR: [
+              { status: "ONGOING" },
+              { status: "UPCOMING", date: { gte: today } }
+            ]
+          },
+          targetYearLevelsFilter
+        ]
       }
     }) : Promise.resolve(0),
 

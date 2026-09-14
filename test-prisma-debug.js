@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const evs = await prisma.event.findMany({ orderBy: { createdAt: 'desc' }, take: 3, select: { title: true, eventType: true, departmentId: true, date: true, status: true, targetYearLevels: true } }); console.log(evs); } main().then(()=>prisma.$disconnect());
