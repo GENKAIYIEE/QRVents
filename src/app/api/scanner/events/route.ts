@@ -24,6 +24,11 @@ export async function GET(request: NextRequest) {
         {
           status: "UPCOMING",
           date: { gte: todayStart, lte: todayEnd }
+        },
+        {
+          status: "COMPLETED",
+          penaltiesGenerated: false,
+          date: { gte: todayStart, lte: todayEnd }
         }
       ]
     }

@@ -30,6 +30,7 @@ export function ScannerClient({ events: initialEvents, autoLockSeconds, basePath
     const now = new Date()
     return rawEvents.filter(event => {
       if (event.status === "ONGOING") return true
+      if (event.status === "COMPLETED") return true
       if (event.status === "UPCOMING" && event.startTime) {
         const [startHours, startMinutes] = event.startTime.split(":").map(Number)
         const eventStartDate = new Date(event.date)
