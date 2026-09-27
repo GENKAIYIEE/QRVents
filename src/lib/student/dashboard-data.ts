@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
-export async function getDashboardData() {
+export async function getDashboardData(options?: { skipSectionCheck?: boolean }) {
   const session = await getSession()
   if (!session || session.role !== "STUDENT") {
     redirect("/login")
@@ -17,6 +17,7 @@ export async function getDashboardData() {
   const studentUser = await prisma.user.findUnique({
     where: { id: studentId },
     include: {
+      department: true,
       _count: {
         select: {
           notifications: { where: { isRead: false } },
@@ -28,6 +29,20 @@ export async function getDashboardData() {
 
   const yearLevel = studentUser?.yearLevel;
   
+  // -- DIRTY SECTION CHECK (FORCE UPDATE FLOW) --
+  if (!options?.skipSectionCheck) {
+    const deptSections = (studentUser?.department as any)?.sections ?? []
+    const hasSectionsConfigured = deptSections.length > 0
+    
+    // If dept has sections, but user's section is missing or not in the list
+    const isSectionDirty = hasSectionsConfigured && (!studentUser?.section || !deptSections.includes(studentUser.section))
+    
+    if (isSectionDirty) {
+      redirect("/student/profile?updateSection=1")
+    }
+  }
+  // ---------------------------------------------
+
   const targetYearLevelsFilter = yearLevel ? {
     OR: [
       { targetYearLevels: { isEmpty: true } },

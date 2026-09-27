@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default async function RegisterPage() {
   const rawDepartments = await prisma.department.findMany({
-    select: { id: true, name: true, code: true },
+    select: { id: true, name: true, code: true, sections: true },
   })
 
   const EXACT_ORDER = ["BSIT", "BEED/BSED", "BSHM", "BSTM", "BSBA", "BSCRIM", "BSMARINE"]

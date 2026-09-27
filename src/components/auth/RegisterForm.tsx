@@ -29,6 +29,7 @@ type Department = {
   id: string
   name: string
   code: string
+  sections?: string[]
 }
 
 type RegisterFormProps = {
@@ -72,12 +73,24 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
 
   const passwordValue = watch("password") || ""
   const yearLevelValue = watch("yearLevel")
+  const selectedDeptId = watch("departmentId")
+  
+  const selectedDept = departments.find(d => d.id === selectedDeptId)
+  const allDeptSections = selectedDept?.sections || []
+  
+  // Filter sections based on year level (e.g. if "1" or "1st Year", match sections starting with "1")
+  const yearPrefix = yearLevelValue ? yearLevelValue.substring(0, 1) : ""
+  const availableSections = yearPrefix 
+    ? allDeptSections.filter(sec => sec.startsWith(yearPrefix)) 
+    : []
+  
+  const hasSections = allDeptSections.length > 0
   
   const passwordRequirements = [
-    { label: "Minimum of 8 characters", met: passwordValue.length >= 8 },
-    { label: "Uppercase & lowercase letters", met: /[a-z]/.test(passwordValue) && /[A-Z]/.test(passwordValue) },
-    { label: "Numbers", met: /\d/.test(passwordValue) },
-    { label: "Special characters", met: /[^A-Za-z0-9]/.test(passwordValue) },
+    { label: "Min 8 chars", met: passwordValue.length >= 8 },
+    { label: "Upper & lowercase", met: /[a-z]/.test(passwordValue) && /[A-Z]/.test(passwordValue) },
+    { label: "Number", met: /\d/.test(passwordValue) },
+    { label: "Symbol", met: /[^A-Za-z0-9]/.test(passwordValue) },
   ]
   
   const metCount = passwordRequirements.filter((r) => r.met).length
@@ -147,14 +160,6 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
             <p className="text-[#475569] text-sm leading-relaxed mt-2">
               Fill in your details to register. Your permanent QR code will be generated instantly.
             </p>
-
-            {/* Error Banner */}
-            {serverError && (
-              <div className="mt-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
-                <AlertCircle className="text-red-500 w-4 h-4 mt-0.5 flex-shrink-0" />
-                <p className="text-red-700 text-sm leading-snug">{serverError}</p>
-              </div>
-            )}
 
             {/* Registration Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-5" noValidate>
@@ -266,18 +271,37 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
 
                 {/* Section Field */}
                 <div>
-                  <label htmlFor="section" className="block text-sm font-semibold text-[#0F172A] mb-2">
-                    Section
+                  <label htmlFor="section" className="block text-sm font-semibold text-[#0F172A] mb-2 flex items-center justify-between">
+                    <span>Section</span>
+                    {!hasSections && selectedDeptId && (
+                      <span className="text-[10px] text-amber-500 font-normal">Type manually</span>
+                    )}
                   </label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
-                    <input
-                      id="section"
-                      type="text"
-                      placeholder="e.g. A"
-                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300"
-                      {...register("section")}
-                    />
+                    
+                    {hasSections ? (
+                      <select
+                        id="section"
+                        className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!yearLevelValue}
+                        {...register("section")}
+                      >
+                        <option value="" disabled>{yearLevelValue ? "Select Section" : "Select Year Level First"}</option>
+                        {availableSections.map((sec) => (
+                          <option key={sec} value={sec}>{sec}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id="section"
+                        type="text"
+                        placeholder={!selectedDeptId ? "Select dept first" : "e.g. 1A"}
+                        disabled={!selectedDeptId}
+                        className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        {...register("section")}
+                      />
+                    )}
                   </div>
                   {errors.section && <p className="text-red-500 text-xs mt-1.5">{errors.section.message}</p>}
                 </div>
@@ -312,33 +336,33 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                   
                   {/* Password Strength Indicator */}
                   {passwordValue.length > 0 && (
-                    <div className="mt-4 flex flex-col gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                      <div className="flex items-center justify-between text-xs mb-1">
+                    <div className="mt-2 flex flex-col gap-1.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="flex items-center justify-between text-[11px] mb-0.5">
                         <span className="text-[#475569] font-medium">Password strength</span>
                         <span className={`font-semibold ${
                           strengthLabel === "Strong" ? "text-emerald-600" :
                           strengthLabel === "Medium" ? "text-amber-600" : "text-red-600"
                         }`}>{strengthLabel}</span>
                       </div>
-                      <div className="flex h-1.5 w-full gap-1.5">
+                      <div className="flex h-1 w-full gap-1">
                         <div className={`h-full flex-1 rounded-full transition-colors duration-300 ${passwordValue.length > 0 ? (metCount >= 1 ? strengthColor : "bg-red-500") : "bg-slate-200"}`} />
                         <div className={`h-full flex-1 rounded-full transition-colors duration-300 ${metCount >= 3 ? strengthColor : "bg-slate-200"}`} />
                         <div className={`h-full flex-1 rounded-full transition-colors duration-300 ${metCount >= 4 ? strengthColor : "bg-slate-200"}`} />
                       </div>
                       
-                      <div className="flex flex-col gap-y-2 mt-2">
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 mt-1">
                         {passwordRequirements.map((req, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
+                          <div key={idx} className="flex items-center gap-1.5">
                             {req.met ? (
-                              <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                <Check className="w-2.5 h-2.5 text-emerald-600" />
+                              <div className="w-3 h-3 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <Check className="w-2 h-2 text-emerald-600" />
                               </div>
                             ) : (
-                              <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                              <div className="w-3 h-3 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                                <div className="w-1 h-1 rounded-full bg-slate-300" />
                               </div>
                             )}
-                            <span className={`text-[11px] leading-tight ${req.met ? "text-slate-700" : "text-slate-500"}`}>
+                            <span className={`text-[10px] leading-tight ${req.met ? "text-slate-700" : "text-slate-500"}`}>
                               {req.label}
                             </span>
                           </div>
@@ -375,6 +399,14 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                   {errors.confirmPassword && <p className="text-red-500 text-xs mt-1.5">{errors.confirmPassword.message}</p>}
                 </div>
               </div>
+
+              {/* Error Banner */}
+              {serverError && (
+                <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 mt-2">
+                  <AlertCircle className="text-red-500 w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <p className="text-red-700 text-sm leading-snug">{serverError}</p>
+                </div>
+              )}
 
               {/* Submit Button */}
               <button
