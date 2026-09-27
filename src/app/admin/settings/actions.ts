@@ -90,3 +90,37 @@ export async function getSystemSettings() {
   const settings = await prisma.systemSettings.findUnique({ where: { id: "global" } })
   return settings ?? { id: "global", defaultScanDuration: 120, autoLogoutTimer: 5 }
 }
+
+// ── Section Management (Dept Admin only) ─────────────────────────────────────
+
+export async function getDepartmentSections(departmentId: string): Promise<string[]> {
+  const dept = await prisma.department.findUnique({
+    where: { id: departmentId },
+    select: { sections: true },
+  })
+  return dept?.sections ?? []
+}
+
+export async function updateDepartmentSections(sections: string[]) {
+  const session = await getSession()
+  if (!session || session.role !== "DEPT_ADMIN") throw new Error("Unauthorized")
+  if (!session.departmentId) throw new Error("No department assigned to this account.")
+
+  // Sanitize: trim, unique, non-empty
+  const cleaned = [...new Set(sections.map((s) => s.trim()).filter((s) => s.length > 0))]
+
+  await prisma.department.update({
+    where: { id: session.departmentId },
+    data: { sections: cleaned },
+  })
+
+  await logActivity(
+    session.userId,
+    session.fullName,
+    "Updated Department Sections",
+    `Set ${cleaned.length} section(s): ${cleaned.join(", ")}`
+  )
+
+  revalidatePath("/dept/settings")
+  return cleaned
+}

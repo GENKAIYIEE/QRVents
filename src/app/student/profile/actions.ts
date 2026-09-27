@@ -8,6 +8,7 @@ export async function updateStudentProfile(data: {
   fullName: string
   email: string
   yearLevel?: string | null
+  section?: string | null
 }) {
   const session = await getSession()
   if (!session || session.role !== "STUDENT") {
@@ -19,14 +20,22 @@ export async function updateStudentProfile(data: {
     throw new Error("Full Name and Email are required.")
   }
 
+  // Build update payload
+  const updateData: any = {
+    fullName: data.fullName,
+    email: data.email,
+    yearLevel: data.yearLevel,
+  }
+
+  // Only update section if explicitly provided
+  if (data.section !== undefined) {
+    updateData.section = data.section
+  }
+
   // Update user
   const updatedUser = await prisma.user.update({
     where: { id: session.userId },
-    data: {
-      fullName: data.fullName,
-      email: data.email,
-      yearLevel: data.yearLevel,
-    },
+    data: updateData,
   })
 
   revalidatePath("/student/profile")

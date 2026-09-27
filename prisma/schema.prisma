@@ -58,6 +58,7 @@ model Department {
   name      String
   color     String   @default("#1A3A8F")
   lightBg   String   @default("#EEF2FF")
+  sections  String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

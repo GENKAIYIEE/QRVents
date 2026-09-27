@@ -71,7 +71,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ ev
         <div className="min-w-[1056px] flex justify-center print:block">
           
           {/* Certificate Paper */}
-          <div className="bg-gradient-to-br from-white via-[#faf9f6] to-[#f3f0e6] w-[1056px] h-[746.8px] relative shadow-2xl print:shadow-none overflow-hidden print:w-full print:h-full print:max-w-none print:m-0 print:border-none rounded-sm mx-auto print:absolute print:inset-0">
+          <div id="certificate-wrapper" className="bg-gradient-to-br from-white via-[#faf9f6] to-[#f3f0e6] w-[1056px] h-[746.8px] relative shadow-2xl print:shadow-none overflow-hidden print:w-full print:h-full print:max-w-none print:m-0 print:border-none rounded-sm mx-auto print:absolute print:inset-0">
 
 
         {/* Certificate ID */}
@@ -156,8 +156,49 @@ export default async function CertificatePage({ params }: { params: Promise<{ ev
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&display=swap');
         
         @media print {
-          @page { size: landscape; margin: 0; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+          @page { 
+            size: landscape; 
+            margin: 0; 
+          }
+          
+          /* Hide all Next.js layout elements (sidebar, header, padding wrappers) */
+          aside, header, nav { 
+            display: none !important; 
+          }
+          
+          html, body { 
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact; 
+            background: white !important; 
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+          }
+          
+          /* Force parent layout divs to zero out padding/margin in print */
+          body * {
+            box-sizing: border-box;
+          }
+          
+          /* Detach the certificate from the layout flow and snap to top-left */
+          #certificate-wrapper {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: white !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+          }
         }
         
         .animate-spin-slow {

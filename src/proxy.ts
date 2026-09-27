@@ -21,7 +21,7 @@ const PREFIX_MAP: Record<string, string> = {
 
 const PROTECTED_PREFIXES = ["/admin", "/dept", "/student"]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get(COOKIE_NAME)?.value
 
