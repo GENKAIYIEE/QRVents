@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Register for QRVents Student Account",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function RegisterPage() {
   const rawDepartments = await prisma.department.findMany({
     select: { id: true, name: true, code: true, sections: true },
