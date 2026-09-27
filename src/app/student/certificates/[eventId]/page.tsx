@@ -161,42 +161,41 @@ export default async function CertificatePage({ params }: { params: Promise<{ ev
             margin: 0; 
           }
           
-          /* Hide all Next.js layout elements (sidebar, header, padding wrappers) */
+          /* Hide all Next.js layout elements (sidebar, header, nav) */
           aside, header, nav { 
             display: none !important; 
           }
           
-          html, body { 
+          /* Lock all top-level containers to EXACTLY 1 screen height to prevent a 2nd blank page */
+          html, body, #__next, main, .min-h-screen { 
             -webkit-print-color-adjust: exact; 
             print-color-adjust: exact; 
             background: white !important; 
-            width: 100vw !important;
+            width: 100% !important;
             height: 100vh !important;
+            max-height: 100vh !important;
+            min-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
           }
           
-          /* Force parent layout divs to zero out padding/margin in print */
-          body * {
-            box-sizing: border-box;
-          }
-          
           /* Detach the certificate from the layout flow and snap to top-left */
           #certificate-wrapper {
-            position: fixed !important;
+            position: absolute !important;
             top: 0 !important;
             left: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
             width: 100vw !important;
-            height: 100vh !important;
+            height: 99.5vh !important; /* Slightly under 100vh to prevent browser edge bleed */
             z-index: 99999 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             background: white !important;
             page-break-after: avoid !important;
+            page-break-before: avoid !important;
             page-break-inside: avoid !important;
           }
         }
