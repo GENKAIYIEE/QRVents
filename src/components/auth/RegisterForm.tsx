@@ -54,7 +54,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
       password: "",
       confirmPassword: "",
       departmentId: "",
-      yearLevel: undefined,
+      yearLevel: "" as any,
       section: "",
       studentId: "",
     },
@@ -78,10 +78,11 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
   const selectedDept = departments.find(d => d.id === selectedDeptId)
   const allDeptSections = selectedDept?.sections || []
   
-  // Filter sections based on year level (e.g. if "1" or "1st Year", match sections starting with "1")
-  const yearPrefix = yearLevelValue ? yearLevelValue.substring(0, 1) : ""
-  const availableSections = yearPrefix 
-    ? allDeptSections.filter(sec => sec.startsWith(yearPrefix)) 
+  // New format: letter prefix determines year. A=1st, B=2nd, C=3rd, D=4th
+  const YEAR_TO_LETTER: Record<string, string> = { "1": "A", "2": "B", "3": "C", "4": "D" }
+  const letterPrefix = yearLevelValue ? (YEAR_TO_LETTER[yearLevelValue] ?? "") : ""
+  const availableSections = letterPrefix
+    ? allDeptSections.filter(sec => sec.toUpperCase().startsWith(letterPrefix))
     : []
   
   const hasSections = allDeptSections.length > 0
@@ -112,7 +113,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex bg-white">
+    <div className="h-[100dvh] w-screen overflow-hidden flex bg-white">
       {/* Main Container */}
       <div className="w-full h-full flex flex-col md:flex-row">
         
@@ -138,8 +139,9 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div className="w-full md:w-7/12 bg-white flex flex-col justify-center p-6 sm:p-10 lg:p-14 overflow-y-auto overflow-x-hidden">
-          <div className="w-full max-w-xl mx-auto my-auto py-8">
+        <div className="w-full md:w-7/12 bg-white overflow-y-auto overflow-x-hidden custom-scrollbar">
+          <div className="min-h-full w-full flex items-center p-6 sm:p-10 lg:p-14">
+            <div className="w-full max-w-xl mx-auto py-8">
             {/* Mobile logo */}
             <div className="flex md:hidden items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center">
@@ -256,10 +258,11 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                     <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
                     <select
                       id="yearLevel"
-                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none"
+                      disabled={!selectedDeptId}
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-900 text-sm outline-none transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 shadow-sm hover:border-slate-300 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
                       {...register("yearLevel")}
                     >
-                      <option value="" disabled>Select Year</option>
+                      <option value="" disabled>{selectedDeptId ? "Select Year" : "Select Dept First"}</option>
                       <option value="1">1st Year</option>
                       <option value="2">2nd Year</option>
                       <option value="3">3rd Year</option>
@@ -448,6 +451,7 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
 
 
           </div>
+        </div>
         </div>
 
       </div>
