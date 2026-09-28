@@ -185,10 +185,10 @@ export function ProfileClient({ user }: ProfileClientProps) {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-medium text-slate-800 appearance-none"
               >
                 <option value="" disabled>Select Year Level</option>
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="4th Year">4th Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
               </select>
             </div>
 
@@ -201,11 +201,16 @@ export function ProfileClient({ user }: ProfileClientProps) {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-medium text-slate-800 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="" disabled>{selectedYearLevel ? "Choose section…" : "Select Year Level First"}</option>
-                {deptSections
-                  .filter((sec) => selectedYearLevel ? sec.startsWith(selectedYearLevel.substring(0, 1)) : true)
-                  .map((sec) => (
-                    <option key={sec} value={sec}>{sec}</option>
-                ))}
+                {(() => {
+                  // New format: letter prefix determines year. A=1st, B=2nd, C=3rd, D=4th
+                  const YEAR_TO_LETTER: Record<string, string> = { "1": "A", "2": "B", "3": "C", "4": "D" }
+                  const letterPrefix = YEAR_TO_LETTER[selectedYearLevel] ?? ""
+                  return deptSections
+                    .filter((sec) => letterPrefix ? sec.toUpperCase().startsWith(letterPrefix) : true)
+                    .map((sec) => (
+                      <option key={sec} value={sec}>{sec}</option>
+                    ))
+                })()}
               </select>
             </div>
 

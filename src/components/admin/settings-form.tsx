@@ -326,36 +326,38 @@ export function SettingsForm({ user, systemSettings, department }: SettingsFormP
           {/* Sections Tab (Dept Admin only) */}
           {activeTab === "sections" && user.role === "DEPT_ADMIN" && (
             <form onSubmit={handleSectionsSubmit} className="max-w-lg space-y-6 animate-in fade-in slide-in-from-bottom-2">
-              <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-800">
-                <div className="flex items-center gap-2 font-semibold mb-1">
-                  <span className="material-symbols-outlined text-[16px]">info</span>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-700">
+                <div className="flex items-center gap-2 font-semibold text-slate-900 mb-1.5">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500">info</span>
                   Managing Sections for {department?.code ?? "Your Department"}
                 </div>
-                Add the official sections for your department. Students will select from this list during registration.
-                Type a section name and press{" "}
-                <kbd className="bg-blue-100 px-1 rounded text-xs font-mono">Enter</kbd> to add it.
+                <p className="text-slate-600">
+                  Add the official sections for your department. Students will select from this list during registration.
+                  Type a section name and press{" "}
+                  <kbd className="bg-slate-100 border border-slate-300 shadow-sm px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-600">Enter</kbd> to add it.
+                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-900 mb-1.5">
                   Department Sections
                 </label>
 
                 {/* Tag Input Area */}
                 <div
-                  className="min-h-[52px] w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all flex flex-wrap gap-2 items-center cursor-text"
+                  className="min-h-[42px] w-full px-3 py-2 bg-white border border-slate-300 rounded-md focus-within:ring-1 focus-within:ring-slate-900 focus-within:border-slate-900 transition-all flex flex-wrap gap-2 items-center cursor-text"
                   onClick={() => sectionInputRef.current?.focus()}
                 >
                   {sections.map((sec) => (
                     <span
                       key={sec}
-                      className="inline-flex items-center gap-1 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg"
+                      className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium px-2 py-1 rounded-md"
                     >
                       {sec}
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); removeSection(sec) }}
-                        className="hover:bg-blue-700 rounded p-0.5 transition-colors"
+                        className="text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-sm p-0.5 transition-colors"
                         aria-label={`Remove ${sec}`}
                       >
                         <X className="w-3 h-3" />
@@ -368,8 +370,8 @@ export function SettingsForm({ user, systemSettings, department }: SettingsFormP
                     value={sectionInput}
                     onChange={(e) => setSectionInput(e.target.value)}
                     onKeyDown={handleSectionKeyDown}
-                    placeholder={sections.length === 0 ? "Type a section name e.g. 1A, 2B…" : "Add more…"}
-                    className="flex-1 min-w-[140px] bg-transparent outline-none text-sm text-slate-800 placeholder:text-slate-400"
+                    placeholder={sections.length === 0 ? "Type a section e.g. A1, B2…" : "Add more…"}
+                    className="flex-1 min-w-[140px] bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
 
@@ -378,33 +380,34 @@ export function SettingsForm({ user, systemSettings, department }: SettingsFormP
                     type="button"
                     onClick={addSection}
                     disabled={!sectionInput.trim()}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add Section
                   </button>
                   {sections.length > 0 && (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-500">
                       {sections.length} section{sections.length !== 1 ? "s" : ""} configured
                     </span>
                   )}
                 </div>
 
                 {sections.length === 0 && (
-                  <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                    ⚠️ No sections configured yet. Students will see a free-text input during registration until you add at least one section.
-                  </p>
+                  <div className="mt-3 flex items-start gap-2 text-sm text-amber-800 bg-amber-50/50 border border-amber-200 rounded-md p-3">
+                    <span className="material-symbols-outlined text-amber-600 text-[18px] shrink-0 mt-0.5">warning</span>
+                    <p>No sections configured yet. Students will see a free-text input during registration until you add at least one section.</p>
+                  </div>
                 )}
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-4">
-                <p className="text-xs text-slate-400">
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-4">
+                <p className="text-xs text-slate-500">
                   Changes take effect immediately on the registration page.
                 </p>
                 <button
                   type="submit"
                   disabled={isSectionsSubmitting}
-                  className="shrink-0 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-70 flex items-center gap-2"
+                  className="shrink-0 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-medium text-sm transition-colors disabled:opacity-70 flex items-center gap-2 shadow-sm"
                 >
                   {isSectionsSubmitting && <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>}
                   Save Sections
