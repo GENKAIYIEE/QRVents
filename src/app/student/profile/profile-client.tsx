@@ -149,7 +149,16 @@ export function ProfileClient({ user }: ProfileClientProps) {
       {/* ── FORCED SECTION UPDATE MODAL ── */}
       {requireSectionUpdate && hasDeptSections && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in-95 duration-300 relative overflow-hidden">
+            
+            {/* Loading Overlay */}
+            {isSectionSubmitting && (
+              <div className="absolute inset-0 z-50 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center">
+                <span className="material-symbols-outlined animate-spin text-blue-600 text-5xl mb-3">progress_activity</span>
+                <span className="text-sm font-bold text-slate-700 animate-pulse">Updating your account...</span>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center">
                 <span className="material-symbols-outlined text-amber-600 text-2xl">warning</span>
@@ -255,7 +264,16 @@ export function ProfileClient({ user }: ProfileClientProps) {
           </div>
 
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit(onSubmitProfile)} className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6">
+            <form onSubmit={handleSubmit(onSubmitProfile)} className="relative bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6 overflow-hidden">
+              
+              {/* Loading Overlay */}
+              {isSubmitting && (
+                <div className="absolute inset-0 z-50 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
+                  <span className="material-symbols-outlined animate-spin text-blue-600 text-4xl mb-3">progress_activity</span>
+                  <span className="text-sm font-bold text-slate-700 animate-pulse">Saving changes...</span>
+                </div>
+              )}
+
               {error && (
                 <div className="p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-100 text-sm font-bold flex items-center gap-2 animate-in shake">
                   <span className="material-symbols-outlined text-[18px]">error</span>
@@ -390,7 +408,16 @@ export function ProfileClient({ user }: ProfileClientProps) {
           </div>
 
           <div className="lg:col-span-2">
-            <form onSubmit={handleSecuritySubmit} className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6">
+            <form onSubmit={handleSecuritySubmit} className="relative bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6 overflow-hidden">
+              
+              {/* Loading Overlay */}
+              {isSecuritySubmitting && (
+                <div className="absolute inset-0 z-50 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
+                  <span className="material-symbols-outlined animate-spin text-slate-800 text-4xl mb-3">progress_activity</span>
+                  <span className="text-sm font-bold text-slate-700 animate-pulse">Securing account...</span>
+                </div>
+              )}
+
               {securityError && (
                 <div className="p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-100 text-sm font-bold flex items-center gap-2 animate-in shake">
                   <span className="material-symbols-outlined text-[18px]">error</span>
