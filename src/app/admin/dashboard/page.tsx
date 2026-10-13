@@ -199,7 +199,7 @@ export default async function AdminDashboardPage() {
         <div className="lg:col-span-2">
           <SectionCard 
             title="Department Metrics" 
-            subtitle="Student count and total events per department"
+            subtitle="Student count per department"
             icon="bar_chart"
           >
             <div className="h-[280px] w-full">
