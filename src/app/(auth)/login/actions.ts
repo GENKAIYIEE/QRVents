@@ -1,10 +1,11 @@
 "use server"
 
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { SignJWT } from "jose"
 import prisma from "@/lib/prisma"
 import { comparePassword } from "@/lib/auth"
 import { COOKIE_NAME } from "@/lib/constants"
+import { verifyTurnstile, getClientIp } from "@/lib/captcha"
 
 type LoginActionResult = {
   error?: string
@@ -19,8 +20,15 @@ const ROLE_REDIRECT: Record<string, string> = {
 
 export async function loginAction(
   email: string,
-  password: string
+  password: string,
+  captchaToken: string | null
 ): Promise<LoginActionResult> {
+  // Step 0 — Captcha (before touching the database)
+  const captcha = await verifyTurnstile(captchaToken, getClientIp(await headers()))
+  if (!captcha.ok) {
+    return { error: captcha.error }
+  }
+
   // Step 1 & 2 — Database lookup
   const user = await prisma.user.findUnique({
     where: { email },

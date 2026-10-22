@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { loginAction } from "@/app/(auth)/login/actions"
 import { toast } from "sonner"
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget"
 import {
   Mail,
   Lock,
@@ -13,10 +15,6 @@ import {
   EyeOff,
   ArrowRight,
   AlertCircle,
-  QrCode,
-  ScanLine,
-  BarChart2,
-  Shield,
 } from "lucide-react"
 
 const loginSchema = z.object({
@@ -30,8 +28,11 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginForm() {
+  const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
 
   const {
     register,
@@ -45,20 +46,31 @@ export default function LoginForm() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get("registered") === "true") {
-      toast.success("Account has been successfully created!")
+      toast.success("Account registered successfully! You can now log in.")
       // Clean up URL without triggering a reload
       const newUrl = window.location.pathname
       window.history.replaceState({}, '', newUrl)
     }
   }, [])
 
+  const resetCaptcha = () => {
+    setCaptchaToken(null)
+    setCaptchaResetKey((key) => key + 1)
+  }
+
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null)
-    const result = await loginAction(values.email, values.password)
+    if (!captchaToken) {
+      setServerError("Please complete the security check.")
+      return
+    }
+    const result = await loginAction(values.email, values.password, captchaToken)
     if (result?.error) {
       setServerError(result.error)
+      resetCaptcha()
     } else if (result?.redirectTo) {
-      window.location.href = result.redirectTo
+      router.push(result.redirectTo)
+      router.refresh()
     }
   }
 
@@ -195,6 +207,9 @@ export default function LoginForm() {
                   <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>
                 )}
               </div>
+
+              {/* Security check */}
+              <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaResetKey} />
 
               {/* Submit Button */}
               <button

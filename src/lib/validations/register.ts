@@ -2,9 +2,10 @@ import { z } from "zod"
 
 export const registerSchema = z
   .object({
-    fullName: z.string().min(2, "Name must be at least 2 characters"),
+    fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
     email: z
       .string()
+      .trim()
       .email("Please enter a valid email address"),
     password: z
       .string()
@@ -19,7 +20,12 @@ export const registerSchema = z
       message: "Year level is required",
     }),
     section: z.string().min(1, "Section is required").max(10, "Section is too long"),
-    studentId: z.string().min(3, "Student ID is required").max(30, "Student ID is too long"),
+    studentId: z
+      .string()
+      .trim()
+      .min(3, "Student ID is required")
+      .max(30, "Student ID is too long")
+      .regex(/^[A-Za-z0-9-]+$/, "Student ID may only contain letters, numbers, and dashes"),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {

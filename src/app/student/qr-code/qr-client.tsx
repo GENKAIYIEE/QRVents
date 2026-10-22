@@ -2,317 +2,316 @@
 
 import { useState, useEffect } from "react"
 import { QRCodeSVG } from "qrcode.react"
-import { ScanLine, RefreshCw, BadgeInfo, Download, ChevronLeft } from "lucide-react"
+import { RefreshCw, BadgeInfo, Download, MapPin, Clock, Check } from "lucide-react"
 import { getStudentQRCode, getStudentActiveEvents } from "./actions"
-import { format } from "date-fns"
+import { formatTimeString } from "@/lib/utils"
+import { toast } from "sonner"
+import { QrPassSkeleton } from "@/components/student/qr-pass-skeleton"
 
-type StudentInfo = {
-  fullName: string
-  email: string
-  id: string
-  qrCode?: string | null
-  studentId: string | null
-  yearLevel: string | null
-  departmentCode: string
-  departmentName: string
-  departmentColor: string
+type StudentInfo = Awaited<ReturnType<typeof getStudentQRCode>>
+type ActiveEvent = Awaited<ReturnType<typeof getStudentActiveEvents>>[number]
+
+const QR_SVG_ID = "student-qr-svg"
+
+function getAttendanceState(event: ActiveEvent) {
+  const log = event.attendanceLogs?.[0]
+  if (log?.checkOut) {
+    return { label: "Checked out", className: "bg-slate-100 text-slate-600 border-slate-200" }
+  }
+  if (log) {
+    return { label: "Checked in", className: "bg-emerald-50 text-emerald-700 border-emerald-200" }
+  }
+  return { label: "Not yet scanned", className: "bg-blue-50 text-blue-700 border-blue-200" }
 }
 
 export function QrClient() {
   const [data, setData] = useState<StudentInfo | null>(null)
-  const [events, setEvents] = useState<any[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null)
+  const [events, setEvents] = useState<ActiveEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    let cancelled = false
 
-  const fetchData = async () => {
-    try {
-      setIsLoading(true)
-      const [resData, resEvents] = await Promise.all([
-        getStudentQRCode(),
-        getStudentActiveEvents()
-      ])
-      setData(resData)
-      setEvents(resEvents)
-      
-      // Update selected event if it's currently open
-      if (selectedEvent) {
-        const updatedSelected = resEvents.find((e: any) => e.id === selectedEvent.id)
-        if (updatedSelected) setSelectedEvent(updatedSelected)
+    async function load() {
+      try {
+        const [student, activeEvents] = await Promise.all([
+          getStudentQRCode(),
+          getStudentActiveEvents(),
+        ])
+        if (cancelled) return
+        setData(student)
+        setEvents(activeEvents)
+        setLoadError(null)
+      } catch (error) {
+        console.error(error)
+        if (!cancelled) {
+          setLoadError("We couldn't load your pass. Check your connection and try again.")
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false)
       }
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsLoading(false)
     }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [refreshKey])
+
+  const handleRefresh = () => {
+    setIsLoading(true)
+    setRefreshKey((key) => key + 1)
   }
 
   const handleDownload = () => {
-    if (!selectedEvent) return
-    const svg = document.getElementById("student-qr-svg")
+    if (!data || isSaving) return
+    const svg = document.getElementById(QR_SVG_ID)
     if (!svg) return
 
-    const svgData = new XMLSerializer().serializeToString(svg)
+    setIsSaving(true)
+
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
-    const img = new Image()
+    if (!ctx) {
+      setIsSaving(false)
+      toast.error("Failed to generate pass image")
+      return
+    }
 
     canvas.width = 1000
-    canvas.height = 1150
+    canvas.height = 1250
 
+    const img = new Image()
     img.onload = () => {
-      if (ctx) {
+      try {
         ctx.fillStyle = "white"
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-        
-        ctx.fillStyle = "#0F1E45"
-        ctx.font = "bold 70px system-ui, sans-serif"
+
+        ctx.fillStyle = data.departmentColor || "#1A3A8F"
+        ctx.fillRect(0, 0, canvas.width, 260)
+
+        ctx.fillStyle = "white"
         ctx.textAlign = "center"
-        ctx.fillText("Event Pass", canvas.width / 2, 120)
-        
-        ctx.fillStyle = "#334155"
-        ctx.font = "bold 45px system-ui, sans-serif"
-        ctx.fillText(data?.fullName || "", canvas.width / 2, 190)
+        ctx.font = "bold 56px system-ui, sans-serif"
+        ctx.fillText(data.fullName, canvas.width / 2, 120, 900)
+        ctx.font = "34px system-ui, sans-serif"
+        ctx.fillText(
+          [data.studentId, data.departmentCode].filter(Boolean).join("  |  "),
+          canvas.width / 2,
+          190,
+          900
+        )
 
-        ctx.fillStyle = data?.departmentColor || "#3B82F6"
-        ctx.font = "bold 30px system-ui, sans-serif"
-        ctx.fillText(selectedEvent.title, canvas.width / 2, 240)
+        ctx.drawImage(img, 150, 320, 700, 700)
 
-        ctx.drawImage(img, 150, 280, 700, 700)
-        
-        ctx.fillStyle = "#94A3B8"
+        ctx.fillStyle = "#0F172A"
+        ctx.font = "bold 40px system-ui, sans-serif"
+        ctx.fillText("Student Event Pass", canvas.width / 2, 1100)
+        ctx.fillStyle = "#64748B"
         ctx.font = "30px system-ui, sans-serif"
-        ctx.fillText("Scan this at the event entrance", canvas.width / 2, 1050)
-        
-        const a = document.createElement("a")
-        a.download = `QRVents-${selectedEvent.title.replace(/\s+/g, '-')}-Pass.png`
-        a.href = canvas.toDataURL("image/png")
-        a.click()
+        ctx.fillText("Valid for all school events", canvas.width / 2, 1160)
+
+        const link = document.createElement("a")
+        link.download = `QRVents-${data.studentId || "student"}-Pass.png`
+        link.href = canvas.toDataURL("image/png")
+        link.click()
+
+        setIsSaved(true)
+        toast.success("Event pass saved to your downloads!")
+        setTimeout(() => {
+          setIsSaved(false)
+        }, 2500)
+      } catch (err) {
+        console.error(err)
+        toast.error("Failed to save image")
+      } finally {
+        setIsSaving(false)
       }
     }
+
+    img.onerror = () => {
+      setIsSaving(false)
+      toast.error("Failed to process QR code")
+    }
+
+    // Rasterize the on-screen SVG so the saved pass matches what the scanner reads.
+    const svgData = new XMLSerializer().serializeToString(svg)
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)))
   }
 
   if (isLoading && !data) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <span className="material-symbols-outlined animate-spin text-blue-500 text-4xl [font-variation-settings:'FILL'_1]">progress_activity</span>
-        <p className="text-sm font-bold text-slate-500">Loading Active Events...</p>
-      </div>
-    )
+    return <QrPassSkeleton />
   }
 
-  // Fallback UI if QR Code is missing (Moved to correct outer scope)
-  if (data && !data.qrCode) {
+  if (loadError && !data) {
     return (
-      <div className="flex flex-col gap-8 w-full max-w-full pb-10">
-        <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-lg mx-auto bg-white rounded-[2rem] border border-slate-100 mt-10">
-          <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-6">
-            <BadgeInfo className="w-10 h-10 text-rose-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">QR Code Unavailable</h2>
-          <p className="text-slate-500 max-w-md mb-8">
-            We couldn't load your digital QR pass. This may happen if your account was created improperly or if your pass got corrupted.
-          </p>
-          <button 
-            onClick={() => window.location.href = "mailto:it-support@pclu.edu.ph?subject=Requesting%20New%20QR%20Code%20-%20" + encodeURIComponent(data.fullName)}
-            className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-colors flex items-center gap-2"
-          >
-            <RefreshCw className="w-5 h-5" />
-            Request IT Support for New QR
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!selectedEvent) {
-    return (
-      <div className="max-w-3xl mx-auto w-full">
-        <div className="bg-white rounded-[2rem] p-6 sm:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col gap-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Generate Event Pass</h2>
-            <p className="text-slate-500 text-sm mt-2">Select an event below to generate your unique check-in QR code.</p>
-          </div>
-
-          {events.length === 0 ? (
-            <div className="py-16 flex flex-col items-center justify-center text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-              <span className="material-symbols-outlined text-5xl text-slate-300 mb-4 [font-variation-settings:'FILL'_0]">event_busy</span>
-              <h3 className="text-lg font-bold text-slate-700">No events today</h3>
-              <p className="text-sm text-slate-500 mt-2 max-w-sm leading-relaxed">There are no upcoming or ongoing events scheduled for today that you are eligible for.</p>
-              
-              <button 
-                onClick={fetchData}
-                className="mt-6 flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh List
-              </button>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {events.map(event => {
-                const log = event.attendanceLogs?.[0]
-                const isCheckedOut = !!log?.checkOut
-                const isCheckedIn = !!log && !isCheckedOut
-
-                return (
-                  <button
-                    key={event.id}
-                    onClick={() => setSelectedEvent(event)}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-blue-400 hover:shadow-lg hover:shadow-blue-900/5 transition-all text-left gap-5 group"
-                  >
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          event.status === 'ONGOING' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600'
-                        }`}>
-                          {event.status}
-                        </span>
-                      </div>
-                      <h3 className="font-extrabold text-slate-900 text-xl group-hover:text-blue-600 transition-colors line-clamp-1">{event.title}</h3>
-                      <div className="text-sm font-medium text-slate-500 flex items-center gap-4 mt-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
-                          {event.startTime} - {event.endTime}
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
-                          {event.venue}
-                        </div>
-                      </div>
-                      
-                      {event.isMandatory && (
-                        <div className="mt-3 flex items-center gap-1.5 text-rose-600">
-                          <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
-                          <span className="text-[11px] font-bold">Mandatory Event (Penalty Applies)</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 sm:border-l sm:pl-5">
-                      {isCheckedOut ? (
-                        <div className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                          <span className="material-symbols-outlined text-[18px]">done_all</span>
-                          Checked Out
-                        </div>
-                      ) : isCheckedIn ? (
-                        <div className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-emerald-200">
-                          <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
-                          Checked In
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-bold flex items-center justify-center gap-2 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                          <span className="material-symbols-outlined text-[18px]">qr_code</span>
-                          Generate
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  // Calculate dynamic payload specifically for this event
-  const qrPayload = btoa(`QRV-EVT|${data?.id}|${selectedEvent.id}`)
-  
-  const log = selectedEvent.attendanceLogs?.[0]
-  const isCheckedOut = !!log?.checkOut
-  const isCheckedIn = !!log && !isCheckedOut
-
-  return (
-    <div className="max-w-md mx-auto w-full flex flex-col gap-6 pt-2">
-      <div className="flex items-center">
-        <button 
-          onClick={() => setSelectedEvent(null)}
-          className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white/60 px-4 py-2 rounded-full backdrop-blur-md border border-slate-200 shadow-sm"
+      <div className="max-w-md mx-auto w-full mt-10 bg-white border border-slate-200 rounded-2xl p-8 text-center">
+        <BadgeInfo className="w-8 h-8 text-rose-500 mx-auto mb-3" />
+        <h2 className="text-lg font-bold text-slate-900">Pass unavailable</h2>
+        <p className="text-sm text-slate-500 mt-1 mb-6">{loadError}</p>
+        <button
+          onClick={handleRefresh}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-black transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
-          <ChevronLeft className="w-4 h-4" />
-          Back to Events
+          <RefreshCw className="w-4 h-4" />
+          Try again
         </button>
       </div>
+    )
+  }
 
-      {/* Digital ID Card */}
-      <div className="bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden border border-slate-100 flex flex-col">
-        
-        {/* Card Header (Dept Color) */}
-        <div 
-          className="w-full pt-8 pb-12 px-6 text-center relative overflow-hidden shrink-0"
-          style={{ backgroundColor: data?.departmentColor || '#1A3A8F' }}
+  if (!data || !data.qrCode) {
+    return (
+      <div className="max-w-md mx-auto w-full mt-10 bg-white border border-slate-200 rounded-2xl p-8 text-center">
+        <BadgeInfo className="w-8 h-8 text-rose-500 mx-auto mb-3" />
+        <h2 className="text-lg font-bold text-slate-900">QR code unavailable</h2>
+        <p className="text-sm text-slate-500 mt-1 mb-6">
+          Your account has no QR code yet. Please contact IT support to have one issued.
+        </p>
+        <a
+          href={`mailto:it-support@pclu.edu.ph?subject=${encodeURIComponent(`Requesting New QR Code - ${data?.fullName ?? ""}`)}`}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-black transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
-          <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full bg-white/10" />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-black/10" />
-          
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 border border-white/20 shadow-inner">
-              <ScanLine className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-black text-white tracking-tight leading-tight">{data?.fullName}</h2>
-            <p className="text-white/80 font-medium mt-1 truncate max-w-[280px]">{selectedEvent.title}</p>
-          </div>
+          Email IT support
+        </a>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-md mx-auto w-full flex flex-col gap-6 pb-10">
+      <section
+        aria-labelledby="student-pass-heading"
+        className="bg-white rounded-2xl border border-slate-200 overflow-hidden"
+      >
+        <div
+          className="px-6 py-5 text-white"
+          style={{ backgroundColor: data.departmentColor || "#1A3A8F" }}
+        >
+          <h2 id="student-pass-heading" className="text-xl font-bold leading-tight break-words">
+            {data.fullName}
+          </h2>
+          <p className="text-sm text-white/85 mt-1">
+            {[data.studentId, data.departmentCode, data.yearLevel ? `Year ${data.yearLevel}` : null]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
         </div>
 
-        {/* QR Section */}
-        <div className="px-8 pb-8 pt-0 flex-1 flex flex-col items-center bg-white relative">
-          <div className="w-full max-w-[260px] -mt-8 bg-white p-4 rounded-3xl shadow-xl shadow-black/5 relative z-20 mx-auto">
-            <div className={`p-4 rounded-2xl border-2 transition-colors flex justify-center ${isCheckedOut ? 'border-slate-200 opacity-50' : isCheckedIn ? 'border-emerald-200' : 'border-slate-100'}`}>
-              <QRCodeSVG
-                id="student-qr-svg"
-                value={qrPayload}
-                size={200}
-                level="Q"
-                includeMargin={false}
-                className="w-full h-auto max-w-[200px]"
-              />
-            </div>
+        <div className="px-6 py-6 flex flex-col items-center">
+          <div
+            className={`p-4 rounded-xl border bg-white transition-all duration-150 ${
+              isSaved ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200"
+            }`}
+          >
+            <QRCodeSVG
+              id={QR_SVG_ID}
+              value={data.qrCode}
+              size={200}
+              level="Q"
+              marginSize={0}
+              className="w-full h-auto max-w-[200px]"
+            />
           </div>
-
-          <div className="mt-8 w-full">
-            {isCheckedOut ? (
-              <div className="flex items-center justify-center w-full gap-2 bg-slate-100 text-slate-600 px-4 py-3.5 rounded-xl text-sm font-bold">
-                <span className="material-symbols-outlined text-[20px]">gpp_bad</span>
-                QR Expired (Checked Out)
-              </div>
-            ) : isCheckedIn ? (
-              <div className="flex items-center justify-center w-full gap-2 bg-emerald-50 text-emerald-600 px-4 py-3.5 rounded-xl text-sm font-bold border border-emerald-200">
-                <span className="material-symbols-outlined text-[20px]">how_to_reg</span>
-                Checked In - Scan to Check Out
-              </div>
-            ) : (
-              <div className="flex items-center justify-center w-full gap-2 bg-blue-50 text-blue-600 px-4 py-3.5 rounded-xl text-sm font-bold border border-blue-200">
-                <span className="material-symbols-outlined text-[20px]">info</span>
-                Scan to Check In
-              </div>
-            )}
-          </div>
+          <p className="text-sm text-slate-500 text-center mt-4 max-w-xs">
+            Show this QR code at the entrance of any event. It works for every event you attend.
+          </p>
 
           <div className="mt-6 grid grid-cols-2 gap-3 w-full">
-            <button 
-              onClick={fetchData}
-              className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-sm transition-colors border border-slate-200"
+            <button
+              onClick={handleRefresh}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
               Refresh
             </button>
-            <button 
+            <button
               onClick={handleDownload}
-              disabled={isCheckedOut}
-              className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-sm transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSaving}
+              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+                isSaved
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                  : "bg-slate-900 text-white hover:bg-black"
+              } disabled:opacity-75 disabled:cursor-not-allowed`}
             >
-              <Download className="w-4 h-4" />
-              Save Pass
+              {isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : isSaved ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Save pass
+                </>
+              )}
             </button>
           </div>
+          {loadError && (
+            <p role="alert" className="text-xs text-rose-600 mt-3 text-center">
+              {loadError}
+            </p>
+          )}
         </div>
-      </div>
+      </section>
+
+      <section
+        aria-labelledby="todays-events-heading"
+        className="bg-white rounded-2xl border border-slate-200"
+      >
+        <h3
+          id="todays-events-heading"
+          className="px-5 py-4 text-sm font-bold text-slate-900 border-b border-slate-200"
+        >
+          Today&apos;s events
+        </h3>
+
+        {events.length === 0 ? (
+          <p className="px-5 py-8 text-sm text-slate-500 text-center">
+            No events today that you are eligible for.
+          </p>
+        ) : (
+          <ul className="divide-y divide-slate-200">
+            {events.map((event) => {
+              const state = getAttendanceState(event)
+              return (
+                <li key={event.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 break-words">{event.title}</p>
+                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
+                      {formatTimeString(event.startTime)} - {formatTimeString(event.endTime)}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="break-words">{event.venue}</span>
+                    </p>
+                    {event.isMandatory && (
+                      <p className="text-xs font-semibold text-rose-600 mt-1.5">
+                        Mandatory - penalty applies if absent
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full border ${state.className}`}
+                  >
+                    {state.label}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   )
 }

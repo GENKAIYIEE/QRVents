@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { comparePassword, createSession } from "@/lib/auth"
+import { verifyTurnstile, getClientIp } from "@/lib/captcha"
 
 export async function POST(
   request: NextRequest
 ) {
   try {
     const body = await request.json()
-    const { email, password } = body
+    const { email, password, captchaToken } = body
 
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password required" },
         { status: 400 }
       )
+    }
+
+    const captcha = await verifyTurnstile(captchaToken, getClientIp(request.headers))
+    if (!captcha.ok) {
+      return NextResponse.json({ error: captcha.error }, { status: 400 })
     }
 
     const user = await prisma.user.findUnique({
