@@ -32,8 +32,8 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string; icon: strin
     icon: "history",
   },
   "/student/qr-code": {
-    title: "My QR Code",
-    subtitle: "Your digital pass for events",
+    title: "My QR Pass",
+    subtitle: "Your permanent pass for all events",
     icon: "qr_code_2",
   },
   "/student/penalties": {
