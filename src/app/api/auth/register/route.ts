@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth"
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import { createNotificationsForMany } from "@/lib/notifications"
+import { verifyTurnstile, getClientIp } from "@/lib/captcha"
 
 const schema = z.object({
   fullName: z.string().min(2),
@@ -13,6 +14,7 @@ const schema = z.object({
   yearLevel: z.enum(["1", "2", "3", "4"]),
   section: z.string().min(1),
   studentId: z.string().min(3, "Student ID is required"),
+  captchaToken: z.string().min(1, "Please complete the security check."),
 })
 
 export async function POST(request: NextRequest) {
@@ -27,7 +29,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { fullName, email, password, departmentId, yearLevel, section, studentId } = result.data
+    const { fullName, email, password, departmentId, yearLevel, section, studentId, captchaToken } = result.data
+
+    const captcha = await verifyTurnstile(captchaToken, getClientIp(request.headers))
+    if (!captcha.ok) {
+      return NextResponse.json({ error: captcha.error }, { status: 400 })
+    }
 
     // Check for existing email
     const existing = await prisma.user.findUnique({ where: { email } })

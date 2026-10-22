@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { registerAction } from "@/app/(auth)/register/actions"
 import { registerSchema, type RegisterFormValues } from "@/lib/validations/register"
 import { toast } from "sonner"
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget"
 import {
   Mail,
   Lock,
@@ -40,6 +41,8 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
 
   const {
     register,
@@ -61,11 +64,21 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
     mode: "onChange",
   })
 
+  const resetCaptcha = () => {
+    setCaptchaToken(null)
+    setCaptchaResetKey((key) => key + 1)
+  }
+
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null)
-    const result = await registerAction(values)
+    if (!captchaToken) {
+      setServerError("Please complete the security check.")
+      return
+    }
+    const result = await registerAction(values, captchaToken)
     if (result?.error) {
       setServerError(result.error)
+      resetCaptcha()
     } else {
       toast.success("Account has been successfully created!")
     }
@@ -401,6 +414,11 @@ export default function RegisterForm({ departments }: RegisterFormProps) {
                   </div>
                   {errors.confirmPassword && <p className="text-red-500 text-xs mt-1.5">{errors.confirmPassword.message}</p>}
                 </div>
+              </div>
+
+              {/* Security check */}
+              <div className="mt-2">
+                <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaResetKey} />
               </div>
 
               {/* Error Banner */}
