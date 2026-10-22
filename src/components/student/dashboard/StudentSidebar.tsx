@@ -18,9 +18,9 @@ const NAV_ITEMS = [
   },
   {
     icon: QrCode,
-    label: "Generate QR Code",
+    label: "My QR Pass",
     href: "/student/qr-code",
-    description: "Event-specific pass",
+    description: "Permanent digital pass",
     comingSoon: false,
   },
   {
